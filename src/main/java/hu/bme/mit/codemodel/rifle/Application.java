@@ -5,6 +5,7 @@
 package hu.bme.mit.codemodel.rifle;
 
 import com.shapesecurity.functional.data.ImmutableList;
+import com.shapesecurity.functional.data.Maybe;
 import com.shapesecurity.shift.ast.Script;
 import com.shapesecurity.shift.parser.JsError;
 import com.shapesecurity.shift.parser.Parser;
@@ -35,7 +36,9 @@ public class Application {
                 "}";
         Script program = Parser.parseScript(source);
 
-        new Application().iterate(program, "");
+        // System.out.println("@prefix rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .");
+        System.out.println("@prefix id:     <http://inf.mit.bme.hu/codemodel#> .");
+        new Application().iterate(program);
         // System.out.println(Serializer.serialize(program));
 
 
@@ -45,72 +48,108 @@ public class Application {
 
     protected ArrayList<Object> done = new ArrayList<>();
 
-    public void iterate(Object node, String indentation) {
+    public void iterate(Object node) {
         if (node == null || done.contains(node)) {
             return;
         }
         done.add(node);
 
-        System.out.println(indentation + "--------------------------------------------------------------------------------");
-        System.out.println(indentation + node.hashCode());
+        System.out.println();
 
         // print class
         Class<?> aClass = node.getClass();
-        System.out.println(indentation + aClass.getSimpleName());
+        //printType(id, aClass.getSimpleName());
+        String id = String.valueOf(aClass.getSimpleName() + "_" + node.hashCode());
 
 
         // list superclasses, interfaces
-        List<Class<?>> interfaces = Arrays.asList(aClass.getInterfaces());
-        System.out.println(indentation + "Interfaces: " + interfaces.stream().map(elem -> elem.getSimpleName()).collect(Collectors.toList()));
-
-        Class<?> superclass = aClass.getSuperclass();
-        while (superclass != Object.class) {
-            System.out.println(indentation + superclass.getSimpleName());
-            superclass = superclass.getSuperclass();
-        }
-        System.out.println();
+//        List<Class<?>> interfaces = Arrays.asList(aClass.getInterfaces());
+//        interfaces.forEach(elem -> printType(id, elem.getSimpleName()));
+//
+//        Class<?> superclass = aClass.getSuperclass();
+//        while (superclass != Object.class) {
+//            printType(id, superclass.getSimpleName());
+//            superclass = superclass.getSuperclass();
+//        }
 
 
         // list fields
         Arrays.asList(aClass.getFields()).forEach(
                 field -> {
-                    System.out.print(indentation + (Modifier.isPublic(field.getModifiers()) ? "public " : "NOT public "));
+                    // System.out.print(indentation + (Modifier.isPublic(field.getModifiers()) ? "public " : "NOT public "));
                     Class<?> type = field.getType();
-                    System.out.print(indentation + type.getSimpleName() + " ");
-                    System.out.println(indentation + field.getName());
+                    // System.out.print(indentation + type.getSimpleName() + " ");
+                    String fieldName = field.getName();
 
                     if (type == ImmutableList.class) {
                         try {
                             ImmutableList list = (ImmutableList) field.get(node);
-                            list.forEach(el -> iterate(el, indentation + "    "));
+                            list.forEach(
+                                    el -> {
+                                        printTripleRef(id, fieldName, el.getClass().getSimpleName() + "_" + el.hashCode());
+                                        iterate(el);
+                                    }
+                            );
+
+                            // TODO create a list node with numbered connections
                         } catch (IllegalAccessException e) {
                             e.printStackTrace();
                         }
                     } else if (type.isEnum()) {
                         try {
-                            System.out.println(indentation + "    " + field.get(node).toString());
+                            printTriple(id, fieldName, field.get(node).toString());
                         } catch (IllegalAccessException e) {
                             e.printStackTrace();
                         }
                     } else if (type.getName().startsWith("com.shapesecurity.shift.ast")) {
                         try {
-                            iterate(field.get(node), indentation + "    ");
+                            Object el = field.get(node);
+                            printTripleRef(id, fieldName, el.getClass().getSimpleName() + "_" + el.hashCode());
+                            iterate(el);
+                        } catch (IllegalAccessException e) {
+                            e.printStackTrace();
+                        }
+                    } else if (type.getName().startsWith("com.shapesecurity.functional.data")) {
+                        try {
+                            Maybe el = (Maybe) field.get(node);
+                            if (el.isJust()) {
+                                Object obj = el.just();
+                                printTripleRef(id, fieldName, obj.getClass().getSimpleName() + "_" + obj.hashCode());
+                                iterate(obj);
+                            } else {
+                                printTripleRef(id, fieldName, "null");
+                            }
                         } catch (IllegalAccessException e) {
                             e.printStackTrace();
                         }
                     } else {
                         try {
-                            System.out.println(indentation + "    " + field.get(node));
+                            Object el = field.get(node);
+                            printTriple(id, fieldName, el.toString());
                         } catch (IllegalAccessException e) {
                             e.printStackTrace();
                         }
                     }
+
+                    // TODO Maybe
                 }
         );
         System.out.println();
 
         // list methods
         // System.out.println(indentation + aClass.getMethods());
+    }
+
+    protected void printType(String subject, String object) {
+        System.out.println("id:" + subject.replace('-', '_') + "  a   \"" + object + "\" .");
+    }
+
+    protected void printTriple(String subject, String predicate, String object) {
+        System.out.println("id:" + subject.replace('-', '_') + "  <" + predicate + ">   \"" + object + "\" .");
+    }
+
+    protected void printTripleRef(String subject, String predicate, String id) {
+        System.out.println("id:" + subject.replace('-', '_') + " <" + predicate + ">   id:" + id.replace('-', '_') + " .");
     }
 
 }
