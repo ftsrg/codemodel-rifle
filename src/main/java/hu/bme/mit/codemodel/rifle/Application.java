@@ -5,24 +5,16 @@
 package hu.bme.mit.codemodel.rifle;
 
 import com.shapesecurity.functional.Pair;
-import com.shapesecurity.functional.data.HashTable;
-import com.shapesecurity.functional.data.ImmutableList;
-import com.shapesecurity.functional.data.Maybe;
+import com.shapesecurity.functional.data.*;
 import com.shapesecurity.shift.ast.Script;
 import com.shapesecurity.shift.parser.JsError;
 import com.shapesecurity.shift.parser.Parser;
 import com.shapesecurity.shift.scope.GlobalScope;
 import com.shapesecurity.shift.scope.ScopeAnalyzer;
-import com.shapesecurity.shift.scope.ScopeSerializer;
-import com.shapesecurity.shift.serialization.Serializer;
 import org.jetbrains.annotations.NotNull;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
 
 public class Application {
 
@@ -91,6 +83,13 @@ public class Application {
                         } catch (IllegalAccessException e) {
                             e.printStackTrace();
                         }
+                    } else if (type == ConcatList.class) {
+                        try {
+                            ImmutableList list = ((ConcatList) field.get(node)).toList();
+                            handleImmutableList(list, id, fieldName);
+                        } catch (IllegalAccessException e) {
+                            e.printStackTrace();
+                        }
                     } else if (type.isEnum()) {
                         try {
                             printTriple(id, fieldName, field.get(node).toString());
@@ -126,30 +125,34 @@ public class Application {
                             // id -- [field] -> table
                             printTripleRef(id, fieldName, tableId);
 
-                            for (Object el: table.entries()) {
+                            for (Object el : table.entries()) {
                                 Pair pair = (Pair) el;
 
                                 if (pair.b instanceof ImmutableList) {
                                     // table -- [a] -> b.*
-                                    handleImmutableList((ImmutableList) pair.b, tableId, pair.a.toString());
+                                    // handleImmutableList((ImmutableList) pair.b, tableId, pair.a.toString());
 
                                     // id -- [field] -> b.*
                                     handleImmutableList((ImmutableList) pair.b, id, fieldName);
                                 } else {
                                     printTripleRef(id, fieldName, generateId(pair.b));
-                                    printTripleRef(tableId, pair.a.toString(), generateId(pair.b));
+                                    // printTripleRef(tableId, pair.a.toString(), generateId(pair.b));
                                     iterate(pair.b);
                                 }
                             }
                         } catch (IllegalAccessException e) {
                             e.printStackTrace();
                         }
+                    } else if (type == Either.class) {
+
                     } else if (type.getName().startsWith("com.shapesecurity.functional.data")) {
                         // TODO
+                        System.out.println("boop");
                     } else {
                         try {
                             Object el = field.get(node);
-                            printTriple(id, fieldName, el.toString());
+                            printTriple(id, fieldName, generateId(el));
+                            iterate(el);
                         } catch (IllegalAccessException e) {
                             e.printStackTrace();
                         }
