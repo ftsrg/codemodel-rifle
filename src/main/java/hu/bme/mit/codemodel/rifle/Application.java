@@ -4,6 +4,8 @@
 
 package hu.bme.mit.codemodel.rifle;
 
+import com.shapesecurity.functional.Pair;
+import com.shapesecurity.functional.data.HashTable;
 import com.shapesecurity.functional.data.ImmutableList;
 import com.shapesecurity.functional.data.Maybe;
 import com.shapesecurity.shift.ast.Script;
@@ -13,7 +15,9 @@ import com.shapesecurity.shift.scope.GlobalScope;
 import com.shapesecurity.shift.scope.ScopeAnalyzer;
 import com.shapesecurity.shift.scope.ScopeSerializer;
 import com.shapesecurity.shift.serialization.Serializer;
+import org.jetbrains.annotations.NotNull;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -38,12 +42,11 @@ public class Application {
 
         // System.out.println("@prefix rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .");
         System.out.println("@prefix id:     <http://inf.mit.bme.hu/codemodel#> .");
-        new Application().iterate(program);
-        // System.out.println(Serializer.serialize(program));
 
+        GlobalScope global = ScopeAnalyzer.analyze(program);
+        // String serializeScope = new ScopeSerializer().serializeScope(global);
 
-        // GlobalScope global = ScopeAnalyzer.analyze(program);
-        //String serializeScope = new ScopeSerializer().serializeScope(global);
+        new Application().iterate(global);
     }
 
     protected ArrayList<Object> done = new ArrayList<>();
@@ -59,7 +62,7 @@ public class Application {
         // print class
         Class<?> aClass = node.getClass();
         //printType(id, aClass.getSimpleName());
-        String id = String.valueOf(aClass.getSimpleName() + "_" + node.hashCode());
+        String id = generateId(node);
 
 
         // list superclasses, interfaces
@@ -84,14 +87,7 @@ public class Application {
                     if (type == ImmutableList.class) {
                         try {
                             ImmutableList list = (ImmutableList) field.get(node);
-                            list.forEach(
-                                    el -> {
-                                        printTripleRef(id, fieldName, el.getClass().getSimpleName() + "_" + el.hashCode());
-                                        iterate(el);
-                                    }
-                            );
-
-                            // TODO create a list node with numbered connections
+                            handleImmutableList(list, id, fieldName);
                         } catch (IllegalAccessException e) {
                             e.printStackTrace();
                         }
@@ -104,17 +100,17 @@ public class Application {
                     } else if (type.getName().startsWith("com.shapesecurity.shift.ast")) {
                         try {
                             Object el = field.get(node);
-                            printTripleRef(id, fieldName, el.getClass().getSimpleName() + "_" + el.hashCode());
+                            printTripleRef(id, fieldName, generateId(el));
                             iterate(el);
                         } catch (IllegalAccessException e) {
                             e.printStackTrace();
                         }
-                    } else if (type.getName().startsWith("com.shapesecurity.functional.data")) {
+                    } else if (type == Maybe.class) {
                         try {
                             Maybe el = (Maybe) field.get(node);
                             if (el.isJust()) {
                                 Object obj = el.just();
-                                printTripleRef(id, fieldName, obj.getClass().getSimpleName() + "_" + obj.hashCode());
+                                printTripleRef(id, fieldName, generateId(obj));
                                 iterate(obj);
                             } else {
                                 printTripleRef(id, fieldName, "null");
@@ -122,6 +118,34 @@ public class Application {
                         } catch (IllegalAccessException e) {
                             e.printStackTrace();
                         }
+                    } else if (type == HashTable.class) {
+                        try {
+                            HashTable table = (HashTable) field.get(node);
+                            String tableId = generateId(table);
+
+                            // id -- [field] -> table
+                            printTripleRef(id, fieldName, tableId);
+
+                            for (Object el: table.entries()) {
+                                Pair pair = (Pair) el;
+
+                                if (pair.b instanceof ImmutableList) {
+                                    // table -- [a] -> b.*
+                                    handleImmutableList((ImmutableList) pair.b, tableId, pair.a.toString());
+
+                                    // id -- [field] -> b.*
+                                    handleImmutableList((ImmutableList) pair.b, id, fieldName);
+                                } else {
+                                    printTripleRef(id, fieldName, generateId(pair.b));
+                                    printTripleRef(tableId, pair.a.toString(), generateId(pair.b));
+                                    iterate(pair.b);
+                                }
+                            }
+                        } catch (IllegalAccessException e) {
+                            e.printStackTrace();
+                        }
+                    } else if (type.getName().startsWith("com.shapesecurity.functional.data")) {
+                        // TODO
                     } else {
                         try {
                             Object el = field.get(node);
@@ -130,14 +154,28 @@ public class Application {
                             e.printStackTrace();
                         }
                     }
-
-                    // TODO Maybe
                 }
         );
         System.out.println();
 
         // list methods
         // System.out.println(indentation + aClass.getMethods());
+    }
+
+    protected void handleImmutableList(ImmutableList list, String id, String fieldName) {
+        list.forEach(
+                el -> {
+                    printTripleRef(id, fieldName, generateId(el));
+                    iterate(el);
+                }
+        );
+
+        // TODO create a list node with numbered connections
+    }
+
+    @NotNull
+    private String generateId(Object obj) {
+        return obj.getClass().getSimpleName() + "_" + obj.hashCode();
     }
 
     protected void printType(String subject, String object) {
