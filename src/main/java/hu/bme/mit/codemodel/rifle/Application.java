@@ -6,6 +6,7 @@ package hu.bme.mit.codemodel.rifle;
 
 import com.shapesecurity.functional.Pair;
 import com.shapesecurity.functional.data.*;
+import com.shapesecurity.shift.ast.Node;
 import com.shapesecurity.shift.ast.Script;
 import com.shapesecurity.shift.parser.JsError;
 import com.shapesecurity.shift.parser.Parser;
@@ -13,23 +14,28 @@ import com.shapesecurity.shift.scope.GlobalScope;
 import com.shapesecurity.shift.scope.ScopeAnalyzer;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class Application {
 
     public static void main(String[] args) throws JsError {
-        String source = "function bytes(n, maxBytes) {\n" +
-                "  if (maxBytes == null) {\n" +
-                "    maxBytes = Math.max(1, Math.ceil(Math.log2(n + 1) / 8));\n" +
-                "  }\n" +
-                "  var rv = Array(maxBytes);\n" +
-                "  for (var bIndex = maxBytes - 1; bIndex >= 0; --bIndex) {\n" +
-                "    rv[bIndex] = n & 0xFF;\n" +
-                "    n >>>= 8;\n" +
-                "  }\n" +
-                "  return rv;\n" +
-                "}";
+        String source = "function x() {\n" +
+                "  return 2;\n" +
+                "}\n" +
+                "\n" +
+                "function y() {\n" +
+                "  return 3;\n" +
+                "}\n" +
+                "\n" +
+                "function z() {\n" +
+                "  x();\n" +
+                "  y();\n" +
+                "}\n" +
+                "\n" +
+                "z();";
         Script program = Parser.parseScript(source);
 
         // System.out.println("@prefix rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .");
@@ -38,143 +44,162 @@ public class Application {
         GlobalScope global = ScopeAnalyzer.analyze(program);
         // String serializeScope = new ScopeSerializer().serializeScope(global);
 
-        new Application().iterate(global);
+        new Application().iterate(null, null, global);
     }
 
     protected ArrayList<Object> done = new ArrayList<>();
 
-    public void iterate(Object node) {
-        if (node == null || done.contains(node)) {
+    public void iterate(String parentId, String predicate, Object node) {
+        if (node == null) {
+            return;
+        }
+
+        Class<?> nodeType = node.getClass();
+        String nodeId = generateId(node);
+
+        if (parentId != null) {
+            if (node.getClass().getName().startsWith("com.shapesecurity") || (node instanceof Iterable) || (node instanceof HashMap)) {
+                printTripleRef(parentId, predicate, nodeId);
+            } else {
+                printTriple(parentId, predicate, node.toString());
+                return;
+            }
+        }
+
+
+        if (done.contains(node)) {
             return;
         }
         done.add(node);
 
-        System.out.println();
 
-        // print class
-        Class<?> aClass = node.getClass();
-        //printType(id, aClass.getSimpleName());
-        String id = generateId(node);
-
-
-        // list superclasses, interfaces
+//        printType(nodeId, aClass.getSimpleName());
+//        // list superclasses, interfaces
 //        List<Class<?>> interfaces = Arrays.asList(aClass.getInterfaces());
-//        interfaces.forEach(elem -> printType(id, elem.getSimpleName()));
+//        interfaces.forEach(elem -> printType(nodeId, elem.getSimpleName()));
 //
 //        Class<?> superclass = aClass.getSuperclass();
 //        while (superclass != Object.class) {
-//            printType(id, superclass.getSimpleName());
+//            printType(nodeId, superclass.getSimpleName());
 //            superclass = superclass.getSuperclass();
 //        }
 
-
-        // list fields
-        Arrays.asList(aClass.getFields()).forEach(
+        getAllFields(nodeType).forEach(
                 field -> {
-                    // System.out.print(indentation + (Modifier.isPublic(field.getModifiers()) ? "public " : "NOT public "));
-                    Class<?> type = field.getType();
-                    // System.out.print(indentation + type.getSimpleName() + " ");
+                    field.setAccessible(true);
+
+                    Class<?> fieldType = field.getType();
                     String fieldName = field.getName();
 
-                    if (type == ImmutableList.class) {
-                        try {
-                            ImmutableList list = (ImmutableList) field.get(node);
-                            handleImmutableList(list, id, fieldName);
-                        } catch (IllegalAccessException e) {
-                            e.printStackTrace();
-                        }
-                    } else if (type == ConcatList.class) {
-                        try {
-                            ImmutableList list = ((ConcatList) field.get(node)).toList();
-                            handleImmutableList(list, id, fieldName);
-                        } catch (IllegalAccessException e) {
-                            e.printStackTrace();
-                        }
-                    } else if (type.isEnum()) {
-                        try {
-                            printTriple(id, fieldName, field.get(node).toString());
-                        } catch (IllegalAccessException e) {
-                            e.printStackTrace();
-                        }
-                    } else if (type.getName().startsWith("com.shapesecurity.shift.ast")) {
-                        try {
-                            Object el = field.get(node);
-                            printTripleRef(id, fieldName, generateId(el));
-                            iterate(el);
-                        } catch (IllegalAccessException e) {
-                            e.printStackTrace();
-                        }
-                    } else if (type == Maybe.class) {
-                        try {
-                            Maybe el = (Maybe) field.get(node);
-                            if (el.isJust()) {
-                                Object obj = el.just();
-                                printTripleRef(id, fieldName, generateId(obj));
-                                iterate(obj);
-                            } else {
-                                printTripleRef(id, fieldName, "null");
+
+                    try {
+                        Object o = field.get(node);
+                        if (o instanceof ImmutableList) {
+
+                            // connect the children directly
+                            ((ImmutableList) o).forEach(el -> iterate(nodeId, fieldName, el));
+
+                        } else if (o instanceof Map) {
+
+                            Map map = (Map) o;
+                            String mapId = generateId(map);
+
+                            // id -- [field] -> table
+                            printTripleRef(nodeId, fieldName, mapId);
+
+                            for (Object el : map.entrySet()) {
+                                Map.Entry entry = (Map.Entry) el;
+                                iterate(mapId, entry.getKey().toString(), entry.getValue());
                             }
-                        } catch (IllegalAccessException e) {
-                            e.printStackTrace();
-                        }
-                    } else if (type == HashTable.class) {
-                        try {
-                            HashTable table = (HashTable) field.get(node);
+
+
+                        } else if (o instanceof HashTable) {
+
+                            HashTable table = (HashTable) o;
                             String tableId = generateId(table);
 
                             // id -- [field] -> table
-                            printTripleRef(id, fieldName, tableId);
+                            printTripleRef(nodeId, fieldName, tableId);
 
                             for (Object el : table.entries()) {
                                 Pair pair = (Pair) el;
-
-                                if (pair.b instanceof ImmutableList) {
-                                    // table -- [a] -> b.*
-                                    // handleImmutableList((ImmutableList) pair.b, tableId, pair.a.toString());
-
-                                    // id -- [field] -> b.*
-                                    handleImmutableList((ImmutableList) pair.b, id, fieldName);
-                                } else {
-                                    printTripleRef(id, fieldName, generateId(pair.b));
-                                    // printTripleRef(tableId, pair.a.toString(), generateId(pair.b));
-                                    iterate(pair.b);
-                                }
+                                iterate(tableId, pair.a.toString(), pair.b);
                             }
-                        } catch (IllegalAccessException e) {
-                            e.printStackTrace();
-                        }
-                    } else if (type == Either.class) {
 
-                    } else if (type.getName().startsWith("com.shapesecurity.functional.data")) {
-                        // TODO
-                        System.out.println("boop");
-                    } else {
-                        try {
-                            Object el = field.get(node);
-                            printTriple(id, fieldName, generateId(el));
-                            iterate(el);
-                        } catch (IllegalAccessException e) {
-                            e.printStackTrace();
+                        } else if (o instanceof ConcatList) {
+
+                            // connect the children directly
+                            ((ConcatList) o).forEach(el -> iterate(nodeId, fieldName, el));
+
+                        } else if (o instanceof Maybe) {
+
+                            Maybe el = (Maybe) o;
+                            if (el.isJust()) {
+                                iterate(nodeId, fieldName, el.just());
+                            } else {
+                                iterate(nodeId, fieldName, "null");
+                            }
+
+                        } else if (o instanceof Either) {
+                            // TODO
+                            iterate(nodeId, fieldName, o);
+
+                        } else if (fieldType.isEnum()) {
+
+                            iterate(nodeId, fieldName, o.toString());
+
+                        } else if (fieldType.getName().startsWith("com.shapesecurity.shift.ast")) {
+
+                            iterate(nodeId, fieldName, o);
+
+                        } else if (fieldType.getName().startsWith("com.shapesecurity.functional")) {
+
+                            // TODO
+                            iterate(nodeId, fieldName, o);
+
+                        } else {
+
+                            // TODO
+                            iterate(nodeId, fieldName, o);
+
                         }
+                    } catch (IllegalAccessException e) {
+                        e.printStackTrace();
                     }
                 }
         );
-        System.out.println();
+//
+//        List<Method> probablyGetters = Arrays.asList(nodeType.getMethods()).stream().filter(
+//                method -> {
+//                    return (
+//                            true &&
+//                                    method.getParameterCount() == 0 &&
+//                                    method.getDeclaringClass().getName().startsWith("com.shapesecurity") &&
+//                                    !method.getName().endsWith("hashCode")
+//
+//                    );
+//                }
+//        ).collect(Collectors.toList());
+//
+//        System.out.println(probablyGetters);
 
-        // list methods
-        // System.out.println(indentation + aClass.getMethods());
     }
 
-    protected void handleImmutableList(ImmutableList list, String id, String fieldName) {
-        list.forEach(
-                el -> {
-                    printTripleRef(id, fieldName, generateId(el));
-                    iterate(el);
-                }
-        );
 
-        // TODO create a list node with numbered connections
+    // http://stackoverflow.com/questions/3567372/access-to-private-inherited-fields-via-reflection-in-java
+    protected List<Field> getAllFields(Class clazz) {
+        List<Field> fields = new ArrayList<Field>();
+
+        fields.addAll(Arrays.asList(clazz.getDeclaredFields()));
+
+        Class superClazz = clazz.getSuperclass();
+        if (superClazz != null) {
+            fields.addAll(getAllFields(superClazz));
+        }
+
+        return fields;
     }
+
 
     @NotNull
     private String generateId(Object obj) {
