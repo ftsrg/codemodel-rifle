@@ -6,20 +6,30 @@ package hu.bme.mit.codemodel.rifle;
 
 import com.shapesecurity.functional.Pair;
 import com.shapesecurity.functional.data.*;
-import com.shapesecurity.shift.ast.Node;
 import com.shapesecurity.shift.ast.Script;
 import com.shapesecurity.shift.parser.JsError;
 import com.shapesecurity.shift.parser.Parser;
 import com.shapesecurity.shift.scope.GlobalScope;
 import com.shapesecurity.shift.scope.ScopeAnalyzer;
-import org.jetbrains.annotations.NotNull;
+import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Label;
+import org.neo4j.graphdb.RelationshipType;
+import org.neo4j.graphdb.Transaction;
+import org.neo4j.graphdb.factory.GraphDatabaseFactory;
+import org.neo4j.visualization.graphviz.GraphvizWriter;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class Application {
+
+
+    final String DB_PATH = "/home/steindani/Downloads/neo4j-community-3.0.0-M02/data/graph.db";
+    final GraphDatabaseService graphDb = new GraphDatabaseFactory().newEmbeddedDatabase(DB_PATH);
+
+
+    protected ArrayList<Object> done = new ArrayList<>();
+    protected Map<Object, org.neo4j.graphdb.Node> nodes = new HashMap<>();
 
     public static void main(String[] args) throws JsError {
         String source = "function x() {\n" +
@@ -38,30 +48,32 @@ public class Application {
                 "z();";
         Script program = Parser.parseScript(source);
 
-        // System.out.println("@prefix rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .");
-        System.out.println("@prefix id:     <http://inf.mit.bme.hu/codemodel#> .");
-
         GlobalScope global = ScopeAnalyzer.analyze(program);
-        // String serializeScope = new ScopeSerializer().serializeScope(global);
 
-        new Application().iterate(null, null, global);
+        Application application = new Application();
+        application.iterate(null, null, global);
+        application.export();
+
     }
 
-    protected ArrayList<Object> done = new ArrayList<>();
+    public void export() {
+//        GraphvizWriter writer = new GraphvizWriter();
+//
+//        writer.emit(System.out, );
+    }
 
-    public void iterate(String parentId, String predicate, Object node) {
+    public void iterate(Object parent, String predicate, Object node) {
         if (node == null) {
             return;
         }
 
         Class<?> nodeType = node.getClass();
-        String nodeId = generateId(node);
 
-        if (parentId != null) {
+        if (parent != null) {
             if (node.getClass().getName().startsWith("com.shapesecurity") || (node instanceof Iterable) || (node instanceof HashMap)) {
-                printTripleRef(parentId, predicate, nodeId);
+                storeReference(parent, predicate, node);
             } else {
-                printTriple(parentId, predicate, node.toString());
+                storeProperty(parent, predicate, node);
                 return;
             }
         }
@@ -73,16 +85,16 @@ public class Application {
         done.add(node);
 
 
-//        printType(nodeId, aClass.getSimpleName());
-//        // list superclasses, interfaces
-//        List<Class<?>> interfaces = Arrays.asList(aClass.getInterfaces());
-//        interfaces.forEach(elem -> printType(nodeId, elem.getSimpleName()));
-//
-//        Class<?> superclass = aClass.getSuperclass();
-//        while (superclass != Object.class) {
-//            printType(nodeId, superclass.getSimpleName());
-//            superclass = superclass.getSuperclass();
-//        }
+        storeType(node, nodeType.getSimpleName());
+        // list superclasses, interfaces
+        List<Class<?>> interfaces = Arrays.asList(nodeType.getInterfaces());
+        interfaces.forEach(elem -> storeType(node, elem.getSimpleName()));
+
+        Class<?> superclass = nodeType.getSuperclass();
+        while (superclass != Object.class) {
+            storeType(node, superclass.getSimpleName());
+            superclass = superclass.getSuperclass();
+        }
 
         getAllFields(nodeType).forEach(
                 field -> {
@@ -97,70 +109,68 @@ public class Application {
                         if (o instanceof ImmutableList) {
 
                             // connect the children directly
-                            ((ImmutableList) o).forEach(el -> iterate(nodeId, fieldName, el));
+                            ((ImmutableList) o).forEach(el -> iterate(node, fieldName, el));
 
                         } else if (o instanceof Map) {
 
                             Map map = (Map) o;
-                            String mapId = generateId(map);
 
                             // id -- [field] -> table
-                            printTripleRef(nodeId, fieldName, mapId);
+                            storeReference(node, fieldName, map);
 
                             for (Object el : map.entrySet()) {
                                 Map.Entry entry = (Map.Entry) el;
-                                iterate(mapId, entry.getKey().toString(), entry.getValue());
+                                iterate(map, entry.getKey().toString(), entry.getValue());
                             }
 
 
                         } else if (o instanceof HashTable) {
 
                             HashTable table = (HashTable) o;
-                            String tableId = generateId(table);
 
                             // id -- [field] -> table
-                            printTripleRef(nodeId, fieldName, tableId);
+                            storeReference(node, fieldName, table);
 
                             for (Object el : table.entries()) {
                                 Pair pair = (Pair) el;
-                                iterate(tableId, pair.a.toString(), pair.b);
+                                iterate(table, pair.a.toString(), pair.b);
                             }
 
                         } else if (o instanceof ConcatList) {
 
                             // connect the children directly
-                            ((ConcatList) o).forEach(el -> iterate(nodeId, fieldName, el));
+                            ((ConcatList) o).forEach(el -> iterate(node, fieldName, el));
 
                         } else if (o instanceof Maybe) {
 
                             Maybe el = (Maybe) o;
                             if (el.isJust()) {
-                                iterate(nodeId, fieldName, el.just());
+                                iterate(node, fieldName, el.just());
                             } else {
-                                iterate(nodeId, fieldName, "null");
+                                iterate(node, fieldName, "null");
                             }
 
                         } else if (o instanceof Either) {
                             // TODO
-                            iterate(nodeId, fieldName, o);
+                            iterate(node, fieldName, o);
 
                         } else if (fieldType.isEnum()) {
 
-                            iterate(nodeId, fieldName, o.toString());
+                            iterate(node, fieldName, o.toString());
 
                         } else if (fieldType.getName().startsWith("com.shapesecurity.shift.ast")) {
 
-                            iterate(nodeId, fieldName, o);
+                            iterate(node, fieldName, o);
 
                         } else if (fieldType.getName().startsWith("com.shapesecurity.functional")) {
 
                             // TODO
-                            iterate(nodeId, fieldName, o);
+                            iterate(node, fieldName, o);
 
                         } else {
 
                             // TODO
-                            iterate(nodeId, fieldName, o);
+                            iterate(node, fieldName, o);
 
                         }
                     } catch (IllegalAccessException e) {
@@ -168,23 +178,51 @@ public class Application {
                     }
                 }
         );
-//
-//        List<Method> probablyGetters = Arrays.asList(nodeType.getMethods()).stream().filter(
-//                method -> {
-//                    return (
-//                            true &&
-//                                    method.getParameterCount() == 0 &&
-//                                    method.getDeclaringClass().getName().startsWith("com.shapesecurity") &&
-//                                    !method.getName().endsWith("hashCode")
-//
-//                    );
-//                }
-//        ).collect(Collectors.toList());
-//
-//        System.out.println(probablyGetters);
 
     }
 
+    protected void storeReference(Object subject, String predicate, Object object) {
+        try (final Transaction tx = graphDb.beginTx()) {
+            org.neo4j.graphdb.Node node = findOrCreate(subject);
+            org.neo4j.graphdb.Node other = findOrCreate(object);
+            node.createRelationshipTo(other, RelationshipType.withName(predicate));
+
+            tx.success();
+        }
+    }
+
+    protected void storeProperty(Object subject, String predicate, Object object) {
+        try (final Transaction tx = graphDb.beginTx()) {
+            org.neo4j.graphdb.Node node = findOrCreate(subject);
+            node.setProperty(predicate, object);
+
+            tx.success();
+        }
+    }
+
+    protected void storeType(Object subject, String type) {
+        try (final Transaction tx = graphDb.beginTx()) {
+            org.neo4j.graphdb.Node node = findOrCreate(subject);
+            node.addLabel(Label.label(type));
+            tx.success();
+        }
+    }
+
+    protected org.neo4j.graphdb.Node findOrCreate(Object subject) {
+        if (nodes.containsKey(subject)) {
+            return nodes.get(subject);
+        } else {
+            try (final Transaction tx = graphDb.beginTx()) {
+                org.neo4j.graphdb.Node node = graphDb.createNode();
+                tx.success();
+
+                nodes.put(subject, node);
+
+                return node;
+            }
+        }
+
+    }
 
     // http://stackoverflow.com/questions/3567372/access-to-private-inherited-fields-via-reflection-in-java
     protected List<Field> getAllFields(Class clazz) {
@@ -198,24 +236,6 @@ public class Application {
         }
 
         return fields;
-    }
-
-
-    @NotNull
-    private String generateId(Object obj) {
-        return obj.getClass().getSimpleName() + "_" + obj.hashCode();
-    }
-
-    protected void printType(String subject, String object) {
-        System.out.println("id:" + subject.replace('-', '_') + "  a   \"" + object + "\" .");
-    }
-
-    protected void printTriple(String subject, String predicate, String object) {
-        System.out.println("id:" + subject.replace('-', '_') + "  <" + predicate + ">   \"" + object + "\" .");
-    }
-
-    protected void printTripleRef(String subject, String predicate, String id) {
-        System.out.println("id:" + subject.replace('-', '_') + " <" + predicate + ">   id:" + id.replace('-', '_') + " .");
     }
 
 }
