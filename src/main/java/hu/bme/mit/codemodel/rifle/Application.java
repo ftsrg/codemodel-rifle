@@ -11,13 +11,17 @@ import com.shapesecurity.shift.parser.JsError;
 import com.shapesecurity.shift.parser.Parser;
 import com.shapesecurity.shift.scope.GlobalScope;
 import com.shapesecurity.shift.scope.ScopeAnalyzer;
+import com.sun.org.apache.xpath.internal.axes.WalkerFactory;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import org.neo4j.visualization.graphviz.GraphvizWriter;
+import org.neo4j.walk.Walker;
+import scala.App;
 
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.*;
 
@@ -56,10 +60,28 @@ public class Application {
 
     }
 
+    public Application() {
+
+        try (Transaction transaction = graphDb.beginTx()) {
+            graphDb.getAllNodes().forEach(node -> {
+                node.getRelationships().forEach(
+                        relationship -> relationship.delete()
+                );
+                node.delete();
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     public void export() {
-//        GraphvizWriter writer = new GraphvizWriter();
-//
-//        writer.emit(System.out, );
+        try (Transaction transaction = graphDb.beginTx()) {
+            GraphvizWriter writer = new GraphvizWriter();
+            writer.emit(System.out, Walker.fullGraph(graphDb));
+            transaction.success();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void iterate(Object parent, String predicate, Object node) {
