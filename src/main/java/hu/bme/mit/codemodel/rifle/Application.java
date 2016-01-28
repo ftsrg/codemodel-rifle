@@ -6,12 +6,12 @@ package hu.bme.mit.codemodel.rifle;
 
 import com.shapesecurity.functional.Pair;
 import com.shapesecurity.functional.data.*;
+import com.shapesecurity.shift.ast.Node;
 import com.shapesecurity.shift.ast.Script;
 import com.shapesecurity.shift.parser.JsError;
 import com.shapesecurity.shift.parser.Parser;
 import com.shapesecurity.shift.scope.GlobalScope;
 import com.shapesecurity.shift.scope.ScopeAnalyzer;
-import com.sun.org.apache.xpath.internal.axes.WalkerFactory;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.RelationshipType;
@@ -19,7 +19,6 @@ import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import org.neo4j.visualization.graphviz.GraphvizWriter;
 import org.neo4j.walk.Walker;
-import scala.App;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -68,6 +67,8 @@ public class Application {
                         relationship -> relationship.delete()
                 );
                 node.delete();
+
+                transaction.success();
             });
         } catch (Exception e) {
             e.printStackTrace();
@@ -92,7 +93,7 @@ public class Application {
         Class<?> nodeType = node.getClass();
 
         if (parent != null) {
-            if (node.getClass().getName().startsWith("com.shapesecurity") || (node instanceof Iterable) || (node instanceof HashMap)) {
+            if (!isPrimitive(node.getClass()) || (node instanceof Iterable) || (node instanceof HashMap)) {
                 storeReference(parent, predicate, node);
             } else {
                 storeProperty(parent, predicate, node);
@@ -118,89 +119,118 @@ public class Application {
             superclass = superclass.getSuperclass();
         }
 
-        getAllFields(nodeType).forEach(
-                field -> {
-                    field.setAccessible(true);
+        if (node instanceof ImmutableList) {
 
-                    Class<?> fieldType = field.getType();
-                    String fieldName = field.getName();
+            // connect the children directly
+            ((ImmutableList) node).forEach(el -> iterate(node, predicate, el));
 
+        } else if (node instanceof Map) {
 
-                    try {
-                        Object o = field.get(node);
-                        if (o instanceof ImmutableList) {
+            Map map = (Map) node;
 
-                            // connect the children directly
-                            ((ImmutableList) o).forEach(el -> iterate(node, fieldName, el));
+            if (!map.isEmpty()) {
+                // id -- [field] -> table
+                storeReference(parent, predicate, map);
+                storeType(map, node.getClass().getSimpleName());
+                storeType(map, "Map");
 
-                        } else if (o instanceof Map) {
-
-                            Map map = (Map) o;
-
-                            // id -- [field] -> table
-                            storeReference(node, fieldName, map);
-
-                            for (Object el : map.entrySet()) {
-                                Map.Entry entry = (Map.Entry) el;
-                                iterate(map, entry.getKey().toString(), entry.getValue());
-                            }
-
-
-                        } else if (o instanceof HashTable) {
-
-                            HashTable table = (HashTable) o;
-
-                            // id -- [field] -> table
-                            storeReference(node, fieldName, table);
-
-                            for (Object el : table.entries()) {
-                                Pair pair = (Pair) el;
-                                iterate(table, pair.a.toString(), pair.b);
-                            }
-
-                        } else if (o instanceof ConcatList) {
-
-                            // connect the children directly
-                            ((ConcatList) o).forEach(el -> iterate(node, fieldName, el));
-
-                        } else if (o instanceof Maybe) {
-
-                            Maybe el = (Maybe) o;
-                            if (el.isJust()) {
-                                iterate(node, fieldName, el.just());
-                            } else {
-                                iterate(node, fieldName, "null");
-                            }
-
-                        } else if (o instanceof Either) {
-                            // TODO
-                            iterate(node, fieldName, o);
-
-                        } else if (fieldType.isEnum()) {
-
-                            iterate(node, fieldName, o.toString());
-
-                        } else if (fieldType.getName().startsWith("com.shapesecurity.shift.ast")) {
-
-                            iterate(node, fieldName, o);
-
-                        } else if (fieldType.getName().startsWith("com.shapesecurity.functional")) {
-
-                            // TODO
-                            iterate(node, fieldName, o);
-
-                        } else {
-
-                            // TODO
-                            iterate(node, fieldName, o);
-
-                        }
-                    } catch (IllegalAccessException e) {
-                        e.printStackTrace();
-                    }
+                for (Object el : map.entrySet()) {
+                    Map.Entry entry = (Map.Entry) el;
+                    iterate(map, entry.getKey().toString(), entry.getValue());
                 }
-        );
+            }
 
+        } else if (node instanceof HashTable) {
+
+            HashTable table = (HashTable) node;
+
+            if (table.length > 0) {
+                // id -- [field] -> table
+                storeReference(parent, predicate, table);
+                storeType(table, "HashTable");
+
+                for (Object el : table.entries()) {
+                    Pair pair = (Pair) el;
+                    iterate(table, pair.a.toString(), pair.b);
+                }
+            }
+
+        } else if (node instanceof ConcatList) {
+
+            // connect the children directly
+            ((ConcatList) node).forEach(el -> iterate(node, predicate, el));
+
+        } else {
+
+            getAllFields(nodeType).forEach(
+                    field -> {
+                        field.setAccessible(true);
+
+                        Class<?> fieldType = field.getType();
+                        String fieldName = field.getName();
+
+
+                        try {
+                            Object o = field.get(node);
+                            if (o instanceof Maybe) {
+
+                                Maybe el = (Maybe) o;
+                                if (el.isJust()) {
+                                    iterate(node, fieldName, el.just());
+                                } else {
+                                    iterate(node, fieldName, "null");
+                                }
+
+                            } else if (o instanceof Either) {
+                                // TODO
+                                iterate(node, fieldName, o);
+
+                            } else if (fieldType.isEnum()) {
+
+                                iterate(node, fieldName, o.toString());
+
+                            } else if (o instanceof Node) {
+
+                                iterate(node, fieldName, o);
+
+                            } else if (fieldType.getName().startsWith("com.shapesecurity.functional")) {
+
+                                // TODO
+                                iterate(node, fieldName, o);
+
+                            } else {
+
+                                // TODO
+                                iterate(node, fieldName, o);
+
+                            }
+                        } catch (IllegalAccessException e) {
+                            e.printStackTrace();
+                        }
+                    }
+            );
+        }
+
+    }
+
+    // http://stackoverflow.com/questions/209366/how-can-i-generically-tell-if-a-java-class-is-a-primitive-type
+    public static boolean isPrimitive(Class c) {
+        if (c.isPrimitive()) {
+            return true;
+        } else if (c == Byte.class
+                || c == Short.class
+                || c == Integer.class
+                || c == Long.class
+                || c == Float.class
+                || c == Double.class
+                || c == Boolean.class
+                || c == Character.class) {
+            return true;
+        } else if (c == String.class) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     protected void storeReference(Object subject, String predicate, Object object) {
@@ -223,6 +253,10 @@ public class Application {
     }
 
     protected void storeType(Object subject, String type) {
+        if (type == null || type.length() == 0) {
+            return;
+        }
+
         try (final Transaction tx = graphDb.beginTx()) {
             org.neo4j.graphdb.Node node = findOrCreate(subject);
             node.addLabel(Label.label(type));
