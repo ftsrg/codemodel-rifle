@@ -2,6 +2,7 @@ package hu.bme.mit.codemodel.rifle.utils;
 
 import com.shapesecurity.functional.Pair;
 import com.shapesecurity.functional.data.*;
+import com.shapesecurity.shift.ast.SourceSpan;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
@@ -31,6 +32,15 @@ public class GraphIterator {
         // TODO for presentation reasons the Nil node is hidden
         if (node instanceof Nil) {
             return;
+        }
+
+        if (node instanceof com.shapesecurity.shift.ast.Node) {
+            Maybe<SourceSpan> location = com.shapesecurity.shift.parser.Parser.getLocation((com.shapesecurity.shift.ast.Node) node);
+            if (location != null) {
+                if (location.isJust()) {
+                    iterate(node, "location", location.just());
+                }
+            }
         }
 
 

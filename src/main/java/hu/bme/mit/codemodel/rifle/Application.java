@@ -25,11 +25,12 @@ public class Application {
 
         dbServices.clean();
 
-        String[] sources = {"test.js"};
+        String[] sources = {"import.js", "export.js"};
         List<GlobalScope> scopes = Parser.parseWithScope(sources);
 
-        GraphIterator iterator = new GraphIterator(dbServices);
+        GraphIterator iterator;
         for (Scope scope : scopes) {
+            iterator = new GraphIterator(dbServices);
             iterator.iterate(null, null, scope);
         }
 
