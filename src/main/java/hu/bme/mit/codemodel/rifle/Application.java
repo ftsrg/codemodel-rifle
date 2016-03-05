@@ -25,7 +25,7 @@ public class Application {
 
         dbServices.clean();
 
-        String[] sources = {"import.js", "export.js"};
+        String[] sources = {"parse-exif.js"};
         List<GlobalScope> scopes = Parser.parseWithScope(sources);
 
         GraphIterator iterator;
