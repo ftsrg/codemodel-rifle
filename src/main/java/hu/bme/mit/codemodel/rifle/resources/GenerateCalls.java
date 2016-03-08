@@ -23,7 +23,7 @@ public class GenerateCalls {
 
     @GET
     @Produces(MediaType.TEXT_PLAIN)
-    public Response getUnusedFunctions() {
+    public Response generateCalls() {
 
         Result result = WebApplication.graphDatabaseService.execute(query);
         return Response.ok(result.resultAsString()).build();

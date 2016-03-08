@@ -22,5 +22,5 @@ WHERE       // List the ones that are not available (Kleene closure) from the
         main:Script OR main:Module
     )
 
-RETURN
-    find, start.line, start.column, end.line, end.column
+RETURN DISTINCT
+    ID(find) as id, start.line, start.column, end.line, end.column

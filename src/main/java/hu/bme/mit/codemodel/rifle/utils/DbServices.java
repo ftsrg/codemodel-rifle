@@ -55,13 +55,10 @@ public class DbServices {
         }
     }
 
-    public Node createNode(Object subject) {
-        try (final Transaction tx = graphDb.beginTx()) {
-            org.neo4j.graphdb.Node node = graphDb.createNode();
-            tx.success();
+    public Node createNode(Transaction tx, Object subject) {
+        org.neo4j.graphdb.Node node = graphDb.createNode();
 
-            return node;
-        }
+        return node;
     }
 
     public Transaction beginTx() {

@@ -26,12 +26,12 @@ public class Application {
         dbServices.clean();
 
         String[] sources = {"parse-exif.js"};
-        List<GlobalScope> scopes = Parser.parseWithScope(sources);
+        Parser.ParseResult parseResult = Parser.parseWithScope(sources);
 
         GraphIterator iterator;
-        for (Scope scope : scopes) {
-            iterator = new GraphIterator(dbServices);
-            iterator.iterate(null, null, scope);
+        for (Scope scope : parseResult.scopes) {
+            iterator = new GraphIterator(dbServices, parseResult.locations);
+            iterator.iterate(null, null, null, scope);
         }
 
         dbServices.export("result.dot");

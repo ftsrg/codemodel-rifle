@@ -16,15 +16,19 @@ import java.util.*;
  */
 public class GraphIterator {
 
+    private final Map<com.shapesecurity.shift.ast.Node, Maybe<SourceSpan>> locations;
     protected DbServices dbServices;
     protected Set<Object> done = new HashSet<>();
     protected Map<Object, org.neo4j.graphdb.Node> nodes = new HashMap<>();
 
-    public GraphIterator(DbServices dbServices) {
+    public GraphIterator(DbServices dbServices, Map<com.shapesecurity.shift.ast.Node, Maybe<SourceSpan>> locations) {
         this.dbServices = dbServices;
+        this.locations = locations;
     }
 
-    public void iterate(Object parent, String predicate, Object node) {
+    public void iterate(Transaction transaction, Object parent, String predicate, Object node) {
+        final Transaction tx = (transaction == null) ? dbServices.beginTx() : transaction;
+
         if (node == null) {
             return;
         }
@@ -35,10 +39,10 @@ public class GraphIterator {
         }
 
         if (node instanceof com.shapesecurity.shift.ast.Node) {
-            Maybe<SourceSpan> location = com.shapesecurity.shift.parser.Parser.getLocation((com.shapesecurity.shift.ast.Node) node);
+            Maybe<SourceSpan> location = locations.get(node);
             if (location != null) {
                 if (location.isJust()) {
-                    iterate(node, "location", location.just());
+                    iterate(tx, node, "location", location.just());
                 }
             }
         }
@@ -47,7 +51,7 @@ public class GraphIterator {
         if (node instanceof ImmutableList) {
 
             // connect the children directly
-            ((ImmutableList) node).forEach(el -> iterate(parent, predicate, el));
+            ((ImmutableList) node).forEach(el -> iterate(tx, parent, predicate, el));
 
         } else if (node instanceof Map) {
 
@@ -55,13 +59,13 @@ public class GraphIterator {
 
             if (!map.isEmpty()) {
                 // id -- [field] -> table
-                storeReference(parent, predicate, map);
-                storeType(map, node.getClass().getSimpleName());
-                storeType(map, "Map");
+                storeReference(tx, parent, predicate, map);
+                storeType(tx, map, node.getClass().getSimpleName());
+                storeType(tx, map, "Map");
 
                 for (Object el : map.entrySet()) {
                     Map.Entry entry = (Map.Entry) el;
-                    iterate(map, entry.getKey().toString(), entry.getValue());
+                    iterate(tx, map, entry.getKey().toString(), entry.getValue());
                 }
             }
 
@@ -71,27 +75,27 @@ public class GraphIterator {
 
             if (table.length > 0) {
                 // id -- [field] -> table
-                storeReference(parent, predicate, table);
-                storeType(table, "HashTable");
+                storeReference(tx, parent, predicate, table);
+                storeType(tx, table, "HashTable");
 
                 for (Object el : table.entries()) {
                     Pair pair = (Pair) el;
-                    iterate(table, pair.a.toString(), pair.b);
+                    iterate(tx, table, pair.a.toString(), pair.b);
                 }
             }
 
         } else if (node instanceof ConcatList) {
 
             // connect the children directlydbServices
-            ((ConcatList) node).forEach(el -> iterate(node, predicate, el));
+            ((ConcatList) node).forEach(el -> iterate(tx, node, predicate, el));
 
         } else {
 
             if (parent != null) {
                 if (!isPrimitive(node.getClass()) || (node instanceof Iterable) || (node instanceof HashMap)) {
-                    storeReference(parent, predicate, node);
+                    storeReference(tx, parent, predicate, node);
                 } else {
-                    storeProperty(parent, predicate, node);
+                    storeProperty(tx, parent, predicate, node);
                     return;
                 }
             }
@@ -105,14 +109,14 @@ public class GraphIterator {
 
             Class<?> nodeType = node.getClass();
 
-            storeType(node, nodeType.getSimpleName());
+            storeType(tx, node, nodeType.getSimpleName());
             // list superclasses, interfaces
             List<Class<?>> interfaces = Arrays.asList(nodeType.getInterfaces());
-            interfaces.forEach(elem -> storeType(node, elem.getSimpleName()));
+            interfaces.forEach(elem -> storeType(tx, node, elem.getSimpleName()));
 
             Class<?> superclass = nodeType.getSuperclass();
             while (superclass != Object.class) {
-                storeType(node, superclass.getSimpleName());
+                storeType(tx, node, superclass.getSimpleName());
                 superclass = superclass.getSuperclass();
             }
 
@@ -131,32 +135,32 @@ public class GraphIterator {
 
                                 Maybe el = (Maybe) o;
                                 if (el.isJust()) {
-                                    iterate(node, fieldName, el.just());
+                                    iterate(tx, node, fieldName, el.just());
                                 } else {
-                                    iterate(node, fieldName, "null");
+                                    iterate(tx, node, fieldName, "null");
                                 }
 
                             } else if (o instanceof Either) {
                                 // TODO
-                                iterate(node, fieldName, o);
+                                iterate(tx, node, fieldName, o);
 
                             } else if (fieldType.isEnum()) {
 
-                                iterate(node, fieldName, o.toString());
+                                iterate(tx, node, fieldName, o.toString());
 
                             } else if (o instanceof Node) {
 
-                                iterate(node, fieldName, o);
+                                iterate(tx, node, fieldName, o);
 
                             } else if (fieldType.getName().startsWith("com.shapesecurity.functional")) {
 
                                 // TODO
-                                iterate(node, fieldName, o);
+                                iterate(tx, node, fieldName, o);
 
                             } else {
 
                                 // TODO
-                                iterate(node, fieldName, o);
+                                iterate(tx, node, fieldName, o);
 
                             }
                         } catch (IllegalAccessException e) {
@@ -166,6 +170,10 @@ public class GraphIterator {
             );
         }
 
+        if (transaction == null) {
+            tx.success();
+            tx.close();
+        }
     }
 
     // http://stackoverflow.com/questions/209366/how-can-i-generically-tell-if-a-java-class-is-a-primitive-type
@@ -188,45 +196,34 @@ public class GraphIterator {
         }
     }
 
-    protected Node findOrCreate(Object subject) {
+    protected Node findOrCreate(Transaction tx, Object subject) {
         if (nodes.containsKey(subject)) {
             return nodes.get(subject);
         } else {
-            Node node = dbServices.createNode(subject);
+            Node node = dbServices.createNode(tx, subject);
             nodes.put(subject, node);
             return node;
         }
     }
 
-    public void storeReference(Object subject, String predicate, Object object) {
-        try (final Transaction tx = dbServices.beginTx()) {
-            Node node = findOrCreate(subject);
-            Node other = findOrCreate(object);
-            node.createRelationshipTo(other, RelationshipType.withName(predicate));
-
-            tx.success();
-        }
+    public void storeReference(Transaction tx, Object subject, String predicate, Object object) {
+        Node node = findOrCreate(tx, subject);
+        Node other = findOrCreate(tx, object);
+        node.createRelationshipTo(other, RelationshipType.withName(predicate));
     }
 
-    public void storeProperty(Object subject, String predicate, Object object) {
-        try (final Transaction tx = dbServices.beginTx()) {
-            Node node = findOrCreate(subject);
-            node.setProperty(predicate, object);
-
-            tx.success();
-        }
+    public void storeProperty(Transaction tx, Object subject, String predicate, Object object) {
+        Node node = findOrCreate(tx, subject);
+        node.setProperty(predicate, object);
     }
 
-    public void storeType(Object subject, String type) {
+    public void storeType(Transaction tx, Object subject, String type) {
         if (type == null || type.length() == 0) {
             return;
         }
 
-        try (final Transaction tx = dbServices.beginTx()) {
-            Node node = findOrCreate(subject);
-            node.addLabel(Label.label(type));
-            tx.success();
-        }
+        Node node = findOrCreate(tx, subject);
+        node.addLabel(Label.label(type));
     }
 
     // http://stackoverflow.com/questions/3567372/access-to-private-inherited-fields-via-reflection-in-java

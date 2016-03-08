@@ -6,6 +6,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.neo4j.graphdb.Result;
+import org.neo4j.graphdb.Transaction;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -25,6 +26,10 @@ public class UnusedFunctions {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response getUnusedFunctions() {
+
+        Transaction tx = WebApplication.graphDatabaseService.beginTx();
+        new GenerateCalls().generateCalls();
+
         Result result = WebApplication.graphDatabaseService.execute(query);
 
         try {
@@ -32,6 +37,9 @@ public class UnusedFunctions {
             JSONArray functions = new JSONArray();
             while (result.hasNext()) {
                 Map<String, Object> next = result.next();
+
+                Object id = next.get("id");
+
                 Object startLine = next.get("start.line");
                 Object startColumn = next.get("start.column");
 
@@ -47,6 +55,7 @@ public class UnusedFunctions {
                 end.put("line", endLine);
                 end.put("column", endColumn);
 
+                row.put("id", id);
                 row.put("start", start);
                 row.put("end", end);
                 functions.put(row);
@@ -56,6 +65,9 @@ public class UnusedFunctions {
             return Response.ok(response.toString()).build();
         } catch (JSONException e) {
             e.printStackTrace();
+        } finally {
+            tx.failure();
+            tx.close();
         }
 
         return Response.serverError().build();
