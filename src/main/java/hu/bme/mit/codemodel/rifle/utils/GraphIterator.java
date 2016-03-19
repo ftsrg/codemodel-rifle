@@ -16,19 +16,25 @@ import java.util.*;
  */
 public class GraphIterator {
 
-    private final Map<com.shapesecurity.shift.ast.Node, Maybe<SourceSpan>> locations;
-    protected DbServices dbServices;
+    protected final HashTable<com.shapesecurity.shift.ast.Node, SourceSpan> locations;
+    protected final Transaction tx;
+    protected final DbServices dbServices;
+    protected final Node pathNode;
+
     protected Set<Object> done = new HashSet<>();
     protected Map<Object, org.neo4j.graphdb.Node> nodes = new HashMap<>();
 
-    public GraphIterator(DbServices dbServices, Map<com.shapesecurity.shift.ast.Node, Maybe<SourceSpan>> locations) {
+    public GraphIterator(DbServices dbServices, Transaction tx, String relativePath, HashTable<com.shapesecurity.shift.ast.Node, SourceSpan> locations) {
         this.dbServices = dbServices;
+        this.tx = tx;
         this.locations = locations;
+
+        this.pathNode = findOrCreate(tx, relativePath);
+        pathNode.addLabel(Label.label("Meta"));
+        pathNode.addLabel(Label.label("Path"));
     }
 
-    public void iterate(Transaction transaction, Object parent, String predicate, Object node) {
-        final Transaction tx = (transaction == null) ? dbServices.beginTx() : transaction;
-
+    public void iterate(Object parent, String predicate, Object node) {
         if (node == null) {
             return;
         }
@@ -38,11 +44,13 @@ public class GraphIterator {
             return;
         }
 
+        storeReference(tx, pathNode, "contains", node);
+
         if (node instanceof com.shapesecurity.shift.ast.Node) {
-            Maybe<SourceSpan> location = locations.get(node);
+            Maybe<SourceSpan> location = locations.get((com.shapesecurity.shift.ast.Node) node);
             if (location != null) {
                 if (location.isJust()) {
-                    iterate(tx, node, "location", location.just());
+                    iterate(node, "location", location.just());
                 }
             }
         }
@@ -51,7 +59,7 @@ public class GraphIterator {
         if (node instanceof ImmutableList) {
 
             // connect the children directly
-            ((ImmutableList) node).forEach(el -> iterate(tx, parent, predicate, el));
+            ((ImmutableList) node).forEach(el -> iterate(parent, predicate, el));
 
         } else if (node instanceof Map) {
 
@@ -65,7 +73,7 @@ public class GraphIterator {
 
                 for (Object el : map.entrySet()) {
                     Map.Entry entry = (Map.Entry) el;
-                    iterate(tx, map, entry.getKey().toString(), entry.getValue());
+                    iterate(map, entry.getKey().toString(), entry.getValue());
                 }
             }
 
@@ -80,14 +88,14 @@ public class GraphIterator {
 
                 for (Object el : table.entries()) {
                     Pair pair = (Pair) el;
-                    iterate(tx, table, pair.a.toString(), pair.b);
+                    iterate(table, pair.a.toString(), pair.b);
                 }
             }
 
         } else if (node instanceof ConcatList) {
 
             // connect the children directlydbServices
-            ((ConcatList) node).forEach(el -> iterate(tx, node, predicate, el));
+            ((ConcatList) node).forEach(el -> iterate(node, predicate, el));
 
         } else {
 
@@ -135,32 +143,32 @@ public class GraphIterator {
 
                                 Maybe el = (Maybe) o;
                                 if (el.isJust()) {
-                                    iterate(tx, node, fieldName, el.just());
+                                    iterate(node, fieldName, el.just());
                                 } else {
-                                    iterate(tx, node, fieldName, "null");
+                                    iterate(node, fieldName, "null");
                                 }
 
                             } else if (o instanceof Either) {
                                 // TODO
-                                iterate(tx, node, fieldName, o);
+                                iterate(node, fieldName, o);
 
                             } else if (fieldType.isEnum()) {
 
-                                iterate(tx, node, fieldName, o.toString());
+                                iterate(node, fieldName, o.toString());
 
                             } else if (o instanceof Node) {
 
-                                iterate(tx, node, fieldName, o);
+                                iterate(node, fieldName, o);
 
                             } else if (fieldType.getName().startsWith("com.shapesecurity.functional")) {
 
                                 // TODO
-                                iterate(tx, node, fieldName, o);
+                                iterate(node, fieldName, o);
 
                             } else {
 
                                 // TODO
-                                iterate(tx, node, fieldName, o);
+                                iterate(node, fieldName, o);
 
                             }
                         } catch (IllegalAccessException e) {
@@ -168,11 +176,6 @@ public class GraphIterator {
                         }
                     }
             );
-        }
-
-        if (transaction == null) {
-            tx.success();
-            tx.close();
         }
     }
 

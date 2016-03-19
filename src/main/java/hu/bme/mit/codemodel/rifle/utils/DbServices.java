@@ -6,13 +6,16 @@ import org.neo4j.walk.Walker;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by steindani on 2/26/16.
  */
 public class DbServices {
 
-    protected GraphDatabaseService graphDb;
+    protected final GraphDatabaseService graphDb;
+    protected final Map<String, Transaction> TRANSACTIONS = new HashMap<>();
 
     public DbServices(GraphDatabaseService graphDb) {
         this.graphDb = graphDb;
@@ -61,7 +64,14 @@ public class DbServices {
         return node;
     }
 
-    public Transaction beginTx() {
-        return graphDb.beginTx();
+    synchronized
+    public Transaction getTransactionFor(String sessionId) {
+        if (!TRANSACTIONS.containsKey(sessionId)) {
+            final Transaction tx = graphDb.beginTx();
+            TRANSACTIONS.put(sessionId, tx);
+        }
+
+        return TRANSACTIONS.get(sessionId);
     }
+
 }

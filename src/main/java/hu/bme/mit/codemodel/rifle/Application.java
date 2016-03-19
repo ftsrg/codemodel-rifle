@@ -19,21 +19,21 @@ import java.util.List;
 public class Application {
 
     public static void main(String[] args) throws JsError, IOException {
-        final String DB_PATH = "/home/steindani/Downloads/neo4j-community-3.0.0-M02/data/graph.db";
-        final GraphDatabaseService graphDb = new GraphDatabaseFactory().newEmbeddedDatabase(DB_PATH);
-        DbServices dbServices = new DbServices(graphDb);
-
-        dbServices.clean();
-
-        String[] sources = {"parse-exif.js"};
-        Parser.ParseResult parseResult = Parser.parseWithScope(sources);
-
-        GraphIterator iterator;
-        for (Scope scope : parseResult.scopes) {
-            iterator = new GraphIterator(dbServices, parseResult.locations);
-            iterator.iterate(null, null, null, scope);
-        }
-
-        dbServices.export("result.dot");
+//        final String DB_PATH = "/home/steindani/Downloads/neo4j-community-3.0.0-M02/data/graph.db";
+//        final GraphDatabaseService graphDb = new GraphDatabaseFactory().newEmbeddedDatabase(DB_PATH);
+//        DbServices dbServices = new DbServices(graphDb);
+//
+//        dbServices.clean();
+//
+//        String[] sources = {"parse-exif.js"};
+//        Parser.ParseResult parseResult = Parser.parseWithScope(sources);
+//
+//        GraphIterator iterator;
+//        for (Scope scope : parseResult.scopes) {
+//            iterator = new GraphIterator(dbServices, parseResult.locations);
+//            iterator.iterate(null, null, null, scope);
+//        }
+//
+//        dbServices.export("result.dot");
     }
 }

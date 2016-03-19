@@ -21,33 +21,33 @@ import java.util.Map;
  */
 public class Parser {
 
-    public static ParseResult parseWithScope(String[] paths) throws IOException, JsError {
-
-        final List<GlobalScope> scopes = new ArrayList<>();
-        final Map<Node, Maybe<SourceSpan>> locations = new HashMap<>();
-
-        for (String path : paths) {
-            String source = FileUtils.readFileToString(new File(path));
-
-            com.shapesecurity.shift.parser.Parser.ModuleParser parser = new com.shapesecurity.shift.parser.Parser.ModuleParser(source);
-            Module module = parser.parse();
-            locations.putAll(parser.locations);
-            GlobalScope scope = ScopeAnalyzer.analyze(module);
-
-            scopes.add(scope);
-        }
-
-        return new ParseResult(scopes, locations);
-    }
-
-    public static class ParseResult {
-        public final List<GlobalScope> scopes;
-        public final Map<Node, Maybe<SourceSpan>> locations;
-
-        public ParseResult(List<GlobalScope> scopes, Map<Node, Maybe<SourceSpan>> locations) {
-            this.scopes = scopes;
-            this.locations = locations;
-        }
-    }
+//    public static ParseResult parseWithScope(String[] paths) throws IOException, JsError {
+//
+//        final List<GlobalScope> scopes = new ArrayList<>();
+//        final Map<Node, Maybe<SourceSpan>> locations = new HashMap<>();
+//
+//        for (String path : paths) {
+//            String source = FileUtils.readFileToString(new File(path));
+//
+//            com.shapesecurity.shift.parser.Parser.ModuleParser parser = new com.shapesecurity.shift.parser.Parser.ModuleParser(source);
+//            Module module = parser.parse();
+//            locations.putAll(parser.locations);
+//            GlobalScope scope = ScopeAnalyzer.analyze(module);
+//
+//            scopes.add(scope);
+//        }
+//
+//        return new ParseResult(scopes, locations);
+//    }
+//
+//    public static class ParseResult {
+//        public final List<GlobalScope> scopes;
+//        public final Map<Node, Maybe<SourceSpan>> locations;
+//
+//        public ParseResult(List<GlobalScope> scopes, Map<Node, Maybe<SourceSpan>> locations) {
+//            this.scopes = scopes;
+//            this.locations = locations;
+//        }
+//    }
 
 }
