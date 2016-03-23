@@ -31,7 +31,7 @@ public class Application {
         GraphIterator iterator;
         for (Scope scope : parseResult.scopes) {
             iterator = new GraphIterator(dbServices, parseResult.locations);
-            iterator.iterate(null, null, null, scope);
+            iterator.iterate(scope, null);
         }
 
         dbServices.export("result.dot");
