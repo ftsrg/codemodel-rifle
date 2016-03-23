@@ -1,13 +1,12 @@
 package hu.bme.mit.codemodel.rifle.resources;
 
 import hu.bme.mit.codemodel.rifle.WebApplication;
+import hu.bme.mit.codemodel.rifle.utils.DbServicesManager;
 import hu.bme.mit.codemodel.rifle.utils.ResourceReader;
 import org.apache.commons.io.IOUtils;
 import org.neo4j.graphdb.Result;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
@@ -23,9 +22,13 @@ public class GenerateCalls {
 
     @GET
     @Produces(MediaType.TEXT_PLAIN)
-    public Response generateCalls() {
+    public Response generateCalls(
+            @QueryParam("sessionId") String sessionId,
+            @DefaultValue("master")
+            @QueryParam("branchId") String branchId
+    ) {
 
-        Result result = WebApplication.graphDatabaseService.execute(query);
+        Result result = DbServicesManager.getDbServices(branchId).getTransactionFor(sessionId)..execute(query);
         return Response.ok(result.resultAsString()).build();
 
     }
