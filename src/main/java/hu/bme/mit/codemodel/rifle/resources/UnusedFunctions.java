@@ -65,7 +65,7 @@ public class UnusedFunctions {
                 row.put("end", end);
                 functions.put(row);
             }
-            response.append("unusedfunctions", functions);
+            response.put("unusedfunctions", functions);
 
             return Response.ok(response.toString()).build();
         } catch (JSONException e) {
