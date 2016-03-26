@@ -3,6 +3,7 @@ package hu.bme.mit.codemodel.rifle.utils;
 import com.shapesecurity.functional.Pair;
 import com.shapesecurity.functional.data.*;
 import com.shapesecurity.shift.ast.SourceSpan;
+import com.shapesecurity.shift.parser.ParserWithLocation;
 import com.shapesecurity.shift.scope.Scope;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
@@ -19,25 +20,27 @@ import java.util.concurrent.LinkedBlockingQueue;
  */
 public class GraphIterator {
 
-    private final Map<com.shapesecurity.shift.ast.Node, Maybe<SourceSpan>> locations;
-    protected DbServices dbServices;
-    protected Set<Object> done = new HashSet<>();
-    protected Map<Object, org.neo4j.graphdb.Node> nodes = new HashMap<>();
+    protected final String path;
+    protected final ParserWithLocation parserWithLocation;
+    protected final DbServices dbServices;
+    protected final Set<Object> done = new HashSet<>();
+    protected final Map<Object, org.neo4j.graphdb.Node> nodes = new IdentityHashMap<>();
 
     protected BlockingQueue<QueueItem> queue = new LinkedBlockingQueue<>();
 
-    public GraphIterator(DbServices dbServices, Map<com.shapesecurity.shift.ast.Node, Maybe<SourceSpan>> locations) {
+    public GraphIterator(DbServices dbServices, String path, ParserWithLocation parserWithLocation) {
         this.dbServices = dbServices;
-        this.locations = locations;
+        this.path = path;
+        this.parserWithLocation = parserWithLocation;
     }
 
     public void iterate(Scope scope, String sessionId) {
         try (Transaction tx = dbServices.beginTx()) {
 
+            createPathNode(sessionId, tx);
             queue.add(new QueueItem(null, null, scope));
 
             while (!queue.isEmpty()) {
-                System.out.println(queue.size());
                 final QueueItem queueItem = queue.take();
                 process(queueItem, tx, sessionId);
             }
@@ -46,6 +49,12 @@ public class GraphIterator {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+    }
+
+    protected void createPathNode(String sessionId, Transaction tx) {
+        storeType(tx, path, "CompilationUnit");
+        storeProperty(tx, path, "path", path);
+        storeProperty(tx, path, "sessionid", sessionId);
     }
 
     protected void process(QueueItem queueItem, Transaction tx, String sessionId) {
@@ -57,6 +66,8 @@ public class GraphIterator {
         if (node == null || node instanceof Nil) {
             return;
         }
+
+        storeReference(tx, path, "contains", node);
 
         // If the sessionId is set, mark the node temporal and store the id.
         handleIfInSession(tx, sessionId, node);
@@ -220,11 +231,9 @@ public class GraphIterator {
 
     protected void storeLocation(Object node) {
         if (node instanceof com.shapesecurity.shift.ast.Node) {
-            Maybe<SourceSpan> location = locations.get((com.shapesecurity.shift.ast.Node) node);
-            if (location != null) {
-                if (location.isJust()) {
-                    queue.add(new QueueItem(node, "location", location.just()));
-                }
+            Maybe<SourceSpan> location = parserWithLocation.getLocation((com.shapesecurity.shift.ast.Node) node);
+            if (location.isJust()) {
+                queue.add(new QueueItem(node, "location", location.just()));
             }
         }
     }
@@ -261,12 +270,15 @@ public class GraphIterator {
     }
 
     public void storeReference(Transaction tx, Object subject, String predicate, Object object) {
-        Node node = findOrCreate(tx, subject);
-        Node other = findOrCreate(tx, object);
-        node.createRelationshipTo(other, RelationshipType.withName(predicate));
+        Node a = findOrCreate(tx, subject);
+        Node b = findOrCreate(tx, object);
+        a.createRelationshipTo(b, RelationshipType.withName(predicate));
     }
 
     public void storeProperty(Transaction tx, Object subject, String predicate, Object object) {
+        if (object == null) {
+            return;
+        }
         Node node = findOrCreate(tx, subject);
         node.setProperty(predicate, object);
     }

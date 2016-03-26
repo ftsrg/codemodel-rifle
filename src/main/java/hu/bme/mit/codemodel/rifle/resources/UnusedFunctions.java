@@ -1,6 +1,8 @@
 package hu.bme.mit.codemodel.rifle.resources;
 
 import hu.bme.mit.codemodel.rifle.WebApplication;
+import hu.bme.mit.codemodel.rifle.utils.DbServices;
+import hu.bme.mit.codemodel.rifle.utils.DbServicesManager;
 import hu.bme.mit.codemodel.rifle.utils.ResourceReader;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -8,9 +10,7 @@ import org.json.JSONObject;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.Map;
@@ -20,17 +20,22 @@ import java.util.Map;
  */
 @Path("unusedfunctions")
 public class UnusedFunctions {
-    protected static final String NAME = "unusedfunctions";
-    protected final String query = ResourceReader.query(NAME);
+    protected final String UNUSED_QUERY = ResourceReader.query("unusedfunctions");
+    protected final String GENERATE_CALLS = ResourceReader.query("generatecalls");
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getUnusedFunctions() {
+    public Response getUnusedFunctions(
+            @QueryParam("sessionid") String sessionid,
 
-        Transaction tx = WebApplication.graphDatabaseService.beginTx();
-        new GenerateCalls().generateCalls();
+            @DefaultValue("master")
+            @QueryParam("branchid") String branchid
+    ) {
+        final DbServices dbServices = DbServicesManager.getDbServices(branchid);
+        Transaction tx = dbServices.beginTx();
 
-        Result result = WebApplication.graphDatabaseService.execute(query);
+        dbServices.graphDb.execute(GENERATE_CALLS);
+        Result result = dbServices.graphDb.execute(UNUSED_QUERY);
 
         try {
             JSONObject response = new JSONObject();

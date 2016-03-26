@@ -14,8 +14,7 @@ import java.util.Map;
  */
 public class DbServices {
 
-    protected final GraphDatabaseService graphDb;
-    protected final Map<String, Transaction> TRANSACTIONS = new HashMap<>();
+    public final GraphDatabaseService graphDb;
 
     public DbServices(GraphDatabaseService graphDb) {
         this.graphDb = graphDb;
@@ -64,14 +63,7 @@ public class DbServices {
         return node;
     }
 
-    synchronized
-    public Transaction getTransactionFor(String sessionId) {
-        if (!TRANSACTIONS.containsKey(sessionId)) {
-            final Transaction tx = graphDb.beginTx();
-            TRANSACTIONS.put(sessionId, tx);
-        }
-
-        return TRANSACTIONS.get(sessionId);
+    public Transaction beginTx() {
+        return graphDb.beginTx();
     }
-
 }
