@@ -6,13 +6,19 @@ import com.shapesecurity.shift.parser.Parser;
 import com.shapesecurity.shift.parser.ParserWithLocation;
 import com.shapesecurity.shift.scope.GlobalScope;
 import com.shapesecurity.shift.scope.ScopeAnalyzer;
+import hu.bme.mit.codemodel.rifle.utils.DbServices;
 import hu.bme.mit.codemodel.rifle.utils.DbServicesManager;
 import hu.bme.mit.codemodel.rifle.utils.GraphIterator;
+import hu.bme.mit.codemodel.rifle.utils.ResourceReader;
+import org.neo4j.graphdb.Result;
+import org.neo4j.graphdb.Transaction;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.net.URI;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by steindani on 3/23/16.
@@ -52,7 +58,11 @@ public class HandleChange {
             @DefaultValue("master")
             @QueryParam("branchid") String branchid
     ) {
-        return Response.ok().build();
+        final Response response = remove(sessionid, path, branchid);
+        if (response.getStatus() == Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()) {
+            return response;
+        }
+        return add(sessionid, path, content, branchid);
     }
 
     @DELETE
@@ -64,7 +74,12 @@ public class HandleChange {
             @DefaultValue("master")
             @QueryParam("branchid") String branchid
     ) {
-        return Response.ok().build();
+        final boolean result = removeFile(sessionid, path, branchid);
+        if (result) {
+            return Response.ok().build();
+        } else {
+            return Response.serverError().build();
+        }
     }
 
 
@@ -75,6 +90,25 @@ public class HandleChange {
         GlobalScope scope = ScopeAnalyzer.analyze(module);
         GraphIterator iterator = new GraphIterator(DbServicesManager.getDbServices(branchid), path, parser);
         iterator.iterate(scope, sessionid);
+    }
+
+    protected boolean removeFile(String sessionid, String path, String branchid) {
+        String removeFile = ResourceReader.query("removefile");
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("path", path);
+        parameters.put("sessionid", sessionid);
+
+
+        final DbServices dbServices = DbServicesManager.getDbServices(branchid);
+        try (Transaction tx = dbServices.beginTx()) {
+            dbServices.graphDb.execute(removeFile, parameters);
+            tx.success();
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return false;
     }
 
 }
