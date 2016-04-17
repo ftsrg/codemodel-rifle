@@ -13,6 +13,7 @@ import org.neo4j.graphdb.Transaction;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -35,11 +36,16 @@ public class UnusedFunctions {
         Transaction tx = dbServices.beginTx();
 
         dbServices.graphDb.execute(GENERATE_CALLS);
-        Result result = dbServices.graphDb.execute(UNUSED_QUERY);
+
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("sessionid", sessionid);
+        Result result = dbServices.graphDb.execute(UNUSED_QUERY, parameters);
 
         try {
             JSONObject response = new JSONObject();
             JSONArray functions = new JSONArray();
+
+            processRows:
             while (result.hasNext()) {
                 Map<String, Object> next = result.next();
 
@@ -50,6 +56,17 @@ public class UnusedFunctions {
 
                 Object endLine = next.get("end.line");
                 Object endColumn = next.get("end.column");
+
+                Object deadSessionid = next.get("dead.session");
+
+                try {
+                    final String s = (String) deadSessionid;
+                    if (s != null && !s.equals(sessionid)) {
+                        continue processRows;
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
 
                 JSONObject row = new JSONObject();
                 JSONObject start = new JSONObject();
@@ -63,6 +80,7 @@ public class UnusedFunctions {
                 row.put("id", id);
                 row.put("start", start);
                 row.put("end", end);
+                row.put("sessionid", deadSessionid);
                 functions.put(row);
             }
             response.put("unusedfunctions", functions);
@@ -70,11 +88,10 @@ public class UnusedFunctions {
             return Response.ok(response.toString()).build();
         } catch (JSONException e) {
             e.printStackTrace();
+            throw new WebApplicationException(e);
         } finally {
             tx.failure();
             tx.close();
         }
-
-        return Response.serverError().build();
     }
 }

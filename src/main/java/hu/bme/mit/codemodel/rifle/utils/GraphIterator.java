@@ -23,10 +23,10 @@ public class GraphIterator {
     protected final String path;
     protected final ParserWithLocation parserWithLocation;
     protected final DbServices dbServices;
-    protected final Set<Object> done = new HashSet<>();
+    protected final IdentityHashMap<Object, Object> done = new IdentityHashMap<>();
     protected final Map<Object, org.neo4j.graphdb.Node> nodes = new IdentityHashMap<>();
 
-    protected BlockingQueue<QueueItem> queue = new LinkedBlockingQueue<>();
+    protected final BlockingQueue<QueueItem> queue = new LinkedBlockingQueue<>();
 
     public GraphIterator(DbServices dbServices, String path, ParserWithLocation parserWithLocation) {
         this.dbServices = dbServices;
@@ -41,7 +41,7 @@ public class GraphIterator {
             queue.add(new QueueItem(null, null, scope));
 
             while (!queue.isEmpty()) {
-                final QueueItem queueItem = queue.take();
+                QueueItem queueItem = queue.take();
                 process(queueItem, tx, sessionId);
             }
 
@@ -54,7 +54,7 @@ public class GraphIterator {
     protected void createPathNode(String sessionId, Transaction tx) {
         storeType(tx, path, "CompilationUnit");
         storeProperty(tx, path, "path", path);
-        storeProperty(tx, path, "sessionid", sessionId);
+        storeProperty(tx, path, "session", sessionId);
     }
 
     protected void process(QueueItem queueItem, Transaction tx, String sessionId) {
@@ -67,39 +67,49 @@ public class GraphIterator {
             return;
         }
 
-        storeReference(tx, path, "contains", node);
-
-        // If the sessionId is set, mark the node temporal and store the id.
-        handleIfInSession(tx, sessionId, node);
-
-        if (node instanceof ImmutableList
-                || node instanceof Map
-                || node instanceof HashTable
-                || node instanceof ConcatList
-                ) {
-            if (done.contains(node)) {
-                return;
-            }
-            done.add(node);
-            handleCollection(tx, parent, predicate, node);
+        if (isPrimitive(node.getClass())) {
+            storeProperty(tx, parent, predicate, node);
+        } else if (isCollection(node)) {
+            handleCollection(tx, parent, predicate, node, sessionId);
+        } else if (node instanceof Maybe || node instanceof Either) {
+            handleFunctional(tx, parent, predicate, node, sessionId);
+        } else if (node.getClass().getName().startsWith("com.shapesecurity")) {
+            handleAstNode(tx, parent, predicate, node, sessionId);
         } else {
-
-            if (parent != null) {
-                if (isPrimitive(node.getClass())) {
-                    storeProperty(tx, parent, predicate, node);
-                } else {
-                    storeReference(tx, parent, predicate, node);
-                }
-            }
-            if (done.contains(node)) {
-                return;
-            }
-            done.add(node);
-
-            handleAstNode(tx, parent, predicate, node);
+            System.err.println("WTF");
         }
 
+    }
 
+    protected static boolean isCollection(Object node) {
+        return node instanceof ImmutableList
+                || node instanceof Map
+                || node instanceof HashTable
+                || node instanceof ConcatList;
+    }
+
+    private void handleFunctional(Transaction tx, Object parent, String predicate, Object node, String sessionId) {
+        if (done.containsKey(node)) {
+            return;
+        }
+        done.put(node, node);
+
+        if (node instanceof Maybe) {
+            Maybe el = (Maybe) node;
+            if (el.isJust()) {
+                queue.add(new QueueItem(parent, predicate, el.just()));
+//            } else {
+//                queue.add(new QueueItem(node, fieldName, "null"));
+            }
+        } else if (node instanceof Either) {
+            Either el = (Either) node;
+            if (el.isLeft()) {
+                handleFunctional(tx, parent, predicate, el.left(), sessionId);
+            }
+            if (el.isRight()) {
+                handleFunctional(tx, parent, predicate, el.right(), sessionId);
+            }
+        }
     }
 
     /**
@@ -117,11 +127,33 @@ public class GraphIterator {
         }
     }
 
-    protected void handleCollection(Transaction tx, Object parent, String predicate, Object node) {
-        if (node instanceof ImmutableList) {
+    protected void handleCollection(Transaction tx, Object parent, String predicate, Object node, String sessionId) {
+        if (done.containsKey(node)) {
+            return;
+        }
+        done.put(node, node);
 
-            // connect the children directly
-            ((ImmutableList) node).forEach(el -> queue.add(new QueueItem(parent, predicate, el)));
+        if (node instanceof ImmutableList || node instanceof ConcatList) {
+
+            Iterable list = (Iterable) node;
+
+            // id -- [field] -> list
+            storeReference(tx, parent, predicate, list);
+            storeType(tx, list, "List");
+            storeReference(tx, path, "contains", list);
+            handleIfInSession(tx, sessionId, list);
+
+            final Iterator iterator = list.iterator();
+            int i = 0;
+            while (iterator.hasNext()) {
+                Object el = iterator.next();
+                queue.add(new QueueItem(list, Integer.toString(i), el));
+
+                // connect the children directly
+                queue.add(new QueueItem(parent, predicate, el));
+
+                i++;
+            }
 
         } else if (node instanceof Map) {
 
@@ -130,8 +162,10 @@ public class GraphIterator {
             if (!map.isEmpty()) {
                 // id -- [field] -> table
                 storeReference(tx, parent, predicate, map);
-                storeType(tx, map, node.getClass().getSimpleName());
+//                storeType(tx, map, node.getClass().getSimpleName());
                 storeType(tx, map, "Map");
+                storeReference(tx, path, "contains", map);
+                handleIfInSession(tx, sessionId, map);
 
                 for (Object el : map.entrySet()) {
                     Map.Entry entry = (Map.Entry) el;
@@ -147,6 +181,8 @@ public class GraphIterator {
                 // id -- [field] -> table
                 storeReference(tx, parent, predicate, table);
                 storeType(tx, table, "HashTable");
+                storeReference(tx, path, "contains", table);
+                handleIfInSession(tx, sessionId, table);
 
                 for (Object el : table.entries()) {
                     Pair pair = (Pair) el;
@@ -154,16 +190,22 @@ public class GraphIterator {
                 }
             }
 
-        } else if (node instanceof ConcatList) {
-
-            // connect the children directlydbServices
-            ((ConcatList) node).forEach(el -> queue.add(new QueueItem(node, predicate, el)));
-
         }
     }
 
-    protected void handleAstNode(Transaction tx, Object parent, String predicate, Object node) {
+    protected void handleAstNode(Transaction tx, Object parent, String predicate, Object node, String sessionId) {
 
+        if (parent != null) {
+            storeReference(tx, parent, predicate, node);
+        }
+
+        if (done.containsKey(node)) {
+            return;
+        }
+        done.put(node, node);
+
+        storeReference(tx, path, "contains", node);
+        handleIfInSession(tx, sessionId, node);
         storeLocation(node);
 
         Class<?> nodeType = node.getClass();
@@ -190,22 +232,10 @@ public class GraphIterator {
 
                     try {
                         Object o = field.get(node);
-                        if (o instanceof Maybe) {
+                        if (fieldType.isEnum()) {
 
-                            Maybe el = (Maybe) o;
-                            if (el.isJust()) {
-                                queue.add(new QueueItem(node, fieldName, el.just()));
-                            } else {
-                                queue.add(new QueueItem(node, fieldName, "null"));
-                            }
-
-                        } else if (o instanceof Either) {
-                            // TODO
-                            queue.add(new QueueItem(node, fieldName, o));
-
-                        } else if (fieldType.isEnum()) {
-
-                            queue.add(new QueueItem(node, fieldName, o.toString()));
+                            // queue.add(new QueueItem(node, fieldName, o.toString()));
+                            storeProperty(tx, node, fieldName, o.toString());
 
                         } else if (o instanceof Node) {
 
@@ -270,6 +300,9 @@ public class GraphIterator {
     }
 
     public void storeReference(Transaction tx, Object subject, String predicate, Object object) {
+        if (subject == null || object == null) {
+            return;
+        }
         Node a = findOrCreate(tx, subject);
         Node b = findOrCreate(tx, object);
         a.createRelationshipTo(b, RelationshipType.withName(predicate));

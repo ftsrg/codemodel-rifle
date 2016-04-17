@@ -4,11 +4,15 @@ import hu.bme.mit.codemodel.rifle.utils.DbServices;
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
+import org.jhades.JHades;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Created by steindani on 3/2/16.
@@ -28,6 +32,15 @@ public class WebApplication {
      * @return Grizzly HTTP server.
      */
     public static HttpServer startServer() {
+
+        // source: http://stackoverflow.com/questions/21329733/grizzly-standalone-logging
+        Logger l = Logger.getLogger("org.glassfish.grizzly.http.server.HttpHandler");
+        l.setLevel(Level.FINE);
+        l.setUseParentHandlers(false);
+        ConsoleHandler ch = new ConsoleHandler();
+        ch.setLevel(Level.ALL);
+        l.addHandler(ch);
+
         // create a resource config that scans for JAX-RS resources and providers
         // in hu.bme.mit.codemodel.rifle package
         final ResourceConfig rc = new ResourceConfig().packages("hu.bme.mit.codemodel.rifle.resources");
@@ -43,6 +56,8 @@ public class WebApplication {
      * @throws IOException
      */
     public static void main(String[] args) throws IOException {
+//        new JHades().overlappingJarsReport();
+
         final HttpServer server = startServer();
         System.out.println(String.format("Jersey app started with WADL available at "
                 + "%sapplication.wadl\nHit enter to stop it...", BASE_URI));
