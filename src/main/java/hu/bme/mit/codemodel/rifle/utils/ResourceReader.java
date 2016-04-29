@@ -24,6 +24,6 @@ public class ResourceReader {
     }
 
     public static String query(String queryName) {
-        return readFromResource("queries" + File.separator + queryName + ".cql");
+        return readFromResource("queries" + File.separator + queryName + ".cypher");
     }
 }

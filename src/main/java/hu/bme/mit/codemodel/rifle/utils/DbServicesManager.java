@@ -17,7 +17,7 @@ public class DbServicesManager {
     public static DbServices getDbServices(String branchId) {
         if (!dbServices.containsKey(branchId)) {
             final String DB_PATH = "database" + File.separator + branchId;
-            final GraphDatabaseService graphDb = new GraphDatabaseFactory().newEmbeddedDatabase(DB_PATH);
+            final GraphDatabaseService graphDb = new GraphDatabaseFactory().newEmbeddedDatabase(new File(DB_PATH));
             final DbServices dbs = new DbServices(graphDb);
 
             dbServices.put(branchId, dbs);

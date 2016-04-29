@@ -38,13 +38,13 @@
         <dependency>
             <groupId>org.neo4j</groupId>
             <artifactId>neo4j</artifactId>
-            <version>3.0.0-M02</version>
+            <version>3.0.0</version>
         </dependency>
 
         <dependency>
             <groupId>org.neo4j.app</groupId>
             <artifactId>neo4j-server</artifactId>
-            <version>3.0.0-M02</version>
+            <version>3.0.0</version>
 
             <exclusions>
                 <exclusion>
@@ -65,7 +65,7 @@
         <dependency>
             <groupId>org.neo4j</groupId>
             <artifactId>neo4j-graphviz</artifactId>
-            <version>3.0.0-M02</version>
+            <version>3.0.0</version>
         </dependency>
 
         <dependency>
