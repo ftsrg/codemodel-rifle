@@ -57,13 +57,17 @@ MATCH
     (vdor:VariableDeclarator)-[:init]->
     (exp:Expression)-[:type]->
     (type:Tag)
+//MERGE
+//    (var)-[:type]->(tag:Tag)
+//CALL apoc.create.addLabels(tag, labels(type))
+WHERE
+    NOT (var)-[:type]-(:Tag)-[:from]->(type)
+CALL
+    apoc.refactor.cloneNodes([type]) YIELD input, output as tag, error
 MERGE
-    (var)-[:type]->(tag:Tag)
-CALL apoc.create.addLabels(tag, labels(type))
-SET
-    tag.session = exp.session
-MERGE
-    (tag)-[:from]->(type)
+    (var)-[:type]->(tag)-[:from]->(type)
+//MERGE
+//    (tag)-[:from]->(type)
 MERGE
     (tag)-[:through]->(vdor)
 ;
@@ -82,7 +86,7 @@ MERGE
  WHERE
      NOT (vdor)-[:init]->(:Expression)
  MERGE
-     (var)-[:type]->(tag:Tag)
+     (var)-[:type]->(tag:Tag:UndefinedTag)
  SET
      tag.session = var.session
  MERGE
@@ -114,9 +118,12 @@ MATCH
     (var:Variable)-[:references]->
     (ref:Reference)-[:node]->
     (exp:Expression)
+WHERE
+    NOT (exp)-[:type]-(:Tag)-[:from]->(type)
+CALL
+    apoc.refactor.cloneNodes([type]) YIELD input, output as tag, error
 MERGE
-    (exp)-[:type]->(tag)
-CALL apoc.create.addLabels(tag, labels(type))
+    (exp)-[:type]->(tag)-[:from]->(type)
 ;
 
 /**
