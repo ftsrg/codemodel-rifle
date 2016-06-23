@@ -84,7 +84,7 @@ public class ExportGraph {
             final File dot = File.createTempFile("dot", null);
             dot.deleteOnExit();
 
-            FileOutputStream fileOutputStream = new FileOutputStream(dot);
+            NewlineFilterStream fileOutputStream = new NewlineFilterStream(new FileOutputStream(dot));
             new GraphvizWriter().emit(fileOutputStream, new SimpleWalker(dbServices));
             fileOutputStream.close();
 
@@ -115,7 +115,7 @@ public class ExportGraph {
     }
 
     @GET
-    @Produces("imgae/png")
+    @Produces("image/png")
     @Path("png")
     public Response png(
             @DefaultValue("master")
@@ -128,7 +128,7 @@ public class ExportGraph {
             final File dot = File.createTempFile("dot", null);
             dot.deleteOnExit();
 
-            FileOutputStream fileOutputStream = new FileOutputStream(dot);
+            NewlineFilterStream fileOutputStream = new NewlineFilterStream(new FileOutputStream(dot));
             new GraphvizWriter().emit(fileOutputStream, new SimpleWalker(dbServices));
             fileOutputStream.close();
 
@@ -187,6 +187,48 @@ public class ExportGraph {
                 }
             }
             return visitor.done();
+        }
+    }
+
+    class NewlineFilterStream extends FilterOutputStream {
+        int buffer = -1;
+
+        /**
+         * Creates an output stream filter built on top of the specified
+         * underlying output stream.
+         *
+         * @param out the underlying output stream to be assigned to
+         *            the field <tt>this.out</tt> for later use, or
+         *            <code>null</code> if this instance is to be
+         *            created without an underlying stream.
+         */
+        public NewlineFilterStream(OutputStream out) {
+            super(out);
+        }
+
+        @Override
+        public void write(int b) throws IOException {
+            if (buffer == ',' && b == ' ') {
+                out.write('\\');
+                out.write('n');
+//                out.write('\n');
+                buffer = -1;
+            } else {
+                if (buffer != -1) {
+                    out.write(buffer);
+                }
+
+                buffer = b;
+            }
+        }
+
+        @Override
+        public void flush() throws IOException {
+            if (buffer != -1) {
+                out.write(buffer);
+            }
+            buffer = -1;
+            super.flush();
         }
     }
 }
