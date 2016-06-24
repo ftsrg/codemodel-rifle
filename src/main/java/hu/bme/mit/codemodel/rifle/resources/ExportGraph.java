@@ -13,6 +13,10 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 import java.io.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by steindani on 3/2/16.
@@ -75,7 +79,9 @@ public class ExportGraph {
     @Path("svg")
     public Response svg(
             @DefaultValue("master")
-            @QueryParam("branchid") String branchid
+            @QueryParam("branchid") String branchid,
+            @DefaultValue("-1")
+            @QueryParam("nodeid") long nodeid
     ) {
         try {
             final DbServices dbServices = DbServicesManager.getDbServices(branchid);
@@ -84,8 +90,16 @@ public class ExportGraph {
             final File dot = File.createTempFile("dot", null);
             dot.deleteOnExit();
 
+            Walker walker;
+
+            if (nodeid != -1) {
+                walker = new SubgraphWalker(dbServices, nodeid);
+            } else {
+                walker = new SimpleWalker(dbServices);
+            }
+
             NewlineFilterStream fileOutputStream = new NewlineFilterStream(new FileOutputStream(dot));
-            new GraphvizWriter().emit(fileOutputStream, new SimpleWalker(dbServices));
+            new GraphvizWriter().emit(fileOutputStream, walker);
             fileOutputStream.close();
 
 
@@ -119,7 +133,9 @@ public class ExportGraph {
     @Path("png")
     public Response png(
             @DefaultValue("master")
-            @QueryParam("branchid") String branchid
+            @QueryParam("branchid") String branchid,
+            @DefaultValue("-1")
+            @QueryParam("nodeid") long nodeid
     ) {
         try {
             final DbServices dbServices = DbServicesManager.getDbServices(branchid);
@@ -128,8 +144,16 @@ public class ExportGraph {
             final File dot = File.createTempFile("dot", null);
             dot.deleteOnExit();
 
+            Walker walker;
+
+            if (nodeid != -1) {
+                walker = new SubgraphWalker(dbServices, nodeid);
+            } else {
+                walker = new SimpleWalker(dbServices);
+            }
+
             NewlineFilterStream fileOutputStream = new NewlineFilterStream(new FileOutputStream(dot));
-            new GraphvizWriter().emit(fileOutputStream, new SimpleWalker(dbServices));
+            new GraphvizWriter().emit(fileOutputStream, walker);
             fileOutputStream.close();
 
 
@@ -184,6 +208,61 @@ public class ExportGraph {
                         continue;
                     }
                     visitor.visitRelationship(edge);
+                }
+            }
+            return visitor.done();
+        }
+    }
+
+    // based on org.neo4j.walk.Walker.crosscut()
+    protected class SubgraphWalker extends Walker {
+
+        private final List<Node> nodes = new ArrayList<>();
+
+        public SubgraphWalker(DbServices dbServices, long rootId) {
+            final Node root = dbServices.graphDb.getNodeById(rootId);
+            nodes.add(root);
+
+            final Result result = dbServices.graphDb.execute(
+                    "MATCH (root)-[*]->(n) WHERE id(root) = {rootid} RETURN id(n) as id",
+                    new HashMap<String, Object>() {{
+                        put("rootid", rootId);
+                    }});
+
+            while (result.hasNext()) {
+                final Map<String, Object> next = result.next();
+                nodes.add(dbServices.graphDb.getNodeById(Long.valueOf(next.get("id").toString())));
+            }
+//            nodes = dbServices.graphDb
+//                    .traversalDescription()
+//                    .breadthFirst()
+//                    .traverse(root)
+//                    .nodes()
+//                    .stream().map(node -> node).collect(Collectors.toList());
+        }
+
+        @Override
+        public <R, E extends Throwable> R accept(Visitor<R, E> visitor) throws E {
+            for (Node node : nodes) {
+
+                if (node.hasLabel(Label.label("CompilationUnit"))) {
+                    continue;
+                }
+                if (node.hasLabel(Label.label("SourceSpan"))) {
+                    continue;
+                }
+                if (node.hasLabel(Label.label("SourceLocation"))) {
+                    continue;
+                }
+
+                visitor.visitNode(node);
+                for (Relationship relationship : node.getRelationships(Direction.OUTGOING)) {
+                    if (nodes.contains(relationship.getOtherNode(node))) {
+                        if (relationship.isType(RelationshipType.withName("location"))) {
+                            continue;
+                        }
+                        visitor.visitRelationship(relationship);
+                    }
                 }
             }
             return visitor.done();
