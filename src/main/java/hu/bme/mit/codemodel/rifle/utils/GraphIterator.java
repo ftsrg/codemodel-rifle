@@ -145,9 +145,17 @@ public class GraphIterator {
 
             final Iterator iterator = list.iterator();
             int i = 0;
+
+            Object prev = null;
+
             while (iterator.hasNext()) {
                 Object el = iterator.next();
                 queue.add(new QueueItem(list, Integer.toString(i), el));
+
+                if (prev != null) {
+                    queue.add(new QueueItem(prev, "_next", el));
+                }
+                prev = el;
 
                 // connect the children directly
                 queue.add(new QueueItem(parent, predicate, el));
