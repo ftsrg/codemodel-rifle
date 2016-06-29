@@ -81,7 +81,12 @@ public class ExportGraph {
             @DefaultValue("master")
             @QueryParam("branchid") String branchid,
             @DefaultValue("-1")
-            @QueryParam("nodeid") long nodeid
+            @QueryParam("nodeid") long nodeid,
+
+            @DefaultValue("true")
+            @QueryParam("simple") boolean simple,
+            @DefaultValue("true")
+            @QueryParam("cfg") boolean cfg
     ) {
         try {
             final DbServices dbServices = DbServicesManager.getDbServices(branchid);
@@ -93,7 +98,7 @@ public class ExportGraph {
             Walker walker;
 
             if (nodeid != -1) {
-                walker = new SubgraphWalker(dbServices, nodeid);
+                walker = new SubgraphWalker(dbServices, nodeid, simple, cfg);
             } else {
                 walker = new SimpleWalker(dbServices);
             }
@@ -135,7 +140,12 @@ public class ExportGraph {
             @DefaultValue("master")
             @QueryParam("branchid") String branchid,
             @DefaultValue("-1")
-            @QueryParam("nodeid") long nodeid
+            @QueryParam("nodeid") long nodeid,
+
+            @DefaultValue("true")
+            @QueryParam("simple") boolean simple,
+            @DefaultValue("true")
+            @QueryParam("cfg") boolean cfg
     ) {
         try {
             final DbServices dbServices = DbServicesManager.getDbServices(branchid);
@@ -147,7 +157,7 @@ public class ExportGraph {
             Walker walker;
 
             if (nodeid != -1) {
-                walker = new SubgraphWalker(dbServices, nodeid);
+                walker = new SubgraphWalker(dbServices, nodeid, simple, cfg);
             } else {
                 walker = new SimpleWalker(dbServices);
             }
@@ -218,8 +228,13 @@ public class ExportGraph {
     protected class SubgraphWalker extends Walker {
 
         private final List<Node> nodes = new ArrayList<>();
+        private final boolean simple;
+        private final boolean cfg;
 
-        public SubgraphWalker(DbServices dbServices, long rootId) {
+        public SubgraphWalker(DbServices dbServices, long rootId, boolean simple, boolean cfg) {
+            this.simple = simple;
+            this.cfg = cfg;
+
             final Node root = dbServices.graphDb.getNodeById(rootId);
             nodes.add(root);
 
@@ -243,16 +258,28 @@ public class ExportGraph {
 
         @Override
         public <R, E extends Throwable> R accept(Visitor<R, E> visitor) throws E {
+            //filternodes:
             for (Node node : nodes) {
 
-                if (node.hasLabel(Label.label("CompilationUnit"))) {
-                    continue;
+                if (simple) {
+                    if (node.hasLabel(Label.label("CompilationUnit"))) {
+                        continue; // filternodes;
+                    }
+                    if (node.hasLabel(Label.label("SourceSpan"))) {
+                        continue; // filternodes;
+                    }
+                    if (node.hasLabel(Label.label("SourceLocation"))) {
+                        continue; // filternodes;
+                    }
                 }
-                if (node.hasLabel(Label.label("SourceSpan"))) {
-                    continue;
-                }
-                if (node.hasLabel(Label.label("SourceLocation"))) {
-                    continue;
+
+                if (!cfg) {
+                    if (node.hasLabel(Label.label("StartProto"))) {
+                        continue; // filternodes;
+                    }
+                    if (node.hasLabel(Label.label("EndProto"))) {
+                        continue; // filternodes;
+                    }
                 }
 
                 visitor.visitNode(node);
@@ -261,6 +288,25 @@ public class ExportGraph {
                         if (relationship.isType(RelationshipType.withName("location"))) {
                             continue;
                         }
+
+                        if (!cfg) {
+                            if (relationship.isType(RelationshipType.withName("_owns"))) {
+                                continue;
+                            }
+                            if (relationship.isType(RelationshipType.withName("_next"))) {
+                                continue;
+                            }
+                            if (relationship.isType(RelationshipType.withName("_true"))) {
+                                continue;
+                            }
+                            if (relationship.isType(RelationshipType.withName("_false"))) {
+                                continue;
+                            }
+                            if (relationship.isType(RelationshipType.withName("_normal"))) {
+                                continue;
+                            }
+                        }
+
                         visitor.visitRelationship(relationship);
                     }
                 }
