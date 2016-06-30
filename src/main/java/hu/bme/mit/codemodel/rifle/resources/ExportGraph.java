@@ -2,6 +2,7 @@ package hu.bme.mit.codemodel.rifle.resources;
 
 import hu.bme.mit.codemodel.rifle.utils.DbServices;
 import hu.bme.mit.codemodel.rifle.utils.DbServicesManager;
+import org.neo4j.cypher.internal.frontend.v2_3.ast.functions.Str;
 import org.neo4j.graphdb.*;
 import org.neo4j.visualization.graphviz.GraphvizWriter;
 import org.neo4j.walk.Visitor;
@@ -13,10 +14,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 import java.io.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by steindani on 3/2/16.
@@ -192,6 +191,52 @@ public class ExportGraph {
         return Response.serverError().build();
     }
 
+    @GET
+    @Produces("image/png")
+    @Path("cfg")
+    public Response png(
+            @DefaultValue("master")
+            @QueryParam("branchid") String branchid
+    ) {
+        try {
+            final DbServices dbServices = DbServicesManager.getDbServices(branchid);
+            Transaction transaction = dbServices.beginTx();
+
+            final File dot = File.createTempFile("dot", null);
+            dot.deleteOnExit();
+
+            Walker walker = new CFGWalker(dbServices);
+
+            NewlineFilterStream fileOutputStream = new NewlineFilterStream(new FileOutputStream(dot));
+            new GraphvizWriter().emit(fileOutputStream, walker);
+            fileOutputStream.close();
+
+
+            ProcessBuilder builder = new ProcessBuilder("dot", "-Tpng", dot.getAbsolutePath());
+            builder.redirectErrorStream(true);
+            Process process = builder.start();
+
+            final InputStream inputStream = process.getInputStream();
+            final BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);
+
+            StreamingOutput stream = output -> {
+                int read = bufferedInputStream.read();
+                while (read != -1) {
+                    output.write(read);
+                    read = bufferedInputStream.read();
+                }
+                output.flush();
+                bufferedInputStream.close();
+            };
+
+            return Response.ok(stream).build();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return Response.serverError().build();
+    }
+
     protected class SimpleWalker extends Walker {
         private final DbServices dbServices;
 
@@ -305,6 +350,47 @@ public class ExportGraph {
                             if (relationship.isType(RelationshipType.withName("_normal"))) {
                                 continue;
                             }
+                        }
+
+                        visitor.visitRelationship(relationship);
+                    }
+                }
+            }
+            return visitor.done();
+        }
+    }
+
+    // based on org.neo4j.walk.Walker.crosscut()
+    protected class CFGWalker extends Walker {
+
+        private final Set<Node> nodes = new HashSet<>();
+        List<String> relationships = Arrays.asList(":`_owns`", ":`_normal`", ":`_next`", ":`_true`", ":`_false`");
+        List<String> relationshipLabels = relationships.stream()
+                .map(before -> before.substring(2, before.length() - 1))
+                .collect(Collectors.toList());
+
+        public CFGWalker(DbServices dbServices) {
+            final Result result = dbServices.graphDb.execute(
+                    "MATCH (a)-[" + String.join("|", relationships) + "]->(b) RETURN id(a) as a, id(b) as b"
+            );
+
+            while (result.hasNext()) {
+                final Map<String, Object> next = result.next();
+                nodes.add(dbServices.graphDb.getNodeById(Long.valueOf(next.get("a").toString())));
+                nodes.add(dbServices.graphDb.getNodeById(Long.valueOf(next.get("b").toString())));
+            }
+        }
+
+        @Override
+        public <R, E extends Throwable> R accept(Visitor<R, E> visitor) throws E {
+            //filternodes:
+            for (Node node : nodes) {
+                visitor.visitNode(node);
+                for (Relationship relationship : node.getRelationships(Direction.OUTGOING)) {
+                    if (nodes.contains(relationship.getOtherNode(node))) {
+
+                        if (!relationshipLabels.contains(relationship.getType().name())) {
+                            continue;
                         }
 
                         visitor.visitRelationship(relationship);
