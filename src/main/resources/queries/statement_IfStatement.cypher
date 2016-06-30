@@ -12,6 +12,9 @@ MERGE
   (alternateS:StartProto)<-[:`_owns`]-(alternate)-[:`_owns`]->(alternateE:EndProto)
 
 MERGE
+  (ifS)-[:`_normal`]->(testS)
+
+MERGE
   (testE)-[:`_true`]->(consequentS)
 MERGE
   (testE)-[:`_false`]->(alternateS)
