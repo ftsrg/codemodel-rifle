@@ -43,8 +43,12 @@ public class HandleChange {
             // TODO provide URI for the parsed content?
             return Response.created(URI.create("")).build();
         } catch (JsError jsError) {
+            System.err.println(path);
             jsError.printStackTrace();
-            return Response.serverError().entity(jsError).build();
+
+            final Exception exception = new Exception(path);
+            exception.addSuppressed(jsError);
+            return Response.serverError().entity(exception).build();
         }
     }
 
