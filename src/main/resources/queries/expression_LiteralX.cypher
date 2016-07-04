@@ -7,7 +7,6 @@ WHERE
   OR "LiteralRegExpExpression" IN labels(le)
   OR "LiteralStringExpression" IN labels(le)
 
-MERGE
-  (leS:StartProto)<-[:`_owns`]-(le)-[:`_owns`]->(leE:EndProto)
-MERGE
-  (leS)-[:`_normal`]->(leE)
+MERGE (le)    -[:`_end`]->  (leE:End)
+
+MERGE (le)    -[:`_normal`]-> (leE)

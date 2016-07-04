@@ -319,10 +319,7 @@ public class ExportGraph {
                 }
 
                 if (!cfg) {
-                    if (node.hasLabel(Label.label("StartProto"))) {
-                        continue; // filternodes;
-                    }
-                    if (node.hasLabel(Label.label("EndProto"))) {
+                    if (node.hasLabel(Label.label("End"))) {
                         continue; // filternodes;
                     }
                 }
@@ -335,7 +332,7 @@ public class ExportGraph {
                         }
 
                         if (!cfg) {
-                            if (relationship.isType(RelationshipType.withName("_owns"))) {
+                            if (relationship.isType(RelationshipType.withName("_end"))) {
                                 continue;
                             }
                             if (relationship.isType(RelationshipType.withName("_next"))) {
@@ -364,7 +361,7 @@ public class ExportGraph {
     protected class CFGWalker extends Walker {
 
         private final Set<Node> nodes = new HashSet<>();
-        List<String> relationships = Arrays.asList(":`_owns`", ":`_normal`", ":`_next`", ":`_true`", ":`_false`");
+        List<String> relationships = Arrays.asList(":`_end`", ":`_normal`", ":`_next`", ":`_true`", ":`_false`");
         List<String> relationshipLabels = relationships.stream()
                 .map(before -> before.substring(2, before.length() - 1))
                 .collect(Collectors.toList());

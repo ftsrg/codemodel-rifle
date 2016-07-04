@@ -1,17 +1,8 @@
 MATCH
-  (fd:FunctionDeclaration)-[:body]->(b:FunctionBody)-[:statements]->(:List)-[:`0`]->(s:Statement),
-  (b)-[:statements]->(last:Statement)
-WHERE
-  NOT (last)-[:`_next`]->()
+  (fd:FunctionDeclaration)-[:body]->(b:FunctionBody)-[:statements]->(list:List)
 
-MERGE
-  (fdS:StartProto)<-[:`_owns`]-(fd)-[:`_owns`]->(fdE:EndProto)
-MERGE
-  (sS:StartProto)<-[:`_owns`]-(s)-[:`_owns`]->(sE:EndProto)
-MERGE
-  (lastS:StartProto)<-[:`_owns`]-(last)-[:`_owns`]->(lastE:EndProto)
+MERGE (fd)    -[:`_end`]->  (fdE:End)
+MERGE (list)  -[:`_end`]->  (listE:End)
 
-MERGE
-  (fdS)-[:`_normal`]->(sS)
-MERGE
-  (lastE)-[:`_normal`]->(fdE)
+MERGE (fd)    -[:`_normal`]-> (list)
+MERGE (listE) -[:`_normal`]-> (fdE)

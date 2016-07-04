@@ -20,6 +20,8 @@ import java.util.stream.Collectors;
 public class BuildCallGraph {
 
     protected final static List<String> QUERYNAMES = Arrays.asList(
+            "ListNoItem",
+            "ListWithItem",
             "expression_CallExpressionNoParam",
             "expression_CallExpressionParam",
             "expression_LiteralX",

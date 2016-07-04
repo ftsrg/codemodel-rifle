@@ -6,12 +6,8 @@ MATCH
 WHERE
   NOT (call)-[:arguments]->()
 
-MERGE
-  (callS:StartProto)<-[:`_owns`]-(call)-[:`_owns`]->(callE:EndProto)
-MERGE
-  (fdS:StartProto)<-[:`_owns`]-(fd)-[:`_owns`]->(fdE:EndProto)
+MERGE (call)    -[:`_end`]->  (callE:End)
+MERGE (fd)      -[:`_end`]->  (fdE:End)
 
-MERGE
-  (callS)-[:`_normal`]->(fdS)
-MERGE
-  (fdE)-[:`_normal`]->(callE)
+MERGE (call)    -[:`_normal`]-> (fd)
+MERGE (fdE)     -[:`_normal`]-> (callE)
