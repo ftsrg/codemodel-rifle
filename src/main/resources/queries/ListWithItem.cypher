@@ -1,6 +1,6 @@
 MATCH
   (l:List)-[:`0`]->(first),
-  (first)-[:`_next`*]->(last)
+  (first)-[:`_next`*0..]->(last)
 WHERE
   NOT (last)-[:`_next`]->()
 
