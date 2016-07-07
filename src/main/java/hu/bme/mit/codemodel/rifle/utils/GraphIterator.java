@@ -212,6 +212,8 @@ public class GraphIterator {
         }
         done.put(node, node);
 
+        createEndNode(tx, node, sessionId);
+
         storeReference(tx, path, "contains", node);
         handleIfInSession(tx, sessionId, node);
         storeLocation(node);
@@ -265,6 +267,14 @@ public class GraphIterator {
                     }
                 }
         );
+    }
+
+    protected void createEndNode(Transaction tx, Object node, String sessionId) {
+        Object end = new Object();
+        storeType(tx, end, "End");
+        storeReference(tx, node, "_end", end);
+        storeProperty(tx, node, "session", sessionId);
+        storeReference(tx, path, "contains", end);
     }
 
     protected void storeLocation(Object node) {
