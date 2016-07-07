@@ -28,7 +28,8 @@ public class BuildCallGraph {
             "statement_BlockStatement",
             "statement_ExpressionStatement",
             "statement_FunctionDeclaration",
-            "statement_IfStatement",
+            "statement_IfStatementAlternate",
+            "statement_IfStatementNoAlternate",
             "statement_VariableDeclarationStatement"
     );
     protected final static List<String> QUERIES = QUERYNAMES.stream()
