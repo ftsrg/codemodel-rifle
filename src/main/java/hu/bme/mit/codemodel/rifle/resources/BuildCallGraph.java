@@ -9,8 +9,10 @@ import org.neo4j.graphdb.Transaction;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 /**
@@ -42,38 +44,60 @@ public class BuildCallGraph {
             @DefaultValue("master")
             @QueryParam("branchid") String branchid
     ) {
-        Transaction tx = null;
-        StringBuilder builder = new StringBuilder();
 
-        try {
-            final DbServices dbServices = DbServicesManager.getDbServices(branchid);
-            tx = dbServices.beginTx();
+        final DbServices dbServices = DbServicesManager.getDbServices(branchid);
+        ExecutorService executorService = Executors.newCachedThreadPool();
 
-            for (int i = 0; i < QUERYNAMES.size(); i++) {
-                String name = QUERYNAMES.get(i);
-                String query = QUERIES.get(i);
+        List<Callable<String>> tasks = new ArrayList<>();
 
-                builder.append('\n').append(name).append('\n');
+        for (int i = 0; i < QUERYNAMES.size(); i++) {
+            String name = QUERYNAMES.get(i);
+            String query = QUERIES.get(i);
+
+            Callable<String> callable = () -> {
+                Transaction tx = dbServices.beginTx();
+                StringBuilder builder = new StringBuilder();
 
                 try {
+                    builder.append('\n').append(name).append('\n');
                     final Result result = dbServices.graphDb.execute(query);
                     builder.append(result.resultAsString()).append('\n');
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    builder.append(e.toString()).append('\n');
-                }
-            }
 
-            tx.success();
+                    tx.success();
+                } catch (Exception e) {
+                    System.err.println(name);
+                    e.printStackTrace();
+
+                    builder.append(name).append('\n').append(e.toString()).append('\n');
+                    throw new WebApplicationException(e);
+                } finally {
+                    if (tx != null) {
+                        tx.close();
+                    }
+                }
+
+                return builder.toString();
+            };
+
+            tasks.add(callable);
+        }
+
+        try {
+            final List<Future<String>> futures = executorService.invokeAll(tasks);
+            StringBuilder builder = new StringBuilder();
+
+            for (Future<String> future : futures) {
+                builder.append(future.get());
+                builder.append('\n');
+            }
 
             return Response.ok(builder.toString()).build();
-        } catch (Exception e) {
+        } catch (InterruptedException e) {
             e.printStackTrace();
-            throw new WebApplicationException(e);
-        } finally {
-            if (tx != null) {
-                tx.close();
-            }
+        } catch (ExecutionException e) {
+            e.printStackTrace();
         }
+
+        return Response.serverError().build();
     }
 }
