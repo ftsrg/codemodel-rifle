@@ -7,6 +7,6 @@ WHERE
   OR "LiteralRegExpExpression" IN labels(le)
   OR "LiteralStringExpression" IN labels(le)
 
-MERGE (le)    -[:`_end`]->  (leE:End)
+MATCH (le)    -[:`_end`]->  (leE:End)
 
 MERGE (le)    -[:`_normal`]-> (leE)

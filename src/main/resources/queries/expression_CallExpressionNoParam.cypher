@@ -6,8 +6,8 @@ MATCH
 WHERE
   NOT (call)-[:arguments]->()
 
-MERGE (call)    -[:`_end`]->  (callE:End)
-MERGE (fd)      -[:`_end`]->  (fdE:End)
+MATCH (call)    -[:`_end`]->  (callE:End)
+MATCH (fd)      -[:`_end`]->  (fdE:End)
 
 MERGE (call)    -[:`_normal`]-> (fd)
 MERGE (fdE)     -[:`_normal`]-> (callE)

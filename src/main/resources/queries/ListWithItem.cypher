@@ -4,8 +4,8 @@ MATCH
 WHERE
   NOT (last)-[:`_next`]->()
 
-MERGE (l)     -[:`_end`]->  (lE:End)
-MERGE (last)  -[:`_end`]->  (lastE:End)
+MATCH (l)     -[:`_end`]->  (lE:End)
+MATCH (last)  -[:`_end`]->  (lastE:End)
 
 MERGE (l)     -[:`_normal`]-> (first)
 MERGE (lastE) -[:`_normal`]-> (lE)

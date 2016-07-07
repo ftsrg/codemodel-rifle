@@ -3,6 +3,6 @@ MATCH
 WHERE
   NOT (l)-[:`0`]->()
 
-MERGE (l)     -[:`_end`]->  (lE:End)
+MATCH (l)     -[:`_end`]->  (lE:End)
 
 MERGE (l)     -[:`_normal`]-> (lE)

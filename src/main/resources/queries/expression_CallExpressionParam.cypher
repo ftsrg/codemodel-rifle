@@ -6,9 +6,9 @@ MATCH
 
   (call)-[:arguments]->(params:List)
 
-MERGE (call)    -[:`_end`]->  (callE:End)
-MERGE (fd)      -[:`_end`]->  (fdE:End)
-MERGE (params)  -[:`_end`]->  (pE:End)
+MATCH (call)    -[:`_end`]->  (callE:End)
+MATCH (fd)      -[:`_end`]->  (fdE:End)
+MATCH (params)  -[:`_end`]->  (pE:End)
 
 MERGE (call)    -[:`_normal`]-> (params)
 MERGE (paramsE) -[:`_normal`]-> (fd)
