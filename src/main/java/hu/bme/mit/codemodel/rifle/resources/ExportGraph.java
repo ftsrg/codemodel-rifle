@@ -196,7 +196,7 @@ public class ExportGraph {
     @GET
     @Produces("image/png")
     @Path("cfg")
-    public Response png(
+    public Response cfg(
             @DefaultValue("master")
             @QueryParam("branchid") String branchid
     ) {
@@ -239,4 +239,35 @@ public class ExportGraph {
         return Response.serverError().build();
     }
 
+    @GET
+    @Produces(MediaType.TEXT_PLAIN)
+    @Path("cfgdot")
+    public Response cfgdot(
+            @DefaultValue("master")
+            @QueryParam("branchid") String branchid
+    ) {
+        try {
+            final DbServices dbServices = DbServicesManager.getDbServices(branchid);
+            Transaction transaction = dbServices.beginTx();
+
+            final File dot = File.createTempFile("dot", null);
+            dot.deleteOnExit();
+
+            StreamingOutput stream = output -> {
+
+                Walker walker = new CFGWalker(dbServices);
+                NewlineFilterStream fileOutputStream = new NewlineFilterStream(output);
+
+                GraphvizWriter writer = new GraphvizWriter();
+                writer.emit(fileOutputStream, walker);
+
+            };
+
+            return Response.ok(stream).build();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return Response.serverError().build();
+    }
 }

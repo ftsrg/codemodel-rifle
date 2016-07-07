@@ -28,7 +28,7 @@ public class NewlineFilterStream extends FilterOutputStream {
         if (buffer == ',' && b == ' ') {
             out.write('\\');
             out.write('n');
-//                out.write('\n');
+            out.write('\n');
             buffer = -1;
         } else {
             if (buffer != -1) {
