@@ -4,12 +4,13 @@ MATCH
   -[:declarations]->(:Declaration)-[:node]->(:BindingIdentifier)
   <-[:name]-(fd:FunctionDeclaration),
 
-  (call)-[:arguments]->(params:List)
+  (call)-[:arguments]->(params:List),
 
-MATCH (call)    -[:`_end`]->  (callE:End)
-MATCH (fd)      -[:`_end`]->  (fdE:End)
-MATCH (params)  -[:`_end`]->  (pE:End)
+  (call)    -[:`_end`]->  (callE:End),
+  (fd)      -[:`_end`]->  (fdE:End),
+  (params)  -[:`_end`]->  (pE:End)
 
-MERGE (call)    -[:`_normal`]-> (params)
-MERGE (paramsE) -[:`_normal`]-> (fd)
-MERGE (fdE)     -[:`_normal`]-> (callE)
+MERGE
+  (call)    -[:`_normal`]-> (params)  -[:`_end`]->
+  (pE)      -[:`_normal`]-> (fd)      -[:`_end`]->
+  (fdE)     -[:`_normal`]-> (callE)

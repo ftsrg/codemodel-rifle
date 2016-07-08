@@ -2,12 +2,14 @@ MATCH
   (call:CallExpression)-[:callee]->(:IdentifierExpression)
   <-[:node]-(:Reference)<-[:references]-(:Variable)
   -[:declarations]->(:Declaration)-[:node]->(:BindingIdentifier)
-  <-[:name]-(fd:FunctionDeclaration)
+  <-[:name]-(fd:FunctionDeclaration),
+
+  (call)    -[:`_end`]->  (callE:End),
+  (fd)      -[:`_end`]->  (fdE:End)
+
 WHERE
   NOT (call)-[:arguments]->()
 
-MATCH (call)    -[:`_end`]->  (callE:End)
-MATCH (fd)      -[:`_end`]->  (fdE:End)
-
-MERGE (call)    -[:`_normal`]-> (fd)
-MERGE (fdE)     -[:`_normal`]-> (callE)
+MERGE
+  (call)    -[:`_normal`]-> (fd)      -[:`_end`]->
+  (fdE)     -[:`_normal`]-> (callE)

@@ -1,8 +1,10 @@
 MATCH
-  (l:List)
+  (l:List),
+
+  (l)     -[:`_end`]->  (lE:End)
+
 WHERE
   NOT (l)-[:`0`]->()
 
-MATCH (l)     -[:`_end`]->  (lE:End)
-
-MERGE (l)     -[:`_normal`]-> (lE)
+MERGE
+  (l)     -[:`_normal`]-> (lE)

@@ -1,12 +1,14 @@
 MATCH
-  (test:Node)<-[:test]-(if:IfStatement)-[:consequent]->(consequent:Node)
-MATCH (if)          -[:`_end`]->  (ifE:End)
-MATCH (test)        -[:`_end`]->  (testE:End)
-MATCH (consequent)  -[:`_end`]->  (consequentE:End)
+  (test:Node)<-[:test]-(if:IfStatement)-[:consequent]->(consequent:Node),
+
+  (if)          -[:`_end`]->  (ifE:End),
+  (test)        -[:`_end`]->  (testE:End),
+  (consequent)  -[:`_end`]->  (consequentE:End)
 
 WHERE
   NOT (if)-[:alternate]->(:Statement)
 
-MERGE (if)          -[:`_normal`]-> (test)
-MERGE (testE)       -[:`_true`]->   (consequent)
-MERGE (consequentE) -[:`_normal`]-> (ifE)
+MERGE
+  (if)			    -[:`_normal`]-> (test)         -[:`_end`]->
+	(testE)   		-[:`_true`]->   (consequent)   -[:`_end`]->
+	(consequentE)	-[:`_normal`]-> (ifE)
