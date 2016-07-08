@@ -223,7 +223,14 @@ public class GraphIterator {
         storeType(tx, node, nodeType.getSimpleName());
         // list superclasses, interfaces
         List<Class<?>> interfaces = Arrays.asList(nodeType.getInterfaces());
-        interfaces.forEach(elem -> storeType(tx, node, elem.getSimpleName()));
+        interfaces.forEach(elem -> {
+            final String interfaceName = elem.getSimpleName();
+            storeType(tx, node, interfaceName);
+            
+            if (interfaceName.startsWith("Literal")) {
+                storeType(tx, node, "Literal");
+            }
+        });
 
         Class<?> superclass = nodeType.getSuperclass();
         while (superclass != Object.class) {
