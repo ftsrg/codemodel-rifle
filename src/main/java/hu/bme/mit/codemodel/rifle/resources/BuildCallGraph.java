@@ -3,6 +3,7 @@ package hu.bme.mit.codemodel.rifle.resources;
 import hu.bme.mit.codemodel.rifle.utils.DbServices;
 import hu.bme.mit.codemodel.rifle.utils.DbServicesManager;
 import hu.bme.mit.codemodel.rifle.utils.ResourceReader;
+import jline.internal.Log;
 import net.jodah.failsafe.Failsafe;
 import net.jodah.failsafe.FailsafeFuture;
 import net.jodah.failsafe.RetryPolicy;
@@ -30,7 +31,7 @@ public class BuildCallGraph {
 
     protected static RetryPolicy retryPolicy = new RetryPolicy()
             .retryOn(DeadlockDetectedException.class)
-            .withDelay(1, TimeUnit.SECONDS);
+            .withBackoff(10, 10000, TimeUnit.MILLISECONDS);
 
     protected final static List<String> QUERYNAMES = Arrays.asList(
             "ListNoItem",
@@ -68,7 +69,9 @@ public class BuildCallGraph {
             futures.add(
                     Failsafe.with(retryPolicy)
                             .with(executorService)
+                            .onRetryAsync(throwable -> System.err.println("Retrying " + name + "\n" + throwable.toString()))
                             .get(() -> {
+                                System.err.println("Starting " + name);
                                 StringBuilder builder = new StringBuilder();
 
                                 try (Transaction tx = dbServices.beginTx()) {
@@ -77,15 +80,8 @@ public class BuildCallGraph {
                                     builder.append(result.resultAsString()).append('\n');
 
                                     tx.success();
-                                } catch (Exception e) {
-                                    System.err.println(name);
-                                    e.printStackTrace();
-
-                                    builder.append(name).append('\n').append(e.toString()).append('\n');
-                                    throw new WebApplicationException(e);
+                                    return builder.toString();
                                 }
-
-                                return builder.toString();
                             })
             );
         }
@@ -94,7 +90,10 @@ public class BuildCallGraph {
             StringBuilder builder = new StringBuilder();
 
             for (FailsafeFuture<String> future : futures) {
-                builder.append(future.get());
+                String result = future.get();
+                System.err.println(result + "\n");
+
+                builder.append(result);
                 builder.append('\n');
             }
 

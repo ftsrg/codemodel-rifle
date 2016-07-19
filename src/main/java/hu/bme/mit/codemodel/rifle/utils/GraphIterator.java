@@ -163,6 +163,7 @@ public class GraphIterator {
                 i++;
             }
 
+            storeReference(tx, list, "last", prev);
             createEndNode(tx, list, sessionId);
 
         } else if (node instanceof Map) {
