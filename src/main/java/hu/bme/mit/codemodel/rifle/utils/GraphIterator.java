@@ -163,6 +163,8 @@ public class GraphIterator {
                 i++;
             }
 
+            createEndNode(tx, list, sessionId);
+
         } else if (node instanceof Map) {
 
             Map map = (Map) node;
