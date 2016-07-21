@@ -3,7 +3,6 @@ package hu.bme.mit.codemodel.rifle.resources;
 import hu.bme.mit.codemodel.rifle.utils.DbServices;
 import hu.bme.mit.codemodel.rifle.utils.DbServicesManager;
 import hu.bme.mit.codemodel.rifle.utils.ResourceReader;
-import jline.internal.Log;
 import net.jodah.failsafe.Failsafe;
 import net.jodah.failsafe.FailsafeFuture;
 import net.jodah.failsafe.RetryPolicy;
@@ -34,17 +33,17 @@ public class BuildCallGraph {
             .withBackoff(10, 10000, TimeUnit.MILLISECONDS);
 
     protected final static List<String> QUERYNAMES = Arrays.asList(
-            "ListNoItem",
-            "ListWithItem",
-            "expression_CallExpressionNoParam",
-            "expression_CallExpressionParam",
-            "expression_LiteralX",
-            "statement_BlockStatement",
-            "statement_ExpressionStatement",
-            "statement_FunctionDeclaration",
-            "statement_IfStatementAlternate",
-            "statement_IfStatementNoAlternate",
-            "statement_VariableDeclarationStatement"
+            "cfg/ListNoItem",
+            "cfg/ListWithItem",
+            "cfg/expression/CallExpressionNoParam",
+            "cfg/expression/LiteralX",
+            "cfg/expression/CallExpressionParam",
+            "cfg/statement/VariableDeclarationStatement",
+            "cfg/statement/ExpressionStatement",
+            "cfg/statement/IfStatementNoAlternate",
+            "cfg/statement/BlockStatement",
+            "cfg/statement/FunctionDeclaration",
+            "cfg/statement/IfStatementAlternate"
     );
     protected final static List<String> QUERIES = QUERYNAMES.stream()
             .map(ResourceReader::query)
