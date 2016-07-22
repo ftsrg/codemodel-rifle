@@ -1,5 +1,6 @@
 MATCH
-  (lit:LiteralInfinityExpression)
+  (lit:LiteralInfinityExpression),
+  (ts:TypeSystem)-[:`_instance`]->(tag:Tag:`Infinity`)
 
 MERGE
-  (lit)-[:`_type`]->(tag:Tag:Infinity)
+  (lit)-[:`_type`]->(tag)

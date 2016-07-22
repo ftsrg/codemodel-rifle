@@ -1,5 +1,6 @@
 MATCH
-  (lit:LiteralNumericExpression)
+  (lit:LiteralNumericExpression),
+  (ts:TypeSystem)-[:`_instance`]->(tag:Tag:`Number`)
 
 MERGE
-  (lit)-[:`_type`]->(tag:Tag:Numeric)
+  (lit)-[:`_type`]->(tag)

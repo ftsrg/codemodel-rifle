@@ -1,5 +1,6 @@
 MATCH
-  (lit:LiteralStringExpression)
+  (lit:LiteralStringExpression),
+  (ts:TypeSystem)-[:`_instance`]->(tag:Tag:`String`)
 
 MERGE
-  (lit)-[:`_type`]->(tag:Tag:String)
+  (lit)-[:`_type`]->(tag)

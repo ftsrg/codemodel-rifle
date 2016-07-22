@@ -1,5 +1,6 @@
 MATCH
-  (lit:LiteralNullExpression)
+  (lit:LiteralNullExpression),
+  (ts:TypeSystem)-[:`_instance`]->(tag:Tag:`Null`)
 
 MERGE
-  (lit)-[:`_type`]->(tag:Tag:`Null`)
+  (lit)-[:`_type`]->(tag)
