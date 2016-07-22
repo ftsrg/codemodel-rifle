@@ -40,6 +40,7 @@ public class TypeInference {
             "type/literal/Numeric",
             "type/literal/Null",
             "type/literal/String",
+            "type/operator/binary/LogicalOr",
             "type/variable/VariableDeclarator",
             "type/variable/Read",
             "type/variable/Write"
@@ -54,6 +55,16 @@ public class TypeInference {
             @DefaultValue("master")
             @QueryParam("branchid") String branchid
     ) {
+
+        // 1. initialize TypeSystem
+        // 2. tag literals (parallel)
+        // 3. repeat the following until there is no modification (parallel, 2x):
+        //    - tag unary expressions
+        //    - tag binary expressions
+        //    - handle and tag new expressions
+        //    - handle and tag call expressions
+        // 4. ???
+        // 5. profit
 
         final DbServices dbServices = DbServicesManager.getDbServices(branchid);
         ScheduledExecutorService executorService = Executors.newScheduledThreadPool(4);
