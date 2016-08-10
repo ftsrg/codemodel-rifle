@@ -1,7 +1,6 @@
 package hu.bme.mit.codemodel.rifle.utils;
 
 import org.apache.commons.io.IOUtils;
-import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;

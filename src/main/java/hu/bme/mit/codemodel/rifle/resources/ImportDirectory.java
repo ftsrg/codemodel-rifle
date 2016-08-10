@@ -37,7 +37,7 @@ public class ImportDirectory {
 
             try {
                 String c = FileUtils.readFileToString(file);
-                handleChange.modify(sessionid, file.getAbsolutePath(), c, branchid);
+                handleChange.modify(sessionid, file.getAbsolutePath(), c, branchid, null);
 
                 builder.append(" SUCCESS\n");
             } catch (IOException e) {

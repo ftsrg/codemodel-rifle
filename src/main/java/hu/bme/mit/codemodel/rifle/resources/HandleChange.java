@@ -2,7 +2,6 @@ package hu.bme.mit.codemodel.rifle.resources;
 
 import com.shapesecurity.shift.ast.Module;
 import com.shapesecurity.shift.parser.JsError;
-import com.shapesecurity.shift.parser.Parser;
 import com.shapesecurity.shift.parser.ParserWithLocation;
 import com.shapesecurity.shift.scope.GlobalScope;
 import com.shapesecurity.shift.scope.ScopeAnalyzer;
@@ -10,7 +9,6 @@ import hu.bme.mit.codemodel.rifle.utils.DbServices;
 import hu.bme.mit.codemodel.rifle.utils.DbServicesManager;
 import hu.bme.mit.codemodel.rifle.utils.GraphIterator;
 import hu.bme.mit.codemodel.rifle.utils.ResourceReader;
-import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 
 import javax.ws.rs.*;
@@ -26,6 +24,9 @@ import java.util.Map;
 @Path("handle")
 public class HandleChange {
 
+    private static final String SET_COMMIT_HASH = ResourceReader.query("setcommithash");
+    private static final String REMOVE_FILE = ResourceReader.query("removefile");
+
     @POST
     @Produces(MediaType.TEXT_PLAIN)
     public Response add(
@@ -34,8 +35,11 @@ public class HandleChange {
             String content,
 
             @DefaultValue("master")
-            @QueryParam("branchid") String branchid
+            @QueryParam("branchid") String branchid,
+            @QueryParam("commithash") String commithash
     ) {
+
+        setCommitHashInNewTransaction(branchid, commithash);
 
         try {
             parseFile(sessionid, path, content, branchid);
@@ -60,13 +64,14 @@ public class HandleChange {
             String content,
 
             @DefaultValue("master")
-            @QueryParam("branchid") String branchid
+            @QueryParam("branchid") String branchid,
+            @QueryParam("commithash") String commithash
     ) {
-        final Response response = remove(sessionid, path, branchid);
+        final Response response = remove(sessionid, path, branchid, commithash);
         if (response.getStatus() == Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()) {
             return response;
         }
-        return add(sessionid, path, content, branchid);
+        return add(sessionid, path, content, branchid, commithash);
     }
 
     @DELETE
@@ -76,9 +81,10 @@ public class HandleChange {
             @QueryParam("path") String path,
 
             @DefaultValue("master")
-            @QueryParam("branchid") String branchid
+            @QueryParam("branchid") String branchid,
+            @QueryParam("commithash") String commithash
     ) {
-        final boolean result = removeFile(sessionid, path, branchid);
+        final boolean result = removeFile(sessionid, path, branchid, commithash);
         if (result) {
             return Response.ok().build();
         } else {
@@ -96,16 +102,15 @@ public class HandleChange {
         iterator.iterate(scope, sessionid);
     }
 
-    protected boolean removeFile(String sessionid, String path, String branchid) {
-        String removeFile = ResourceReader.query("removefile");
+    protected boolean removeFile(String sessionid, String path, String branchid, String commithash) {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("path", path);
         parameters.put("sessionid", sessionid);
 
-
         final DbServices dbServices = DbServicesManager.getDbServices(branchid);
         try (Transaction tx = dbServices.beginTx()) {
-            dbServices.graphDb.execute(removeFile, parameters);
+            setCommitHash(dbServices, tx, branchid, commithash);
+            dbServices.graphDb.execute(REMOVE_FILE, parameters);
             tx.success();
             return true;
         } catch (Exception e) {
@@ -113,6 +118,26 @@ public class HandleChange {
         }
 
         return false;
+    }
+
+    private void setCommitHash(DbServices dbServices, Transaction tx, String branchid, String commitHash) {
+        if (commitHash == null) {
+            return;
+        }
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("commithash", commitHash);
+
+        dbServices.graphDb.execute(SET_COMMIT_HASH, parameters);
+    }
+
+    private void setCommitHashInNewTransaction(String branchid, String commithash) {
+        final DbServices dbServices = DbServicesManager.getDbServices(branchid);
+        try (Transaction tx = dbServices.beginTx()) {
+            setCommitHash(dbServices, tx, branchid, commithash);
+            tx.success();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 }
