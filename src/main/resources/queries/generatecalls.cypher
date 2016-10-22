@@ -6,7 +6,13 @@ MATCH
     <-[:name]-(fd:FunctionDeclaration)
 MATCH
     // List every call from a function body
-    (fun:FunctionDeclaration)-[*]->(call:CallExpression)
+    (fun:FunctionDeclaration), (call:CallExpression),
+    p = shortestPath((fun)-[*]->(call))
+
+MERGE
+    // Create a calls relationship between the caller
+    // FunctionDeclaration and the called FunctionDeclaration
+    (fun)-[:calls]->(fd)
 
 MERGE
     // Create a calls relationship between the caller
