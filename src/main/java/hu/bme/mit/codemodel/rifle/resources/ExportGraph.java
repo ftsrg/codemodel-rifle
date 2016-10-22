@@ -135,6 +135,48 @@ public class ExportGraph {
     }
 
     @GET
+    @Produces(MediaType.TEXT_PLAIN)
+    @Path("dot")
+    public Response dot(
+            @DefaultValue("master")
+            @QueryParam("branchid") String branchid,
+            @DefaultValue("-1")
+            @QueryParam("nodeid") long nodeid,
+
+            @DefaultValue("true")
+            @QueryParam("simple") boolean simple,
+            @DefaultValue("true")
+            @QueryParam("cfg") boolean cfg
+    ) {
+        try {
+            final DbServices dbServices = DbServicesManager.getDbServices(branchid);
+            Transaction transaction = dbServices.beginTx();
+
+            final File dot = File.createTempFile("dot", null);
+            dot.deleteOnExit();
+
+            Walker walker;
+
+            if (nodeid != -1) {
+                walker = new SubgraphWalker(dbServices, nodeid, simple, cfg);
+            } else {
+                walker = new SimpleWalker(dbServices);
+            }
+
+            StreamingOutput stream = output -> {
+                GraphvizWriter writer = new GraphvizWriter();
+                writer.emit(output, walker);
+            };
+
+            return Response.ok(stream).build();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return Response.serverError().build();
+    }
+
+    @GET
     @Produces("image/png")
     @Path("png")
     public Response png(
