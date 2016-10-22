@@ -1,16 +1,16 @@
 MATCH
-  (call:CallExpression)-[:callee]->(:IdentifierExpression)
-  <-[:node]-(:Reference)<-[:references]-(:Variable)
-  -[:declarations]->(:Declaration)-[:node]->(:BindingIdentifier)
-  <-[:name]-(fd:FunctionDeclaration),
+  (arguments:List) <-[:arguments]- (callExp:CallExpression) -[:callee]->
+  (:IdentifierExpression) <-[:`node`]- (:Reference) <-[:references]-
+  (:Variable) -[:declarations]-> (:Declaration) -[:`node`]->
+  (:BindingIdentifier) <-[:name]- (fd:FunctionDeclaration) -[:params]->
+  (:FormalParameters) -[:items]-> (params:List),
 
-  (call)-[:arguments]->(params:List),
-
-  (call)    -[:`_end`]->  (callE:End),
-  (fd)      -[:`_end`]->  (fdE:End),
-  (params)  -[:`_end`]->  (pE:End)
+  (callExp)     -[:`_end`]->  (callExpE:`End`),
+  (fd)          -[:`_end`]->  (fdE:`End`),
+  (arguments)   -[:`_end`]->  (argumentsE:`End`)
 
 MERGE
-  (call)    -[:`_normal`]-> (params)  -[:`_end`]->
-  (pE)      -[:`_normal`]-> (fd)      -[:`_end`]->
-  (fdE)     -[:`_normal`]-> (callE)
+  (callExp)     -[:`_normal`]-> (arguments) -[:`_end`]->
+  (argumentsE)  -[:`_normal`]-> (fd)        -[:`_end`]->
+  (fdE)         -[:`_normal`]-> (callExpE)
+
