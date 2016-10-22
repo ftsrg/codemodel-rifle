@@ -13,8 +13,3 @@ MERGE
     // Create a calls relationship between the caller
     // FunctionDeclaration and the called FunctionDeclaration
     (fun)-[:calls]->(fd)
-
-MERGE
-    // Create a calls relationship between the caller
-    // FunctionDeclaration and the called FunctionDeclaration
-    (fun)-[:calls]->(fd)
