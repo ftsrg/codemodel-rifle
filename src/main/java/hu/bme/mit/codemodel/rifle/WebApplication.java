@@ -1,12 +1,9 @@
 package hu.bme.mit.codemodel.rifle;
 
-import hu.bme.mit.codemodel.rifle.utils.DbServices;
+import hu.bme.mit.codemodel.rifle.resources.*;
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
-import org.jhades.JHades;
-import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 
 import java.io.IOException;
 import java.net.URI;
@@ -44,6 +41,14 @@ public class WebApplication {
         // create a resource config that scans for JAX-RS resources and providers
         // in hu.bme.mit.codemodel.rifle package
         final ResourceConfig rc = new ResourceConfig().packages("hu.bme.mit.codemodel.rifle.resources");
+        rc.register(BuildCallGraph.class);
+        rc.register(ExportGraph.class);
+        rc.register(GetLastCommitHash.class);
+        rc.register(HandleChange.class);
+        rc.register(ImportDirectory.class);
+        rc.register(RunQuery.class);
+        rc.register(TypeInference.class);
+        rc.register(UnusedFunctions.class);
 
         // create and start a new instance of grizzly http server
         // exposing the Jersey application at BASE_URI
