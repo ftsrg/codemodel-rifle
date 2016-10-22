@@ -7,9 +7,7 @@ import org.glassfish.jersey.server.ResourceConfig;
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.logging.ConsoleHandler;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.logging.*;
 
 /**
  * Created by steindani on 3/2/16.
@@ -37,6 +35,20 @@ public class WebApplication {
         ConsoleHandler ch = new ConsoleHandler();
         ch.setLevel(Level.ALL);
         l.addHandler(ch);
+
+        // source: http://stackoverflow.com/questions/15758685/how-to-write-logs-in-text-file-when-using-java-util-logging-logger
+        Logger logger = Logger.getLogger("codemodel");
+        FileHandler fh;
+
+        try {
+            // This block configure the logger with handler and formatter
+            fh = new FileHandler("performance-metrics.txt");
+            logger.addHandler(fh);
+            SimpleFormatter formatter = new SimpleFormatter();
+            fh.setFormatter(formatter);
+        } catch (SecurityException | IOException e) {
+            e.printStackTrace();
+        }
 
         // create a resource config that scans for JAX-RS resources and providers
         // in hu.bme.mit.codemodel.rifle package

@@ -20,6 +20,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 /**
@@ -28,11 +29,11 @@ import java.util.stream.Collectors;
 @Path("buildcfg")
 public class BuildCallGraph {
 
-    protected static RetryPolicy retryPolicy = new RetryPolicy()
+    private static RetryPolicy retryPolicy = new RetryPolicy()
             .retryOn(DeadlockDetectedException.class)
             .withBackoff(10, 10000, TimeUnit.MILLISECONDS);
 
-    protected final static List<String> QUERYNAMES = Arrays.asList(
+    private final static List<String> QUERYNAMES = Arrays.asList(
             "cfg/ListNoItem",
             "cfg/ListWithItem",
             "cfg/expression/CallExpressionNoParam",
@@ -45,9 +46,11 @@ public class BuildCallGraph {
             "cfg/statement/FunctionDeclaration",
             "cfg/statement/IfStatementAlternate"
     );
-    protected final static List<String> QUERIES = QUERYNAMES.stream()
+    private final static List<String> QUERIES = QUERYNAMES.stream()
             .map(ResourceReader::query)
             .collect(Collectors.toList());
+
+    private static final Logger logger = Logger.getLogger("codemodel");
 
     @GET
     @Produces(MediaType.TEXT_PLAIN)
@@ -60,6 +63,8 @@ public class BuildCallGraph {
         ScheduledExecutorService executorService = Executors.newScheduledThreadPool(4);
 
         List<FailsafeFuture<String>> futures = new ArrayList<>();
+
+        long start = System.currentTimeMillis();
 
         for (int i = 0; i < QUERYNAMES.size(); i++) {
             String name = QUERYNAMES.get(i);
@@ -95,6 +100,8 @@ public class BuildCallGraph {
                 builder.append(result);
                 builder.append('\n');
             }
+
+            logger.info(" CFG " + (System.currentTimeMillis() - start));
 
             return Response.ok(builder.toString()).build();
         } catch (InterruptedException | ExecutionException e) {

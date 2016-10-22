@@ -8,12 +8,15 @@ import org.neo4j.graphdb.Transaction;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.logging.Logger;
 
 /**
  * Created by steindani on 6/29/16.
  */
 @Path("run")
 public class RunQuery {
+
+    private static final Logger logger = Logger.getLogger("codemodel");
 
     @POST
     @Produces(MediaType.TEXT_PLAIN)
@@ -24,8 +27,12 @@ public class RunQuery {
     ) {
         final DbServices dbServices = DbServicesManager.getDbServices(branchid);
         try (Transaction tx = dbServices.beginTx()) {
+            long start = System.currentTimeMillis();
+
             final Result execute = dbServices.graphDb.execute(content);
             tx.success();
+
+            logger.info(" RUN " + (System.currentTimeMillis() - start));
             return Response.ok(execute.resultAsString()).build();
         } catch (Exception e) {
             e.printStackTrace();

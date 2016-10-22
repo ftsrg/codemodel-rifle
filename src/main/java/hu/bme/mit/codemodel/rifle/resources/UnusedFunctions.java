@@ -14,6 +14,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * Created by steindani on 3/2/16.
@@ -22,6 +23,8 @@ import java.util.Map;
 public class UnusedFunctions {
     protected final String UNUSED_QUERY = ResourceReader.query("unusedfunctions");
     protected final String GENERATE_CALLS = ResourceReader.query("generatecalls");
+
+    private static final Logger logger = Logger.getLogger("codemodel");
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -34,11 +37,20 @@ public class UnusedFunctions {
         final DbServices dbServices = DbServicesManager.getDbServices(branchid);
         Transaction tx = dbServices.beginTx();
 
+        long startMillis = System.currentTimeMillis();
+
         dbServices.graphDb.execute(GENERATE_CALLS);
+
+        long callsDone = System.currentTimeMillis();
 
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("sessionid", sessionid);
         Result result = dbServices.graphDb.execute(UNUSED_QUERY, parameters);
+
+        long queryDone = System.currentTimeMillis();
+
+        logger.info(" CALLS " + (callsDone - startMillis));
+        logger.info(" QUERY " + (queryDone - callsDone));
 
         try {
             JSONObject response = new JSONObject();

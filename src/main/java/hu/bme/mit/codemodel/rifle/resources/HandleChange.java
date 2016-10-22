@@ -17,6 +17,7 @@ import javax.ws.rs.core.Response;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * Created by steindani on 3/23/16.
@@ -26,6 +27,8 @@ public class HandleChange {
 
     private static final String SET_COMMIT_HASH = ResourceReader.query("setcommithash");
     private static final String REMOVE_FILE = ResourceReader.query("removefile");
+
+    private static final Logger logger = Logger.getLogger("codemodel");
 
     @POST
     @Produces(MediaType.TEXT_PLAIN)
@@ -94,12 +97,25 @@ public class HandleChange {
 
 
     protected void parseFile(String sessionid, String path, String content, String branchid) throws JsError {
+        long start = System.currentTimeMillis();
+
         ParserWithLocation parser = new ParserWithLocation();
         Module module = parser.parseModule(content);
 
+        long parseDone = System.currentTimeMillis();
+
         GlobalScope scope = ScopeAnalyzer.analyze(module);
+
+        long scopeDone = System.currentTimeMillis();
+
         GraphIterator iterator = new GraphIterator(DbServicesManager.getDbServices(branchid), path, parser);
         iterator.iterate(scope, sessionid);
+
+        long graphDone = System.currentTimeMillis();
+
+        logger.info(path + " PARSE " + (parseDone - start));
+        logger.info(path + " SCOPE " + (scopeDone - parseDone));
+        logger.info(path + " GRAPH " + (graphDone - scopeDone));
     }
 
     protected boolean removeFile(String sessionid, String path, String branchid, String commithash) {
