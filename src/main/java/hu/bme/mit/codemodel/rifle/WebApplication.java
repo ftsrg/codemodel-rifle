@@ -61,6 +61,7 @@ public class WebApplication {
         rc.register(RunQuery.class);
         rc.register(TypeInference.class);
         rc.register(UnusedFunctions.class);
+        rc.register(ImportExport.class);
 
         // create and start a new instance of grizzly http server
         // exposing the Jersey application at BASE_URI

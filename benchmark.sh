@@ -5,14 +5,14 @@
 
 function coldStart {
   rm -rm ./database &> /dev/null
-  nohup java -d64 -Xms2g -Xmx12g -jar ./rifle.jar &
+  nohup java -d64 -Xms4g -Xmx12g -jar ./rifle.jar &
   pid=$!
 
   sleep 10
 }
 
 function killServer {
-  kill -9 $pid
+  kill -2 $pid
 }
 
 function nowMilli {
@@ -45,6 +45,22 @@ function importFile {
   cat $1 | curl -s --data-binary "@-" "http://localhost:8080/codemodel/handle?path=$1"
 }
 
+function removeFile {
+  curl -s -X DELETE "http://localhost:8080/codemodel/handle?path=$1"
+}
+
+function buildCfg {
+  curl -s -X GET "http://localhost:8080/codemodel/buildcfg"
+}
+
+function importExport {
+  curl -s -X GET "http://localhost:8080/codemodel/importexport"
+}
+
+function searchDeadcode {
+  curl -s -X GET "http://localhost:8080/codemodel/unusedfunctions"
+}
+
 function importWebclientFull {
   pushd ./sources/webclient-babel
   for filePath in $(find . -name '*.js'); do
@@ -53,4 +69,41 @@ function importWebclientFull {
   popd
 }
 
-timeBatch 1 importWebclientFull
+function buildCfgWebclient {
+  pushd ./sources/webclient-babel
+  for filePath in $(find . -name '*.js'); do
+    importFile $filePath
+    echo $filePath $(timeMilli buildCfg) $(initDb)
+    removeFile $filePath
+  done
+  popd
+}
+
+function importexportWebclientFull {
+  coldStart
+  importWebclientFull
+  timeMilli importExport
+}
+
+function searchDeadcodeWebclient {
+  pushd ./sources/webclient-babel
+  for filePath in $(find . -name '*.js'); do
+    importFile $filePath
+    echo $filePath $(timeMilli searchDeadcode) $(initDb)
+    removeFile $filePath
+  done
+  popd
+}
+
+function timeStartup {
+  for i in `seq 1 10`; do
+    coldStart
+
+    timeMilli initDb
+    cat performance-metrics.txt
+
+    killServer
+  done
+}
+
+timeBatch 1 importexportWebclientFull

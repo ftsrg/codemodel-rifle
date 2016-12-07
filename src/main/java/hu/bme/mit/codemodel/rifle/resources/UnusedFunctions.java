@@ -23,6 +23,7 @@ import java.util.logging.Logger;
 public class UnusedFunctions {
     protected final String UNUSED_QUERY = ResourceReader.query("unusedfunctions");
     protected final String GENERATE_CALLS = ResourceReader.query("generatecalls");
+    protected final String REMOVE_CFG = ResourceReader.query("removecfg");
 
     private static final Logger logger = Logger.getLogger("codemodel");
 
@@ -39,6 +40,10 @@ public class UnusedFunctions {
 
         long startMillis = System.currentTimeMillis();
 
+        dbServices.graphDb.execute(REMOVE_CFG);
+
+        long cfgDone = System.currentTimeMillis();
+
         dbServices.graphDb.execute(GENERATE_CALLS);
 
         long callsDone = System.currentTimeMillis();
@@ -49,7 +54,8 @@ public class UnusedFunctions {
 
         long queryDone = System.currentTimeMillis();
 
-        logger.info(" CALLS " + (callsDone - startMillis));
+        logger.info(" NOCFG " + (cfgDone - startMillis));
+        logger.info(" CALLS " + (callsDone - cfgDone));
         logger.info(" QUERY " + (queryDone - callsDone));
 
         try {
