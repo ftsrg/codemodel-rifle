@@ -19,21 +19,6 @@ public class DbServices {
         this.driver = driver;
     }
 
-//    public void clean() {
-//        try (Transaction transaction = beginTx()) {
-//            graphDb.getAllNodes().forEach(node -> {
-//                node.getRelationships().forEach(
-//                        relationship -> relationship.delete()
-//                );
-//                node.delete();
-//
-//                transaction.success();
-//            });
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//    }
-
 //    public void export(String path) {
 //        FileOutputStream fileOutputStream = null;
 //        try (Transaction transaction = beginTx()) {
@@ -76,13 +61,5 @@ public class DbServices {
     public StatementResult execute(String query, Map<String, Object> parameters) {
     	return transaction.run(query, parameters);
     }
-
-	public Node getNodeById(long id) {
-		return null;
-	}
-
-	public Iterable<Node> getAllNodes() {
-		return null; //graphDb.getAllNodes();
-	}
 
 }

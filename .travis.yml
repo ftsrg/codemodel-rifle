@@ -3,6 +3,7 @@ jdk:
   - oraclejdk8
 install:
   - scripts/get-shift.sh
+  - scripts/init-neo4j.sh
 notifications:
   slack: ftsrg:8yjVb8nJs5WtLkpuM4MZVB9J
   on_success: change

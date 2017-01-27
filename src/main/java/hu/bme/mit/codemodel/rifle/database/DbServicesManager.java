@@ -13,16 +13,13 @@ import org.neo4j.driver.v1.GraphDatabase;
 public class DbServicesManager {
     protected static Map<String, DbServices> dbServices = new HashMap<>();
 
+    protected static final String USER = "neo4j";
+    protected static final String PASSWORD = "neo4j";
+
     synchronized
     public static DbServices getDbServices(String branchId) {
         if (!dbServices.containsKey(branchId)) {
-//            graphDatabaseBuilder
-//                    .setConfig(GraphDatabaseSettings.node_keys_indexable, "true")
-//                    .setConfig(GraphDatabaseSettings.relationship_keys_indexable, "true")
-//                    .setConfig(GraphDatabaseSettings.node_auto_indexing, "true")
-//                    .setConfig(GraphDatabaseSettings.relationship_auto_indexing, "true");
-
-            final Driver driver = GraphDatabase.driver("bolt://localhost", AuthTokens.basic("neo4j", "admin"));
+            final Driver driver = GraphDatabase.driver("bolt://localhost", AuthTokens.basic(USER, PASSWORD));
             final DbServices dbs = new DbServices(driver);
             dbServices.put(branchId, dbs);
         }
