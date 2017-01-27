@@ -15,7 +15,7 @@ local.properties
 .project
 .classpath
 
-neo4j-db
+neo4j-*
 performance-metrics.txt*
 /.gradle/
 /build/
