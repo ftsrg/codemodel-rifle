@@ -6,8 +6,6 @@ jdk:
 install:
   - scripts/init-neo4j.sh
   - scripts/get-shift.sh
-script:
-  - ./gradlew test -i
 notifications:
   slack: ftsrg:8yjVb8nJs5WtLkpuM4MZVB9J
   on_success: change
