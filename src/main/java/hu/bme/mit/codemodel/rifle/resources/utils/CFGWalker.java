@@ -27,7 +27,10 @@ public class CFGWalker extends Walker {
 
     public CFGWalker(DbServices dbServices) {
         final Result result = dbServices.execute(
-                "MATCH (a)-[" + String.join("|", relationships) + "]->(b) RETURN id(a) as a, id(b) as b"
+                String.format(
+            		"MATCH (a)-[%s]->(b) RETURN id(a) as a, id(b) as b",
+            		String.join("|", relationships)
+        		)
         );
 
         while (result.hasNext()) {

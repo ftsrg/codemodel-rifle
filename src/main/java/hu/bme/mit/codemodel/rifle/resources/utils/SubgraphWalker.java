@@ -1,7 +1,6 @@
 package hu.bme.mit.codemodel.rifle.resources.utils;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -13,6 +12,8 @@ import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Result;
 import org.neo4j.walk.Visitor;
 import org.neo4j.walk.Walker;
+
+import com.google.common.collect.ImmutableMap;
 
 import hu.bme.mit.codemodel.rifle.utils.DbServices;
 
@@ -34,10 +35,9 @@ public class SubgraphWalker extends Walker {
         nodes.add(root);
 
         final Result result = dbServices.execute(
-                "MATCH (root)-[*]->(n) WHERE id(root) = {rootid} RETURN id(n) as id",
-                new HashMap<String, Object>() {{
-                    put("rootid", rootId);
-                }});
+                "MATCH (root)-[*]->(n) WHERE id(root) = $rootid RETURN id(n) as id",
+                ImmutableMap.of("rootid", rootId)
+            );
 
         while (result.hasNext()) {
             final Map<String, Object> next = result.next();

@@ -19,7 +19,7 @@ WHERE
     AND ( main:Script OR main:Module )
     AND ( ALL (
                 x in (nodes(p) + nodes(q))
-                WHERE NOT exists(x.session) OR x.session = {sessionid}
+                WHERE NOT exists(x.session) OR x.session = $sessionid
           ) )
 
 RETURN DISTINCT
