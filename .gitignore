@@ -1,9 +1,6 @@
 .idea/
 *.iml
 
-target/
-database/
-
 bin/
 tmp/
 *.tmp
@@ -17,5 +14,5 @@ local.properties
 
 neo4j-*
 performance-metrics.txt*
+build/
 /.gradle/
-/build/
