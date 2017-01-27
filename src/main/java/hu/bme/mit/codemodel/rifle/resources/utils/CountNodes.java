@@ -1,7 +1,5 @@
 package hu.bme.mit.codemodel.rifle.resources.utils;
 
-import java.net.URI;
-
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -30,10 +28,8 @@ public class CountNodes {
         try (Transaction tx = dbServices.beginTx()) {
             Result result = dbServices.execute(COUNT_NODES);
             tx.success();
-            System.out.println(result.resultAsString());
+            return Response.ok(result.resultAsString()).build();
         }
-
-        return Response.created(URI.create("")).build();
     }
 
 }
