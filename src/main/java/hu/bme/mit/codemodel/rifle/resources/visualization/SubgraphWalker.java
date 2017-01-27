@@ -15,7 +15,7 @@ import org.neo4j.walk.Walker;
 
 import com.google.common.collect.ImmutableMap;
 
-import hu.bme.mit.codemodel.rifle.utils.DbServices;
+import hu.bme.mit.codemodel.rifle.database.DbServices;
 
 /**
  * Created by steindani on 7/5/16.

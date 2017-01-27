@@ -8,7 +8,7 @@ import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.walk.Visitor;
 import org.neo4j.walk.Walker;
 
-import hu.bme.mit.codemodel.rifle.utils.DbServices;
+import hu.bme.mit.codemodel.rifle.database.DbServices;
 
 /**
  * Created by steindani on 7/5/16.

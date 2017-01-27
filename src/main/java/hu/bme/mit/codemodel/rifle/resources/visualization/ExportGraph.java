@@ -18,8 +18,8 @@ import org.neo4j.graphdb.Transaction;
 import org.neo4j.visualization.graphviz.GraphvizWriter;
 import org.neo4j.walk.Walker;
 
-import hu.bme.mit.codemodel.rifle.utils.DbServices;
-import hu.bme.mit.codemodel.rifle.utils.DbServicesManager;
+import hu.bme.mit.codemodel.rifle.database.DbServices;
+import hu.bme.mit.codemodel.rifle.database.DbServicesManager;
 
 /**
  * Created by steindani on 3/2/16.

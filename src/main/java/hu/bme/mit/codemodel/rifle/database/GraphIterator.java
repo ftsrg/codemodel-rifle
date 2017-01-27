@@ -1,4 +1,4 @@
-package hu.bme.mit.codemodel.rifle.utils;
+package hu.bme.mit.codemodel.rifle.database;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;

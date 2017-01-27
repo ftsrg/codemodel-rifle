@@ -21,9 +21,9 @@ import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.DeadlockDetectedException;
 
-import hu.bme.mit.codemodel.rifle.utils.DbServices;
-import hu.bme.mit.codemodel.rifle.utils.DbServicesManager;
-import hu.bme.mit.codemodel.rifle.utils.ResourceReader;
+import hu.bme.mit.codemodel.rifle.database.DbServices;
+import hu.bme.mit.codemodel.rifle.database.DbServicesManager;
+import hu.bme.mit.codemodel.rifle.database.ResourceReader;
 import net.jodah.failsafe.Failsafe;
 import net.jodah.failsafe.FailsafeFuture;
 import net.jodah.failsafe.RetryPolicy;

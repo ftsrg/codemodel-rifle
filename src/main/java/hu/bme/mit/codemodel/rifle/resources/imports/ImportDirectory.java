@@ -27,8 +27,7 @@ public class ImportDirectory {
     public Response handle(
             @QueryParam("sessionid") String sessionid,
             @QueryParam("path") String path,
-            String content,
-
+//            String content,
             @DefaultValue("master")
             @QueryParam("branchid") String branchid
     ) {

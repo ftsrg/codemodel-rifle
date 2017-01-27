@@ -1,2 +1,2 @@
 MATCH (n)
-RETURN count(n)
+RETURN count(n) AS count

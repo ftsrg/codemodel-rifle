@@ -14,7 +14,7 @@ import org.neo4j.graphdb.Result;
 import org.neo4j.walk.Visitor;
 import org.neo4j.walk.Walker;
 
-import hu.bme.mit.codemodel.rifle.utils.DbServices;
+import hu.bme.mit.codemodel.rifle.database.DbServices;
 
 // based on org.neo4j.walk.Walker.crosscut()
 public class CFGWalker extends Walker {

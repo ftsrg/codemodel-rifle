@@ -13,9 +13,9 @@ import javax.ws.rs.core.Response;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 
-import hu.bme.mit.codemodel.rifle.utils.DbServices;
-import hu.bme.mit.codemodel.rifle.utils.DbServicesManager;
-import hu.bme.mit.codemodel.rifle.utils.ResourceReader;
+import hu.bme.mit.codemodel.rifle.database.DbServices;
+import hu.bme.mit.codemodel.rifle.database.DbServicesManager;
+import hu.bme.mit.codemodel.rifle.database.ResourceReader;
 
 @Path("importexport")
 public class ImportExport {

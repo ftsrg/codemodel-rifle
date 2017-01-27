@@ -3,6 +3,7 @@ package hu.bme.mit.codemodel.rifle.resources.imports;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import javax.ws.rs.DELETE;
@@ -17,16 +18,17 @@ import javax.ws.rs.core.Response;
 
 import org.neo4j.graphdb.Transaction;
 
+import com.google.common.base.Stopwatch;
 import com.shapesecurity.shift.ast.Module;
 import com.shapesecurity.shift.parser.JsError;
 import com.shapesecurity.shift.parser.ParserWithLocation;
 import com.shapesecurity.shift.scope.GlobalScope;
 import com.shapesecurity.shift.scope.ScopeAnalyzer;
 
-import hu.bme.mit.codemodel.rifle.utils.DbServices;
-import hu.bme.mit.codemodel.rifle.utils.DbServicesManager;
-import hu.bme.mit.codemodel.rifle.utils.GraphIterator;
-import hu.bme.mit.codemodel.rifle.utils.ResourceReader;
+import hu.bme.mit.codemodel.rifle.database.DbServices;
+import hu.bme.mit.codemodel.rifle.database.DbServicesManager;
+import hu.bme.mit.codemodel.rifle.database.GraphIterator;
+import hu.bme.mit.codemodel.rifle.database.ResourceReader;
 
 /**
  * Created by steindani on 3/23/16.
@@ -106,25 +108,28 @@ public class HandleChange {
 
 
     protected void parseFile(String sessionid, String path, String content, String branchid) throws JsError {
-        long start = System.currentTimeMillis();
+        Stopwatch stopwatch = Stopwatch.createStarted();
 
         ParserWithLocation parser = new ParserWithLocation();
         Module module = parser.parseModule(content);
 
-        long parseDone = System.currentTimeMillis();
+        long parseDone = stopwatch.elapsed(TimeUnit.MILLISECONDS);
+        stopwatch.reset();
 
         GlobalScope scope = ScopeAnalyzer.analyze(module);
 
-        long scopeDone = System.currentTimeMillis();
+        long scopeDone = stopwatch.elapsed(TimeUnit.MILLISECONDS);
+        stopwatch.reset();
 
         GraphIterator iterator = new GraphIterator(DbServicesManager.getDbServices(branchid), path, parser);
         iterator.iterate(scope, sessionid);
 
-        long graphDone = System.currentTimeMillis();
+        long graphDone = stopwatch.elapsed(TimeUnit.MILLISECONDS);
+        stopwatch.reset();
 
-        logger.info(path + " PARSE " + (parseDone - start));
-        logger.info(path + " SCOPE " + (scopeDone - parseDone));
-        logger.info(path + " GRAPH " + (graphDone - scopeDone));
+        logger.info(path + " PARSE " + parseDone);
+        logger.info(path + " SCOPE " + scopeDone);
+        logger.info(path + " GRAPH " + graphDone);
     }
 
     protected boolean removeFile(String sessionid, String path, String branchid, String commithash) {
