@@ -1,13 +1,13 @@
 package hu.bme.mit.codemodel.rifle.utils;
 
-import org.neo4j.graphdb.*;
-import org.neo4j.visualization.graphviz.GraphvizWriter;
-import org.neo4j.walk.Walker;
-
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+
+import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.Transaction;
+import org.neo4j.visualization.graphviz.GraphvizWriter;
+import org.neo4j.walk.Walker;
 
 /**
  * Created by steindani on 2/26/16.
@@ -21,7 +21,7 @@ public class DbServices {
     }
 
     public void clean() {
-        try (Transaction transaction = graphDb.beginTx()) {
+        try (Transaction transaction = beginTx()) {
             graphDb.getAllNodes().forEach(node -> {
                 node.getRelationships().forEach(
                         relationship -> relationship.delete()
@@ -37,7 +37,7 @@ public class DbServices {
 
     public void export(String path) {
         FileOutputStream fileOutputStream = null;
-        try (Transaction transaction = graphDb.beginTx()) {
+        try (Transaction transaction = beginTx()) {
             fileOutputStream = new FileOutputStream(path);
 
             GraphvizWriter writer = new GraphvizWriter();
