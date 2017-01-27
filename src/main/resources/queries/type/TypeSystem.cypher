@@ -23,5 +23,4 @@ MERGE (ts)-[:`_instance`]->(:Tag:`Promise`)
 MERGE (ts)-[:`_instance`]->(:Tag:`Proxy`)
 MERGE (ts)-[:`_instance`]->(:Tag:`Reflect`)
 
-
 MERGE (ts)-[:`_instance`]->(:Tag:`Infinity`)
