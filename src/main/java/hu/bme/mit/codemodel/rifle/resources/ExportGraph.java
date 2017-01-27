@@ -1,23 +1,29 @@
 package hu.bme.mit.codemodel.rifle.resources;
 
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.StreamingOutput;
+
+import org.neo4j.graphdb.Transaction;
+import org.neo4j.visualization.graphviz.GraphvizWriter;
+import org.neo4j.walk.Walker;
+
 import hu.bme.mit.codemodel.rifle.resources.utils.CFGWalker;
 import hu.bme.mit.codemodel.rifle.resources.utils.NewlineFilterStream;
 import hu.bme.mit.codemodel.rifle.resources.utils.SimpleWalker;
 import hu.bme.mit.codemodel.rifle.resources.utils.SubgraphWalker;
 import hu.bme.mit.codemodel.rifle.utils.DbServices;
 import hu.bme.mit.codemodel.rifle.utils.DbServicesManager;
-import org.neo4j.graphdb.Transaction;
-import org.neo4j.visualization.graphviz.GraphvizWriter;
-import org.neo4j.walk.Walker;
-
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.StreamingOutput;
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.InputStream;
 
 /**
  * Created by steindani on 3/2/16.

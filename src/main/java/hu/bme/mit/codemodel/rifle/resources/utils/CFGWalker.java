@@ -1,6 +1,12 @@
 package hu.bme.mit.codemodel.rifle.resources.utils;
 
-import hu.bme.mit.codemodel.rifle.utils.DbServices;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
@@ -8,8 +14,7 @@ import org.neo4j.graphdb.Result;
 import org.neo4j.walk.Visitor;
 import org.neo4j.walk.Walker;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import hu.bme.mit.codemodel.rifle.utils.DbServices;
 
 // based on org.neo4j.walk.Walker.crosscut()
 public class CFGWalker extends Walker {

@@ -1,12 +1,12 @@
 package hu.bme.mit.codemodel.rifle.utils;
 
-import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.factory.GraphDatabaseBuilder;
-import org.neo4j.graphdb.factory.GraphDatabaseFactory;
-
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.factory.GraphDatabaseBuilder;
+import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 
 /**
  * Created by steindani on 3/13/16.

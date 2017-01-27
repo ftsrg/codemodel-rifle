@@ -1,18 +1,5 @@
 package hu.bme.mit.codemodel.rifle.resources;
 
-import hu.bme.mit.codemodel.rifle.utils.DbServices;
-import hu.bme.mit.codemodel.rifle.utils.DbServicesManager;
-import hu.bme.mit.codemodel.rifle.utils.ResourceReader;
-import net.jodah.failsafe.Failsafe;
-import net.jodah.failsafe.FailsafeFuture;
-import net.jodah.failsafe.RetryPolicy;
-import org.neo4j.graphdb.Result;
-import org.neo4j.graphdb.Transaction;
-import org.neo4j.kernel.DeadlockDetectedException;
-
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -21,6 +8,25 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
+import org.neo4j.graphdb.Result;
+import org.neo4j.graphdb.Transaction;
+import org.neo4j.kernel.DeadlockDetectedException;
+
+import hu.bme.mit.codemodel.rifle.utils.DbServices;
+import hu.bme.mit.codemodel.rifle.utils.DbServicesManager;
+import hu.bme.mit.codemodel.rifle.utils.ResourceReader;
+import net.jodah.failsafe.Failsafe;
+import net.jodah.failsafe.FailsafeFuture;
+import net.jodah.failsafe.RetryPolicy;
 
 /**
  * Created by steindani on 3/2/16.

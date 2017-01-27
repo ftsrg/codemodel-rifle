@@ -1,19 +1,30 @@
 package hu.bme.mit.codemodel.rifle.utils;
 
-import com.shapesecurity.functional.Pair;
-import com.shapesecurity.functional.data.*;
-import com.shapesecurity.shift.ast.SourceSpan;
-import com.shapesecurity.shift.parser.ParserWithLocation;
-import com.shapesecurity.shift.scope.Scope;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.IdentityHashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Transaction;
 
-import java.lang.reflect.Field;
-import java.util.*;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
+import com.shapesecurity.functional.Pair;
+import com.shapesecurity.functional.data.ConcatList;
+import com.shapesecurity.functional.data.Either;
+import com.shapesecurity.functional.data.HashTable;
+import com.shapesecurity.functional.data.ImmutableList;
+import com.shapesecurity.functional.data.Maybe;
+import com.shapesecurity.functional.data.Nil;
+import com.shapesecurity.shift.ast.SourceSpan;
+import com.shapesecurity.shift.parser.ParserWithLocation;
+import com.shapesecurity.shift.scope.Scope;
 
 /**
  * Created by steindani on 2/26/16.

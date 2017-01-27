@@ -1,23 +1,32 @@
 package hu.bme.mit.codemodel.rifle.resources;
 
+import java.net.URI;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.Logger;
+
+import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
+import org.neo4j.graphdb.Transaction;
+
 import com.shapesecurity.shift.ast.Module;
 import com.shapesecurity.shift.parser.JsError;
 import com.shapesecurity.shift.parser.ParserWithLocation;
 import com.shapesecurity.shift.scope.GlobalScope;
 import com.shapesecurity.shift.scope.ScopeAnalyzer;
+
 import hu.bme.mit.codemodel.rifle.utils.DbServices;
 import hu.bme.mit.codemodel.rifle.utils.DbServicesManager;
 import hu.bme.mit.codemodel.rifle.utils.GraphIterator;
 import hu.bme.mit.codemodel.rifle.utils.ResourceReader;
-import org.neo4j.graphdb.Transaction;
-
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import java.net.URI;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.logging.Logger;
 
 /**
  * Created by steindani on 3/23/16.

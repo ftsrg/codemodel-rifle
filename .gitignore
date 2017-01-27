@@ -16,5 +16,4 @@ local.properties
 .classpath
 
 neo4j-db
-performance-metrics.txt
-*.lck
+performance-metrics.txt*
