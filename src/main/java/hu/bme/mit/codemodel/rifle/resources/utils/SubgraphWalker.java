@@ -30,10 +30,10 @@ public class SubgraphWalker extends Walker {
         this.simple = simple;
         this.cfg = cfg;
 
-        final Node root = dbServices.graphDb.getNodeById(rootId);
+        final Node root = dbServices.getNodeById(rootId);
         nodes.add(root);
 
-        final Result result = dbServices.graphDb.execute(
+        final Result result = dbServices.execute(
                 "MATCH (root)-[*]->(n) WHERE id(root) = {rootid} RETURN id(n) as id",
                 new HashMap<String, Object>() {{
                     put("rootid", rootId);
@@ -41,7 +41,7 @@ public class SubgraphWalker extends Walker {
 
         while (result.hasNext()) {
             final Map<String, Object> next = result.next();
-            nodes.add(dbServices.graphDb.getNodeById(Long.valueOf(next.get("id").toString())));
+            nodes.add(dbServices.getNodeById(Long.valueOf(next.get("id").toString())));
         }
 //            nodes = dbServices.graphDb
 //                    .traversalDescription()

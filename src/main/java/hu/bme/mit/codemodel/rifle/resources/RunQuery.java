@@ -35,7 +35,7 @@ public class RunQuery {
         try (Transaction tx = dbServices.beginTx()) {
             long start = System.currentTimeMillis();
 
-            final Result execute = dbServices.graphDb.execute(content);
+            final Result execute = dbServices.execute(content);
             tx.success();
 
             logger.info(" RUN " + (System.currentTimeMillis() - start));

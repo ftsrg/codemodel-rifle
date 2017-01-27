@@ -135,7 +135,7 @@ public class HandleChange {
         final DbServices dbServices = DbServicesManager.getDbServices(branchid);
         try (Transaction tx = dbServices.beginTx()) {
             setCommitHash(dbServices, tx, branchid, commithash);
-            dbServices.graphDb.execute(REMOVE_FILE, parameters);
+            dbServices.execute(REMOVE_FILE, parameters);
             tx.success();
             return true;
         } catch (Exception e) {
@@ -152,7 +152,7 @@ public class HandleChange {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("commithash", commitHash);
 
-        dbServices.graphDb.execute(SET_COMMIT_HASH, parameters);
+        dbServices.execute(SET_COMMIT_HASH, parameters);
     }
 
     private void setCommitHashInNewTransaction(String branchid, String commithash) {

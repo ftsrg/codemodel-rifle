@@ -2,9 +2,12 @@ package hu.bme.mit.codemodel.rifle.utils;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Map;
 
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.ResourceIterable;
+import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.visualization.graphviz.GraphvizWriter;
 import org.neo4j.walk.Walker;
@@ -14,7 +17,7 @@ import org.neo4j.walk.Walker;
  */
 public class DbServices {
 
-    public final GraphDatabaseService graphDb;
+    protected final GraphDatabaseService graphDb;
 
     public DbServices(GraphDatabaseService graphDb) {
         this.graphDb = graphDb;
@@ -66,4 +69,25 @@ public class DbServices {
     public Transaction beginTx() {
         return graphDb.beginTx();
     }
+
+    public Result execute(String query) {
+    	return graphDb.execute(query);
+    }
+
+    public Result execute(String query, Map<String, Object> parameters) {
+    	return graphDb.execute(query, parameters);
+    }
+
+	public Node getNodeById(long id) {
+		return graphDb.getNodeById(id);
+	}
+
+	public ResourceIterable<Node> getAllNodes() {
+		return graphDb.getAllNodes();
+	}
+
+	public GraphDatabaseService getGraphDb() {
+		return graphDb;
+	}
+
 }

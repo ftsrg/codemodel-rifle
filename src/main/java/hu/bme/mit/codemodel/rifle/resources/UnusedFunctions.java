@@ -47,17 +47,17 @@ public class UnusedFunctions {
 
         long startMillis = System.currentTimeMillis();
 
-        dbServices.graphDb.execute(REMOVE_CFG);
+        dbServices.execute(REMOVE_CFG);
 
         long cfgDone = System.currentTimeMillis();
 
-        dbServices.graphDb.execute(GENERATE_CALLS);
+        dbServices.execute(GENERATE_CALLS);
 
         long callsDone = System.currentTimeMillis();
 
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("sessionid", sessionid);
-        Result result = dbServices.graphDb.execute(UNUSED_QUERY, parameters);
+        Result result = dbServices.execute(UNUSED_QUERY, parameters);
 
         long queryDone = System.currentTimeMillis();
 

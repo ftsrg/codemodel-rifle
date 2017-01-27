@@ -34,7 +34,7 @@ public class ImportExport {
         long start = System.currentTimeMillis();
 
         try (Transaction tx = dbServices.beginTx()) {
-            Result result = dbServices.graphDb.execute(IMPORT_EXPORT);
+            Result result = dbServices.execute(IMPORT_EXPORT);
             tx.success();
             logger.info(" IME " + (System.currentTimeMillis() - start));
             logger.info(result.resultAsString());

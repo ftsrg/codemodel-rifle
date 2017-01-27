@@ -45,7 +45,7 @@ public class ExportGraph {
             StreamingOutput stream = output -> {
 
                 GraphvizWriter writer = new GraphvizWriter();
-                writer.emit(output, Walker.fullGraph(dbServices.graphDb));
+                writer.emit(output, Walker.fullGraph(dbServices.getGraphDb()));
 
             };
 

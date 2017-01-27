@@ -86,7 +86,7 @@ public class BuildCallGraph {
 
                                 try (Transaction tx = dbServices.beginTx()) {
                                     builder.append('\n').append(name).append('\n');
-                                    final Result result = dbServices.graphDb.execute(query);
+                                    final Result result = dbServices.execute(query);
                                     builder.append(result.resultAsString()).append('\n');
 
                                     tx.success();

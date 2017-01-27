@@ -26,14 +26,14 @@ public class CFGWalker extends Walker {
             .collect(Collectors.toList());
 
     public CFGWalker(DbServices dbServices) {
-        final Result result = dbServices.graphDb.execute(
+        final Result result = dbServices.execute(
                 "MATCH (a)-[" + String.join("|", relationships) + "]->(b) RETURN id(a) as a, id(b) as b"
         );
 
         while (result.hasNext()) {
             final Map<String, Object> next = result.next();
-            nodes.add(dbServices.graphDb.getNodeById(Long.valueOf(next.get("a").toString())));
-            nodes.add(dbServices.graphDb.getNodeById(Long.valueOf(next.get("b").toString())));
+            nodes.add(dbServices.getNodeById(Long.valueOf(next.get("a").toString())));
+            nodes.add(dbServices.getNodeById(Long.valueOf(next.get("b").toString())));
         }
     }
 

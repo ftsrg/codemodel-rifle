@@ -33,7 +33,7 @@ public class GetLastCommitHash {
     ) {
         final DbServices dbServices = DbServicesManager.getDbServices(branchid);
         try (Transaction tx = dbServices.beginTx()) {
-            final Result result = dbServices.graphDb.execute(GET_LAST_COMMIT_HASH);
+            final Result result = dbServices.execute(GET_LAST_COMMIT_HASH);
 
             JSONObject response = new JSONObject();
             while (result.hasNext()) {

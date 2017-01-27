@@ -22,7 +22,7 @@ public class SimpleWalker extends Walker {
 
     @Override
     public <R, E extends Throwable> R accept(Visitor<R, E> visitor) throws E {
-        for (Node node : dbServices.graphDb.getAllNodes()) {
+        for (Node node : dbServices.getAllNodes()) {
             if (node.hasLabel(Label.label("CompilationUnit"))) {
                 continue;
             }
