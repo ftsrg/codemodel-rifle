@@ -13,6 +13,7 @@ public class DriverSandboxTest {
     public void test() {
         DbServices dbServices = DbServicesManager.getDbServices("master");
 
+        dbServices.beginTx();
         StatementResult result = dbServices.execute("CREATE (n) RETURN n");
         Node x = result.next().get(0).asNode();
         System.out.println(x);
