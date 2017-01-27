@@ -1,4 +1,4 @@
-package hu.bme.mit.codemodel.rifle.resources;
+package hu.bme.mit.codemodel.rifle.resources.visualization;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -18,10 +18,6 @@ import org.neo4j.graphdb.Transaction;
 import org.neo4j.visualization.graphviz.GraphvizWriter;
 import org.neo4j.walk.Walker;
 
-import hu.bme.mit.codemodel.rifle.resources.utils.CFGWalker;
-import hu.bme.mit.codemodel.rifle.resources.utils.NewlineFilterStream;
-import hu.bme.mit.codemodel.rifle.resources.utils.SimpleWalker;
-import hu.bme.mit.codemodel.rifle.resources.utils.SubgraphWalker;
 import hu.bme.mit.codemodel.rifle.utils.DbServices;
 import hu.bme.mit.codemodel.rifle.utils.DbServicesManager;
 

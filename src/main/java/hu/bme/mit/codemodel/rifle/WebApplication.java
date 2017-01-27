@@ -12,15 +12,14 @@ import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
 
-import hu.bme.mit.codemodel.rifle.resources.BuildCallGraph;
-import hu.bme.mit.codemodel.rifle.resources.ExportGraph;
-import hu.bme.mit.codemodel.rifle.resources.GetLastCommitHash;
-import hu.bme.mit.codemodel.rifle.resources.HandleChange;
-import hu.bme.mit.codemodel.rifle.resources.ImportDirectory;
-import hu.bme.mit.codemodel.rifle.resources.ImportExport;
-import hu.bme.mit.codemodel.rifle.resources.RunQuery;
-import hu.bme.mit.codemodel.rifle.resources.TypeInference;
-import hu.bme.mit.codemodel.rifle.resources.UnusedFunctions;
+import hu.bme.mit.codemodel.rifle.resources.imports.BuildCallGraph;
+import hu.bme.mit.codemodel.rifle.resources.imports.HandleChange;
+import hu.bme.mit.codemodel.rifle.resources.imports.ImportDirectory;
+import hu.bme.mit.codemodel.rifle.resources.imports.ImportExport;
+import hu.bme.mit.codemodel.rifle.resources.queries.RunQuery;
+import hu.bme.mit.codemodel.rifle.resources.queries.TypeInference;
+import hu.bme.mit.codemodel.rifle.resources.queries.UnusedFunctions;
+import hu.bme.mit.codemodel.rifle.resources.visualization.ExportGraph;
 
 /**
  * Created by steindani on 3/2/16.
@@ -68,7 +67,7 @@ public class WebApplication {
         final ResourceConfig rc = new ResourceConfig().packages("hu.bme.mit.codemodel.rifle.resources");
         rc.register(BuildCallGraph.class);
         rc.register(ExportGraph.class);
-        rc.register(GetLastCommitHash.class);
+//        rc.register(GetLastCommitHash.class);
         rc.register(HandleChange.class);
         rc.register(ImportDirectory.class);
         rc.register(RunQuery.class);

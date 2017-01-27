@@ -1,4 +1,4 @@
-package hu.bme.mit.codemodel.rifle.resources;
+package hu.bme.mit.codemodel.rifle.resources.imports;
 
 import java.util.logging.Logger;
 

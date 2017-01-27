@@ -1,8 +1,10 @@
-package hu.bme.mit.codemodel.rifle.resources;
+package hu.bme.mit.codemodel.rifle.resources.imports;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -52,9 +54,8 @@ public class BuildCallGraph {
             "cfg/statement/FunctionDeclaration",
             "cfg/statement/IfStatementAlternate"
     );
-    private final static List<String> QUERIES = QUERYNAMES.stream()
-            .map(ResourceReader::query)
-            .collect(Collectors.toList());
+    private final static Map<String, String> QUERIES = QUERYNAMES.stream().collect(
+            		Collectors.toMap(queryName -> queryName, ResourceReader::query));
 
     private static final Logger logger = Logger.getLogger("codemodel");
 
@@ -72,9 +73,9 @@ public class BuildCallGraph {
 
         long start = System.currentTimeMillis();
 
-        for (int i = 0; i < QUERYNAMES.size(); i++) {
-            String name = QUERYNAMES.get(i);
-            String query = QUERIES.get(i);
+        for (Entry<String, String> entry : QUERIES.entrySet()) {
+            String name = entry.getKey();
+            String query = entry.getValue();
 
             futures.add(
                     Failsafe.with(retryPolicy)

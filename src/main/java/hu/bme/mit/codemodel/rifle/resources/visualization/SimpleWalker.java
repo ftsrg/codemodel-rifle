@@ -1,4 +1,4 @@
-package hu.bme.mit.codemodel.rifle.resources.utils;
+package hu.bme.mit.codemodel.rifle.resources.visualization;
 
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Label;

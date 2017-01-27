@@ -17,7 +17,6 @@ public class ResourceReader {
             return IOUtils.toString(resourceAsStream);
         } catch (IOException e) {
             e.printStackTrace();
-
             return null;
         }
     }

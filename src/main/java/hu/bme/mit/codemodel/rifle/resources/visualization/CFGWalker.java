@@ -1,4 +1,4 @@
-package hu.bme.mit.codemodel.rifle.resources.utils;
+package hu.bme.mit.codemodel.rifle.resources.visualization;
 
 import java.util.Arrays;
 import java.util.HashSet;
