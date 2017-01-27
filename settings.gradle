@@ -1,1 +1,4 @@
-rootProject.name = 'rifle'
+rootProject.name = 'codemodel-js'
+
+include ':codemodel-rifle'
+include ':codemodel-visualization'
