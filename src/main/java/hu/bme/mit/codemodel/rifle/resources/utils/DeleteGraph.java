@@ -8,8 +8,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.neo4j.graphdb.Result;
-import org.neo4j.graphdb.Transaction;
+import org.neo4j.driver.v1.Transaction;
 
 import hu.bme.mit.codemodel.rifle.database.DbServices;
 import hu.bme.mit.codemodel.rifle.database.DbServicesManager;
@@ -26,9 +25,9 @@ public class DeleteGraph {
         final DbServices dbServices = DbServicesManager.getDbServices(branchid);
 
         try (Transaction tx = dbServices.beginTx()) {
-            Result result = dbServices.execute(DELETE_GRAPH);
+            dbServices.execute(DELETE_GRAPH);
             tx.success();
-            return Response.ok(result.resultAsString()).build();
+            return Response.ok().build();
         }
     }
 

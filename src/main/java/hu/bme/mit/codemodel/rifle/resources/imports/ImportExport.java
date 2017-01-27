@@ -10,8 +10,8 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.neo4j.graphdb.Result;
-import org.neo4j.graphdb.Transaction;
+import org.neo4j.driver.v1.StatementResult;
+import org.neo4j.driver.v1.Transaction;
 
 import hu.bme.mit.codemodel.rifle.database.DbServices;
 import hu.bme.mit.codemodel.rifle.database.DbServicesManager;
@@ -34,11 +34,11 @@ public class ImportExport {
         long start = System.currentTimeMillis();
 
         try (Transaction tx = dbServices.beginTx()) {
-            Result result = dbServices.execute(IMPORT_EXPORT);
+            StatementResult result = dbServices.execute(IMPORT_EXPORT);
             tx.success();
             logger.info(" IME " + (System.currentTimeMillis() - start));
-            logger.info(result.resultAsString());
-            return Response.ok(result.resultAsString()).build();
+            logger.info(result.toString());
+            return Response.ok(result.toString()).build();
         } catch (Exception e) {
             e.printStackTrace();
             return Response.serverError().build();

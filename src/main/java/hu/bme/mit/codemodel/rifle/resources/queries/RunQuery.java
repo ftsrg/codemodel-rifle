@@ -10,8 +10,8 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.neo4j.graphdb.Result;
-import org.neo4j.graphdb.Transaction;
+import org.neo4j.driver.v1.StatementResult;
+import org.neo4j.driver.v1.Transaction;
 
 import hu.bme.mit.codemodel.rifle.database.DbServices;
 import hu.bme.mit.codemodel.rifle.database.DbServicesManager;
@@ -35,11 +35,11 @@ public class RunQuery {
         try (Transaction tx = dbServices.beginTx()) {
             long start = System.currentTimeMillis();
 
-            final Result execute = dbServices.execute(content);
+            final StatementResult result = dbServices.execute(content);
             tx.success();
 
             logger.info(" RUN " + (System.currentTimeMillis() - start));
-            return Response.ok(execute.resultAsString()).build();
+            return Response.ok(result.toString()).build();
         } catch (Exception e) {
             e.printStackTrace();
         }

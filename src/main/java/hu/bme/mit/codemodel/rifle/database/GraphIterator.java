@@ -10,11 +10,11 @@ import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import org.neo4j.graphdb.Label;
-import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.RelationshipType;
-import org.neo4j.graphdb.Transaction;
+import org.neo4j.driver.v1.StatementResult;
+import org.neo4j.driver.v1.Transaction;
+import org.neo4j.driver.v1.types.Node;
 
+import com.google.common.base.Preconditions;
 import com.shapesecurity.functional.Pair;
 import com.shapesecurity.functional.data.ConcatList;
 import com.shapesecurity.functional.data.Either;
@@ -35,7 +35,7 @@ public class GraphIterator {
     protected final ParserWithLocation parserWithLocation;
     protected final DbServices dbServices;
     protected final IdentityHashMap<Object, Object> done = new IdentityHashMap<>();
-    protected final Map<Object, org.neo4j.graphdb.Node> nodes = new IdentityHashMap<>();
+    protected final Map<Object, Node> nodes = new IdentityHashMap<>();
 
     protected final BlockingQueue<QueueItem> queue = new LinkedBlockingQueue<>();
 
@@ -240,7 +240,7 @@ public class GraphIterator {
         interfaces.forEach(elem -> {
             final String interfaceName = elem.getSimpleName();
             storeType(tx, node, interfaceName);
-            
+
             if (interfaceName.startsWith("Literal")) {
                 storeType(tx, node, "Literal");
             }
@@ -332,36 +332,44 @@ public class GraphIterator {
         if (nodes.containsKey(subject)) {
             return nodes.get(subject);
         } else {
-            Node node = dbServices.createNode(tx, subject);
+            StatementResult result = dbServices.execute("CREATE (n) RETURN n");
+            Node node = result.next().get(0).asNode();
             nodes.put(subject, node);
             return node;
         }
     }
 
     public void storeReference(Transaction tx, Object subject, String predicate, Object object) {
-        if (subject == null || object == null) {
-            return;
-        }
+        Preconditions.checkNotNull(subject);
+        Preconditions.checkNotNull(object);
+
         Node a = findOrCreate(tx, subject);
         Node b = findOrCreate(tx, object);
-        a.createRelationshipTo(b, RelationshipType.withName(predicate));
+        dbServices.execute(String.format(
+                "MATCH (a), (b) WHERE id(a) = %d AND id(b) = %d MERGE (a)-[:`%s`]->(b)",
+                a.id(), b.id(), predicate
+            ));
     }
 
     public void storeProperty(Transaction tx, Object subject, String predicate, Object object) {
-        if (object == null) {
-            return;
-        }
+        Preconditions.checkNotNull(object);
+
         Node node = findOrCreate(tx, subject);
-        node.setProperty(predicate, object);
+        dbServices.execute(String.format(
+                "MATCH (n) WHERE id(n) = %d SET n.%s = '%s'",
+                node.id(), predicate, object
+            ));
     }
 
     public void storeType(Transaction tx, Object subject, String type) {
-        if (type == null || type.length() == 0) {
-            return;
-        }
+        Preconditions.checkNotNull(type);
+        Preconditions.checkArgument(type.length() != 0);
 
         Node node = findOrCreate(tx, subject);
-        node.addLabel(Label.label(type));
+        dbServices.execute(String.format(
+                "MATCH (n) WHERE id(n) = %d SET n :`%s`",
+                node.id(), type
+            ));
     }
 
     // http://stackoverflow.com/questions/3567372/access-to-private-inherited-fields-via-reflection-in-java

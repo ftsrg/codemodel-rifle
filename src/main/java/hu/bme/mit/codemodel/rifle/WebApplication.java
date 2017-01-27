@@ -19,7 +19,6 @@ import hu.bme.mit.codemodel.rifle.resources.imports.ImportExport;
 import hu.bme.mit.codemodel.rifle.resources.queries.RunQuery;
 import hu.bme.mit.codemodel.rifle.resources.queries.TypeInference;
 import hu.bme.mit.codemodel.rifle.resources.queries.UnusedFunctions;
-import hu.bme.mit.codemodel.rifle.resources.visualization.ExportGraph;
 
 /**
  * Created by steindani on 3/2/16.
@@ -66,7 +65,7 @@ public class WebApplication {
         // in hu.bme.mit.codemodel.rifle package
         final ResourceConfig rc = new ResourceConfig().packages("hu.bme.mit.codemodel.rifle.resources");
         rc.register(BuildCallGraph.class);
-        rc.register(ExportGraph.class);
+//        rc.register(ExportGraph.class);
 //        rc.register(GetLastCommitHash.class);
         rc.register(HandleChange.class);
         rc.register(ImportDirectory.class);

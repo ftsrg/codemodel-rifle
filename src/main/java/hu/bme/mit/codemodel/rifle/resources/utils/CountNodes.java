@@ -8,8 +8,8 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.neo4j.graphdb.Result;
-import org.neo4j.graphdb.Transaction;
+import org.neo4j.driver.v1.StatementResult;
+import org.neo4j.driver.v1.Transaction;
 
 import hu.bme.mit.codemodel.rifle.database.DbServices;
 import hu.bme.mit.codemodel.rifle.database.DbServicesManager;
@@ -26,9 +26,10 @@ public class CountNodes {
         final DbServices dbServices = DbServicesManager.getDbServices(branchid);
 
         try (Transaction tx = dbServices.beginTx()) {
-            Result result = dbServices.execute(COUNT_NODES);
+            StatementResult result = dbServices.execute(COUNT_NODES);
+            System.out.println(result.single());
             tx.success();
-            return Response.ok(result.resultAsString()).build();
+            return Response.ok(result.toString()).build();
         }
     }
 

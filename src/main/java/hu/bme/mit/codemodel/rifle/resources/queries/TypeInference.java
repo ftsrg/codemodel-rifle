@@ -17,9 +17,8 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.neo4j.graphdb.Result;
-import org.neo4j.graphdb.Transaction;
-import org.neo4j.kernel.DeadlockDetectedException;
+import org.neo4j.driver.v1.StatementResult;
+import org.neo4j.driver.v1.Transaction;
 
 import hu.bme.mit.codemodel.rifle.database.DbServices;
 import hu.bme.mit.codemodel.rifle.database.DbServicesManager;
@@ -35,7 +34,7 @@ import net.jodah.failsafe.RetryPolicy;
 public class TypeInference {
 
     protected static RetryPolicy retryPolicy = new RetryPolicy()
-            .retryOn(DeadlockDetectedException.class)
+//            .retryOn(DeadlockDetectedException.class)
             .withBackoff(10, 10000, TimeUnit.MILLISECONDS);
 
     protected final static List<String> QUERYNAMES = Arrays.asList(
@@ -91,8 +90,8 @@ public class TypeInference {
 
                                 try (Transaction tx = dbServices.beginTx()) {
                                     builder.append('\n').append(name).append('\n');
-                                    final Result result = dbServices.execute(query);
-                                    builder.append(result.resultAsString()).append('\n');
+                                    final StatementResult result = dbServices.execute(query);
+                                    builder.append(result.toString()).append('\n');
 
                                     tx.success();
                                     return builder.toString();

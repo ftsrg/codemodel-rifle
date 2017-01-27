@@ -16,8 +16,9 @@ import javax.ws.rs.core.Response;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.neo4j.graphdb.Result;
-import org.neo4j.graphdb.Transaction;
+import org.neo4j.driver.v1.Record;
+import org.neo4j.driver.v1.StatementResult;
+import org.neo4j.driver.v1.Transaction;
 
 import hu.bme.mit.codemodel.rifle.database.DbServices;
 import hu.bme.mit.codemodel.rifle.database.DbServicesManager;
@@ -57,7 +58,7 @@ public class UnusedFunctions {
 
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("sessionid", sessionid);
-        Result result = dbServices.execute(UNUSED_QUERY, parameters);
+        StatementResult result = dbServices.execute(UNUSED_QUERY, parameters);
 
         long queryDone = System.currentTimeMillis();
 
@@ -71,7 +72,7 @@ public class UnusedFunctions {
 
             processRows:
             while (result.hasNext()) {
-                Map<String, Object> next = result.next();
+                Record next = result.next();
 
                 Object id = next.get("id");
 
