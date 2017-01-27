@@ -11,15 +11,19 @@ repositories {
      jcenter()
 }
 
+ext {
+	neo4jVersion = '3.1.1'
+}
+
 dependencies {
     compile group: 'org.jhades', name: 'jhades', version: '1.0.4'
-    compile group: 'org.neo4j', name: 'neo4j', version: '3.0.0'
-    compile(group: 'org.neo4j.app', name: 'neo4j-server', version: '3.0.0') {
+    compile group: 'org.neo4j', name: 'neo4j', version: neo4jVersion
+    compile(group: 'org.neo4j.app', name: 'neo4j-server', version: neo4jVersion) {
 		exclude(module: 'jsr311-api')
 		exclude(module: 'jsr311-api')
 		exclude(module: 'jersey-server')
 	}
-    compile group: 'org.neo4j', name: 'neo4j-graphviz', version: '3.0.0'
+    compile group: 'org.neo4j', name: 'neo4j-graphviz', version: neo4jVersion
     compile group: 'com.shapesecurity', name: 'shift', version: '2.2.0-SNAPSHOT'
     compile group: 'commons-io', name: 'commons-io', version: '2.4'
     compile group: 'org.glassfish.jersey.containers', name: 'jersey-container-grizzly2-http', version: '2.22.2'
