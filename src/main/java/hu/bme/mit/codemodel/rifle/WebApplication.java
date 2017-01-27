@@ -1,13 +1,26 @@
 package hu.bme.mit.codemodel.rifle;
 
-import hu.bme.mit.codemodel.rifle.resources.*;
+import java.io.IOException;
+import java.net.URI;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.FileHandler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
+
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
 
-import java.io.IOException;
-import java.net.URI;
-import java.util.logging.*;
+import hu.bme.mit.codemodel.rifle.resources.BuildCallGraph;
+import hu.bme.mit.codemodel.rifle.resources.ExportGraph;
+import hu.bme.mit.codemodel.rifle.resources.GetLastCommitHash;
+import hu.bme.mit.codemodel.rifle.resources.HandleChange;
+import hu.bme.mit.codemodel.rifle.resources.ImportDirectory;
+import hu.bme.mit.codemodel.rifle.resources.ImportExport;
+import hu.bme.mit.codemodel.rifle.resources.RunQuery;
+import hu.bme.mit.codemodel.rifle.resources.TypeInference;
+import hu.bme.mit.codemodel.rifle.resources.UnusedFunctions;
 
 /**
  * Created by steindani on 3/2/16.
@@ -80,6 +93,6 @@ public class WebApplication {
         System.out.println(String.format("Jersey app started with WADL available at "
                 + "%sapplication.wadl\nHit enter to stop it...", BASE_URI));
         System.in.read();
-        server.stop();
+        server.shutdownNow();
     }
 }
