@@ -17,3 +17,5 @@ local.properties
 
 neo4j-db
 performance-metrics.txt*
+/.gradle/
+/build/

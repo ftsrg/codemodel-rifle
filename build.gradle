@@ -1,0 +1,29 @@
+apply plugin: 'java'
+
+group = 'hu.bme.mit.codemodel'
+version = '1.0-SNAPSHOT'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+repositories {        
+	 mavenLocal()
+     jcenter()
+}
+
+dependencies {
+    compile group: 'org.jhades', name: 'jhades', version: '1.0.4'
+    compile group: 'org.neo4j', name: 'neo4j', version: '3.0.0'
+    compile(group: 'org.neo4j.app', name: 'neo4j-server', version: '3.0.0') {
+		exclude(module: 'jsr311-api')
+		exclude(module: 'jsr311-api')
+		exclude(module: 'jersey-server')
+	}
+    compile group: 'org.neo4j', name: 'neo4j-graphviz', version: '3.0.0'
+    compile group: 'com.shapesecurity', name: 'shift', version: '2.2.0-SNAPSHOT'
+    compile group: 'commons-io', name: 'commons-io', version: '2.4'
+    compile group: 'org.glassfish.jersey.containers', name: 'jersey-container-grizzly2-http', version: '2.22.2'
+    compile group: 'org.glassfish.jersey.media', name: 'jersey-media-moxy', version: '2.22.2'
+    compile group: 'net.jodah', name: 'failsafe', version: '0.8.3'
+	testCompile group: 'junit', name: 'junit', version: '4.12'
+}
