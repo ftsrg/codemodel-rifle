@@ -19,7 +19,7 @@ public class DbServicesManager {
     synchronized
     public static DbServices getDbServices(String branchId) {
         if (!dbServices.containsKey(branchId)) {
-            final Driver driver = GraphDatabase.driver("bolt://localhost", AuthTokens.basic(USER, PASSWORD));
+            final Driver driver = GraphDatabase.driver("bolt://localhost:7687", AuthTokens.basic(USER, PASSWORD));
             final DbServices dbs = new DbServices(driver);
             dbServices.put(branchId, dbs);
         }
