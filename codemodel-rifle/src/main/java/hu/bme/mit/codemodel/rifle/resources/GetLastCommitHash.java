@@ -18,9 +18,6 @@
 //import hu.bme.mit.codemodel.rifle.utils.DbServicesManager;
 //import hu.bme.mit.codemodel.rifle.utils.ResourceReader;
 //
-///**
-// * Created by steindani on 6/29/16.
-// */
 //@Path("lastcommit")
 //public class GetLastCommitHash {
 //    private static final String GET_LAST_COMMIT_HASH = ResourceReader.query("getlastcommithash");

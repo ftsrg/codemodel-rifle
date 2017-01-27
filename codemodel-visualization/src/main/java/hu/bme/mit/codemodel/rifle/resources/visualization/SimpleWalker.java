@@ -10,9 +10,6 @@ import org.neo4j.walk.Walker;
 
 import hu.bme.mit.codemodel.rifle.database.DbServices;
 
-/**
- * Created by steindani on 7/5/16.
- */
 public class SimpleWalker extends Walker {
     private final DbServices dbServices;
 

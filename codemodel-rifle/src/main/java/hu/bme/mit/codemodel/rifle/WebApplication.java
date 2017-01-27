@@ -20,15 +20,8 @@ import hu.bme.mit.codemodel.rifle.resources.queries.RunQuery;
 import hu.bme.mit.codemodel.rifle.resources.queries.TypeInference;
 import hu.bme.mit.codemodel.rifle.resources.queries.UnusedFunctions;
 
-/**
- * Created by steindani on 3/2/16.
- * source: https://jersey.java.net/documentation/latest/getting-started.html
- */
+// based on: https://jersey.java.net/documentation/latest/getting-started.html
 public class WebApplication {
-//    protected static final String DB_PATH = "/home/steindani/Downloads/neo4j-community-3.0.0-M02/data/graph.db";
-//    public static GraphDatabaseService graphDatabaseService = new GraphDatabaseFactory().newEmbeddedDatabase(DB_PATH);
-//    public static DbServices dbServices = new DbServices(graphDatabaseService);
-
 
     // Base URI the Grizzly HTTP server will listen on
     public static final String BASE_URI = "http://localhost:8080/codemodel/";

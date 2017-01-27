@@ -24,9 +24,6 @@ import hu.bme.mit.codemodel.rifle.database.DbServices;
 import hu.bme.mit.codemodel.rifle.database.DbServicesManager;
 import hu.bme.mit.codemodel.rifle.database.ResourceReader;
 
-/**
- * Created by steindani on 3/2/16.
- */
 @Path("unusedfunctions")
 public class UnusedFunctions {
     protected final String UNUSED_QUERY = ResourceReader.query("unusedfunctions");

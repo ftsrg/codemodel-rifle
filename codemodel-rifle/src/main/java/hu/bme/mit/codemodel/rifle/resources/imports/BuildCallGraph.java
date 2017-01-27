@@ -30,9 +30,6 @@ import net.jodah.failsafe.Failsafe;
 import net.jodah.failsafe.FailsafeFuture;
 import net.jodah.failsafe.RetryPolicy;
 
-/**
- * Created by steindani on 3/2/16.
- */
 @Path("buildcfg")
 public class BuildCallGraph {
 

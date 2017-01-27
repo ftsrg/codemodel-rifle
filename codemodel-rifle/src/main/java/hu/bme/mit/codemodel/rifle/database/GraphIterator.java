@@ -25,9 +25,6 @@ import com.shapesecurity.shift.ast.SourceSpan;
 import com.shapesecurity.shift.parser.ParserWithLocation;
 import com.shapesecurity.shift.scope.Scope;
 
-/**
- * Created by steindani on 2/26/16.
- */
 public class GraphIterator {
 
     protected final String path;

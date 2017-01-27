@@ -4,9 +4,6 @@ import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
-/**
- * Created by steindani on 7/5/16.
- */
 public class NewlineFilterStream extends FilterOutputStream {
     int buffer = -1;
 

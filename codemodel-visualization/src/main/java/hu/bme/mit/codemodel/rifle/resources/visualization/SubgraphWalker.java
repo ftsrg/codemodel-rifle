@@ -17,9 +17,6 @@ import com.google.common.collect.ImmutableMap;
 
 import hu.bme.mit.codemodel.rifle.database.DbServices;
 
-/**
- * Created by steindani on 7/5/16.
- */
 // based on org.neo4j.walk.Walker.crosscut()
 public class SubgraphWalker extends Walker {
 

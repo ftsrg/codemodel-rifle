@@ -30,9 +30,6 @@ import hu.bme.mit.codemodel.rifle.database.DbServicesManager;
 import hu.bme.mit.codemodel.rifle.database.GraphIterator;
 import hu.bme.mit.codemodel.rifle.database.ResourceReader;
 
-/**
- * Created by steindani on 3/23/16.
- */
 @Path("handle")
 public class HandleChange {
 

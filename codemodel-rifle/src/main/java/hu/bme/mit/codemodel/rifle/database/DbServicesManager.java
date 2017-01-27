@@ -7,9 +7,6 @@ import org.neo4j.driver.v1.AuthTokens;
 import org.neo4j.driver.v1.Driver;
 import org.neo4j.driver.v1.GraphDatabase;
 
-/**
- * Created by steindani on 3/13/16.
- */
 public class DbServicesManager {
     protected static Map<String, DbServices> dbServices = new HashMap<>();
 

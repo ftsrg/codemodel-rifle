@@ -6,9 +6,6 @@ import java.io.InputStream;
 
 import org.apache.commons.io.IOUtils;
 
-/**
- * Created by steindani on 3/3/16.
- */
 public class ResourceReader {
 
     public static String readFromResource(String fileName) {

@@ -8,9 +8,6 @@ import org.neo4j.driver.v1.StatementResult;
 import org.neo4j.driver.v1.Transaction;
 import org.neo4j.driver.v1.types.Node;
 
-/**
- * Created by steindani on 2/26/16.
- */
 public class DbServices {
 
     protected final Driver driver;

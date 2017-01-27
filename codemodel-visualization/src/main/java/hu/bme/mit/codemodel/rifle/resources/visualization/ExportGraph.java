@@ -15,9 +15,6 @@ import com.google.common.io.ByteStreams;
 
 import hu.bme.mit.codemodel.rifle.database.DbServices;
 
-/**
- * Created by steindani on 3/2/16.
- */
 public class ExportGraph {
 
     final OutputStream out = System.out;

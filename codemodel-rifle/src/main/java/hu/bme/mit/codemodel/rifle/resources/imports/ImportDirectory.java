@@ -14,9 +14,6 @@ import javax.ws.rs.core.Response;
 
 import org.apache.commons.io.FileUtils;
 
-/**
- * Created by steindani on 07/19/16.
- */
 @Path("import")
 public class ImportDirectory {
 

@@ -16,9 +16,6 @@ import org.neo4j.driver.v1.Transaction;
 import hu.bme.mit.codemodel.rifle.database.DbServices;
 import hu.bme.mit.codemodel.rifle.database.DbServicesManager;
 
-/**
- * Created by steindani on 6/29/16.
- */
 @Path("run")
 public class RunQuery {
 
