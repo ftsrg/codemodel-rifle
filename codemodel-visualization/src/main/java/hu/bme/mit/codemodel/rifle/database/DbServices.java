@@ -1,41 +1,41 @@
 package hu.bme.mit.codemodel.rifle.database;
 
+import java.io.File;
+import java.util.Collections;
 import java.util.Map;
 
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
+import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 
 public class DbServices {
 
+    GraphDatabaseService gds = new GraphDatabaseFactory().newEmbeddedDatabase(new File(""));
+
     public Result execute(String format) {
-        // TODO Auto-generated method stub
-        return null;
+        return execute(format, Collections.emptyMap());
     }
 
     public Result execute(String format, Map<String, Object> parameters) {
-        // TODO Auto-generated method stub
-        return null;
+        return gds.execute(format, parameters);
     }
 
     public Iterable<Node> getAllNodes() {
-        // TODO Auto-generated method stub
-        return null;
+        return gds.getAllNodes();
     }
 
-    public Node getNodeById(long rootId) {
-        // TODO Auto-generated method stub
-        return null;
+    public Node getNodeById(long id) {
+        return gds.getNodeById(id);
     }
 
     public Transaction beginTx() {
-        // TODO Auto-generated method stub
-        return null;
+        return gds.beginTx();
     }
 
     public GraphDatabaseService getGraphDb() {
-        return null;
+        return gds;
     }
 
 }
