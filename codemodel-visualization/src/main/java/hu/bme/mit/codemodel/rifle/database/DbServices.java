@@ -12,7 +12,7 @@ import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 
 public class DbServices {
 
-    GraphDatabaseService gds = new GraphDatabaseFactory().newEmbeddedDatabase(new File(""));
+    GraphDatabaseService gds = new GraphDatabaseFactory().newEmbeddedDatabase(new File("neo4j-db/data/"));
 
     public Result execute(String format) {
         return execute(format, Collections.emptyMap());

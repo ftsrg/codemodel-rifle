@@ -13,13 +13,10 @@ import org.neo4j.driver.v1.GraphDatabase;
 public class DbServicesManager {
     protected static Map<String, DbServices> dbServices = new HashMap<>();
 
-    protected static final String USER = "neo4j";
-    protected static final String PASSWORD = "neo4j";
-
     synchronized
     public static DbServices getDbServices(String branchId) {
         if (!dbServices.containsKey(branchId)) {
-            final Driver driver = GraphDatabase.driver("bolt://localhost:7687", AuthTokens.basic(USER, PASSWORD));
+            final Driver driver = GraphDatabase.driver("bolt://localhost", AuthTokens.none());
             final DbServices dbs = new DbServices(driver);
             dbServices.put(branchId, dbs);
         }
