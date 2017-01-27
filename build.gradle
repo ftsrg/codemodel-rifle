@@ -1,6 +1,5 @@
 apply plugin: 'java'
 
-
 allprojects {
     group = 'hu.bme.mit.codemodel'
     version = '1.0.0-SNAPSHOT'

@@ -21,7 +21,6 @@ import com.shapesecurity.functional.data.Either;
 import com.shapesecurity.functional.data.HashTable;
 import com.shapesecurity.functional.data.ImmutableList;
 import com.shapesecurity.functional.data.Maybe;
-import com.shapesecurity.functional.data.Nil;
 import com.shapesecurity.shift.ast.SourceSpan;
 import com.shapesecurity.shift.parser.ParserWithLocation;
 import com.shapesecurity.shift.scope.Scope;
@@ -74,7 +73,7 @@ public class GraphIterator {
         Object node = queueItem.node;
 
         // TODO for presentation reasons the Nil node is hidden
-        if (node == null || node instanceof Nil) {
+        if (node == null) {
             return;
         }
 
@@ -108,7 +107,7 @@ public class GraphIterator {
         if (node instanceof Maybe) {
             Maybe el = (Maybe) node;
             if (el.isJust()) {
-                queue.add(new QueueItem(parent, predicate, el.just()));
+                queue.add(new QueueItem(parent, predicate, el.fromJust()));
 //            } else {
 //                queue.add(new QueueItem(node, fieldName, "null"));
             }
@@ -208,7 +207,7 @@ public class GraphIterator {
 
                 for (Object el : table.entries()) {
                     Pair pair = (Pair) el;
-                    queue.add(new QueueItem(table, pair.a.toString(), pair.b));
+                    queue.add(new QueueItem(table, pair.left().toString(), pair.right()));
                 }
             }
 
@@ -302,7 +301,7 @@ public class GraphIterator {
         if (node instanceof com.shapesecurity.shift.ast.Node) {
             Maybe<SourceSpan> location = parserWithLocation.getLocation((com.shapesecurity.shift.ast.Node) node);
             if (location.isJust()) {
-                queue.add(new QueueItem(node, "location", location.just()));
+                queue.add(new QueueItem(node, "location", location.fromJust()));
             }
         }
     }
@@ -341,7 +340,8 @@ public class GraphIterator {
 
     public void storeReference(Transaction tx, Object subject, String predicate, Object object) {
         Preconditions.checkNotNull(subject);
-        Preconditions.checkNotNull(object);
+//        Preconditions.checkNotNull(object);
+        // TODO
 
         Node a = findOrCreate(tx, subject);
         Node b = findOrCreate(tx, object);

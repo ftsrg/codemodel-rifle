@@ -1,6 +1,13 @@
 # codemodel-rifle
 
-Shift dependency: https://github.com/steindani/shift-java
+Graph-based static analysis of ECMAScript 6 source code repositories.
+
+## Getting started
+
+```
+scripts/init-neo4j.sh
+./gradlew build
+```
 
 ## License
 
