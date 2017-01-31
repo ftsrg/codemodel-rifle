@@ -7,5 +7,5 @@ dependencies {
     compile group: 'org.glassfish.jersey.containers', name: 'jersey-container-grizzly2-http', version: '2.22.2'
     compile group: 'org.glassfish.jersey.media', name: 'jersey-media-moxy', version: '2.22.2'
     compile group: 'net.jodah', name: 'failsafe', version: '0.8.3'
-	testCompile group: 'junit', name: 'junit', version: jUnitVersion
+    testCompile group: 'junit', name: 'junit', version: jUnitVersion
 }
