@@ -5,7 +5,7 @@ set -e # exit with nonzero exit code if anything fails
 cd "$( cd "$( dirname "$0" )" && pwd )/../"
 
 # if the NEO4J_HOME environment variable is set, the bin/neo4j script starts that instance
-export NEO4j_HOME=
+export NEO4J_HOME=
 export NEO4J_VERSION=neo4j-community-3.1.1
 export NEO4J_DIR=neo4j-db
 
