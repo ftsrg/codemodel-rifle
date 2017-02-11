@@ -4,7 +4,8 @@ language: java
 jdk:
   - oraclejdk8
 install:
-  - scripts/init-neo4j.sh
+#  - scripts/init-neo4j.sh
+  - scripts/get-testkit.sh
 notifications:
   slack: ftsrg:8yjVb8nJs5WtLkpuM4MZVB9J
   on_success: change
