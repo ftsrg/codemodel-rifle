@@ -1,6 +1,7 @@
 dependencies {
     compile group: 'org.jhades', name: 'jhades', version: '1.0.4'
-    compile group: 'org.neo4j.driver', name: 'neo4j-java-driver', version: neo4jDriverVersion
+//    compile group: 'org.neo4j.driver', name: 'neo4j-java-driver', version: neo4jDriverVersion
+    compile group: 'neo4j-driver-testkit', name: 'neo4j-driver-testkit', version: '0.0.1-SNAPSHOT'
 
     compile group: 'com.shapesecurity', name: 'shift', version: '2.2.0'
     compile group: 'commons-io', name: 'commons-io', version: '2.4'
