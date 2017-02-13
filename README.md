@@ -6,9 +6,15 @@ Graph-based static analysis of ECMAScript 6 source code repositories.
 
 ### Testing with the reactive driver
 
-Clone the <https://github.com/szarnyasg/neo4j-reactive-driver> repository and publish it to the local Maven repository:
+Clone the following repositories and publish them to the local Maven repository:
+
+* https://github.com/neo4j/neo4j-java-driver (Maven)
+* https://github.com/szarnyasg/neo4j-reactive-driver (Gradle)
+
+You can use these scripts for convenience:
 
 ```
+scripts/get-java-driver.sh
 scripts/get-reactive-driver.sh
 ```
 
