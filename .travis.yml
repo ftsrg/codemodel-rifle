@@ -5,7 +5,7 @@ jdk:
   - oraclejdk8
 install:
 #  - scripts/init-neo4j.sh
-  - scripts/get-testkit.sh
+  - scripts/get-reactive-driver.sh
 notifications:
   slack: ftsrg:8yjVb8nJs5WtLkpuM4MZVB9J
   on_success: change
