@@ -5,7 +5,7 @@ import java.util.Map;
 
 import org.neo4j.driver.v1.Driver;
 
-import neo4j.driver.testkit.Neo4jTestKitDriver;
+import neo4j.driver.reactive.Neo4jReactiveDriver;
 
 public class DbServicesManager {
     protected static Map<String, DbServices> dbServices = new HashMap<>();
@@ -15,7 +15,7 @@ public class DbServicesManager {
             // final Driver driver = GraphDatabase.driver("bolt://localhost",
             // AuthTokens.none());
             // use our mock driver for testing
-            final Driver driver = new Neo4jTestKitDriver();
+            final Driver driver = new Neo4jReactiveDriver();
             final DbServices dbs = new DbServices(driver);
             dbServices.put(branchId, dbs);
         }
