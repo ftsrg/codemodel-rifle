@@ -12,23 +12,22 @@ import org.neo4j.driver.v1.Transaction;
  */
 public class DbServices {
     protected final Driver driver;
-    protected Transaction transaction;
+    protected Session session;
 
     public DbServices(Driver driver) {
         this.driver = driver;
+        this.session = this.driver.session();
     }
 
     public Transaction beginTx() {
-        Session session = driver.session();
-        transaction = session.beginTransaction();
-        return transaction;
+        return this.session.beginTransaction();
     }
 
     public StatementResult execute(String query) {
-        return transaction.run(query);
+        return this.session.run(query);
     }
 
     public StatementResult execute(String query, Map<String, Object> parameters) {
-        return transaction.run(query, parameters);
+        return this.session.run(query, parameters);
     }
 }

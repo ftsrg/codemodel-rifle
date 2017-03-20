@@ -5,7 +5,7 @@ import java.util.Map;
 
 import org.neo4j.driver.v1.Driver;
 
-import neo4j.driver.reactive.Neo4jReactiveDriver;
+import neo4j.driver.testkit.EmbeddedTestkitDriver;
 
 /**
  * Provides a DbServices singleton instance for each branch.
@@ -18,7 +18,7 @@ public class DbServicesManager {
             // final Driver driver = GraphDatabase.driver("bolt://localhost",
             // AuthTokens.none());
             // use our mock driver for testing
-            final Driver driver = new Neo4jReactiveDriver();
+            final Driver driver = new EmbeddedTestkitDriver();
             final DbServices dbs = new DbServices(driver);
             dbServices.put(branchId, dbs);
         }
