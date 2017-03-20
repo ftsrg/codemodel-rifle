@@ -1,4 +1,4 @@
-package hu.bme.mit.codemodel.rifle.resources.imports;
+package hu.bme.mit.codemodel.rifle.actions.imports;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -12,14 +12,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
 import org.neo4j.driver.v1.StatementResult;
 import org.neo4j.driver.v1.Transaction;
 
@@ -30,7 +22,6 @@ import net.jodah.failsafe.Failsafe;
 import net.jodah.failsafe.FailsafeFuture;
 import net.jodah.failsafe.RetryPolicy;
 
-@Path("buildcfg")
 public class BuildCallGraph {
 
     private static RetryPolicy retryPolicy = new RetryPolicy()
@@ -55,14 +46,9 @@ public class BuildCallGraph {
 
     private static final Logger logger = Logger.getLogger("codemodel");
 
-    @GET
-    @Produces(MediaType.TEXT_PLAIN)
-    public Response buildCfg(
-            @DefaultValue("master")
-            @QueryParam("branchid") String branchid
-    ) {
+    public String buildCfg(String branchId) {
 
-        final DbServices dbServices = DbServicesManager.getDbServices(branchid);
+        final DbServices dbServices = DbServicesManager.getDbServices(branchId);
         ScheduledExecutorService executorService = Executors.newScheduledThreadPool(4);
 
         List<FailsafeFuture<String>> futures = new ArrayList<>();
@@ -106,11 +92,11 @@ public class BuildCallGraph {
 
             logger.info(" CFG " + (System.currentTimeMillis() - start));
 
-            return Response.ok(builder.toString()).build();
+            return builder.toString();
         } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
         }
 
-        return Response.serverError().build();
+        return "ERROR";
     }
 }

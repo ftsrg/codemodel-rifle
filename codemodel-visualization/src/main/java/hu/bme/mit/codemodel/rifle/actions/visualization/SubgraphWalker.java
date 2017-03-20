@@ -1,4 +1,4 @@
-package hu.bme.mit.codemodel.rifle.resources.visualization;
+package hu.bme.mit.codemodel.rifle.actions.visualization;
 
 import java.util.ArrayList;
 import java.util.List;

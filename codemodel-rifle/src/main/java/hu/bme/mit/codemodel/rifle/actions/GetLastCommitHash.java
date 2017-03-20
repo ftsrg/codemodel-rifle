@@ -1,12 +1,4 @@
-package hu.bme.mit.codemodel.rifle.resources;
-
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+package hu.bme.mit.codemodel.rifle.actions;
 
 import org.json.JSONObject;
 import org.neo4j.driver.v1.Record;
@@ -17,17 +9,11 @@ import hu.bme.mit.codemodel.rifle.database.DbServices;
 import hu.bme.mit.codemodel.rifle.database.DbServicesManager;
 import hu.bme.mit.codemodel.rifle.database.ResourceReader;
 
-@Path("lastcommit")
 public class GetLastCommitHash {
     private static final String GET_LAST_COMMIT_HASH = ResourceReader.query("getlastcommithash");
 
-    @GET
-    @Produces(MediaType.TEXT_PLAIN)
-    public Response run(
-            @DefaultValue("master")
-            @QueryParam("branchid") String branchid
-    ) {
-        final DbServices dbServices = DbServicesManager.getDbServices(branchid);
+    public String run(String branchId) {
+        final DbServices dbServices = DbServicesManager.getDbServices(branchId);
         try (Transaction tx = dbServices.beginTx()) {
             final StatementResult result = dbServices.execute(GET_LAST_COMMIT_HASH);
 
@@ -39,10 +25,11 @@ public class GetLastCommitHash {
                 response.put("commitHash", commitHash);
             }
 
-            return Response.ok(response.toString()).build();
+            return response.toString();
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return Response.serverError().build();
+
+        return "ERROR";
     }
 }

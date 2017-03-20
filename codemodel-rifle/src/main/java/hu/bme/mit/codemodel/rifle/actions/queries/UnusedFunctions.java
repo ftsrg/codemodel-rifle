@@ -1,17 +1,8 @@
-package hu.bme.mit.codemodel.rifle.resources.queries;
+package hu.bme.mit.codemodel.rifle.actions.queries;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
-
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -24,7 +15,6 @@ import hu.bme.mit.codemodel.rifle.database.DbServices;
 import hu.bme.mit.codemodel.rifle.database.DbServicesManager;
 import hu.bme.mit.codemodel.rifle.database.ResourceReader;
 
-@Path("unusedfunctions")
 public class UnusedFunctions {
     protected final String UNUSED_QUERY = ResourceReader.query("unusedfunctions");
     protected final String GENERATE_CALLS = ResourceReader.query("generatecalls");
@@ -32,16 +22,8 @@ public class UnusedFunctions {
 
     private static final Logger logger = Logger.getLogger("codemodel");
 
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response getUnusedFunctions(
-            @QueryParam("sessionid") String sessionid,
-
-            @DefaultValue("master")
-            @QueryParam("branchid") String branchid
-    ) {
-        final DbServices dbServices = DbServicesManager.getDbServices(branchid);
-        Transaction tx = dbServices.beginTx();
+    public String getUnusedFunctions(String sessionId, String branchId) {
+        final DbServices dbServices = DbServicesManager.getDbServices(branchId);
 
         long startMillis = System.currentTimeMillis();
 
@@ -54,7 +36,7 @@ public class UnusedFunctions {
         long callsDone = System.currentTimeMillis();
 
         Map<String, Object> parameters = new HashMap<>();
-        parameters.put("sessionid", sessionid);
+        parameters.put("sessionid", sessionId);
         StatementResult result = dbServices.execute(UNUSED_QUERY, parameters);
 
         long queryDone = System.currentTimeMillis();
@@ -63,7 +45,7 @@ public class UnusedFunctions {
         logger.info(" CALLS " + (callsDone - cfgDone));
         logger.info(" QUERY " + (queryDone - callsDone));
 
-        try {
+        try (Transaction tx = dbServices.beginTx()) {
             JSONObject response = new JSONObject();
             JSONArray functions = new JSONArray();
 
@@ -82,8 +64,8 @@ public class UnusedFunctions {
                 Object deadSessionid = next.get("dead.session");
 
                 try {
-                    final String s = (String) deadSessionid;
-                    if (s != null && !s.equals(sessionid)) {
+                    final String s = (String)deadSessionid;
+                    if (s != null && !s.equals(sessionId)) {
                         continue processRows;
                     }
                 } catch (Exception e) {
@@ -107,13 +89,10 @@ public class UnusedFunctions {
             }
             response.put("unusedfunctions", functions);
 
-            return Response.ok(response.toString()).build();
+            return response.toString();
         } catch (JSONException e) {
             e.printStackTrace();
-            throw new WebApplicationException(e);
-        } finally {
-            tx.failure();
-            tx.close();
+            return "ERROR";
         }
     }
 }
