@@ -1,4 +1,4 @@
-package hu.bme.mit.codemodel.rifle.actions.utils;
+package hu.bme.mit.codemodel.rifle.tasks;
 
 import org.neo4j.driver.v1.StatementResult;
 import org.neo4j.driver.v1.Transaction;

@@ -1,4 +1,4 @@
-package hu.bme.mit.codemodel.rifle.actions;
+package hu.bme.mit.codemodel.rifle.actions.utils;
 
 import org.json.JSONObject;
 import org.neo4j.driver.v1.Record;

@@ -1,4 +1,4 @@
-package hu.bme.mit.codemodel.rifle.actions.imports;
+package hu.bme.mit.codemodel.rifle.tasks;
 
 import java.util.ArrayList;
 import java.util.Arrays;

@@ -1,4 +1,4 @@
-package hu.bme.mit.codemodel.rifle.actions.queries;
+package hu.bme.mit.codemodel.rifle.tasks;
 
 import java.util.HashMap;
 import java.util.Map;

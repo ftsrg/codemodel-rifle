@@ -7,7 +7,6 @@ import hu.bme.mit.codemodel.rifle.database.DbServicesManager;
 import hu.bme.mit.codemodel.rifle.database.ResourceReader;
 
 public class DeleteGraph {
-
     private static final String DELETE_GRAPH = ResourceReader.query("deletegraph");
 
     public boolean delete(String branchId) {
@@ -16,8 +15,8 @@ public class DeleteGraph {
         try (Transaction tx = dbServices.beginTx()) {
             dbServices.execute(DELETE_GRAPH);
             tx.success();
+
             return true;
         }
     }
-
 }

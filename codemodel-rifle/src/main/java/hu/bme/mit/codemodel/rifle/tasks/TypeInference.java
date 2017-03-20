@@ -1,4 +1,4 @@
-package hu.bme.mit.codemodel.rifle.actions.queries;
+package hu.bme.mit.codemodel.rifle.tasks;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -35,8 +35,8 @@ public class TypeInference {
         // 3. repeat the following until there is no modification (parallel, 2x):
         //    - tag unary expressions
         //    - tag binary expressions
-        //    - handle and tag new expressions
-        //    - handle and tag call expressions
+        //    - sync and tag new expressions
+        //    - sync and tag call expressions
         // 4. ???
         // 5. profit
 

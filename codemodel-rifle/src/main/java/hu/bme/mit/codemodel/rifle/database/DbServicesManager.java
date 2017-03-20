@@ -7,11 +7,14 @@ import org.neo4j.driver.v1.Driver;
 
 import neo4j.driver.reactive.Neo4jReactiveDriver;
 
+/**
+ * Provides a DbServices singleton instance for each branch.
+ */
 public class DbServicesManager {
     protected static Map<String, DbServices> dbServices = new HashMap<>();
 
     synchronized public static DbServices getDbServices(String branchId) {
-        if (!dbServices.containsKey(branchId)) {
+        if (! dbServices.containsKey(branchId)) {
             // final Driver driver = GraphDatabase.driver("bolt://localhost",
             // AuthTokens.none());
             // use our mock driver for testing

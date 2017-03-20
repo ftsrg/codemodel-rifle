@@ -6,10 +6,15 @@ import java.io.InputStream;
 
 import org.apache.commons.io.IOUtils;
 
+/**
+ * Manages resources reading from the resources directory.
+ * <p>
+ * Separate resource types have their own getters, see {@link #query(String)}.
+ */
 public class ResourceReader {
-
-    public static String readFromResource(String fileName) {
+    protected static String readFromResource(String fileName) {
         InputStream resourceAsStream = ResourceReader.class.getClassLoader().getResourceAsStream(fileName);
+
         try {
             return IOUtils.toString(resourceAsStream);
         } catch (IOException e) {
