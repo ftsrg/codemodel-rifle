@@ -10,15 +10,27 @@ import hu.bme.mit.codemodel.rifle.database.ResourceReader;
 public class CountNodes {
 
     private static final String COUNT_NODES = ResourceReader.query("countnodes");
+    private static final String COUNT_COMPILATIONUNIT_NODES = ResourceReader.query("countcompilationunitnodes");
 
-    public String get(String branchId) {
+    public int countAll(String branchId) {
         final DbServices dbServices = DbServicesManager.getDbServices(branchId);
 
         try (Transaction tx = dbServices.beginTx()) {
             StatementResult result = dbServices.execute(COUNT_NODES);
-            System.out.println(result.single());
             tx.success();
-            return result.toString();
+
+            return result.single().get("count").asInt();
+        }
+    }
+
+    public int countCompilationUnitNodes(String branchId) {
+        final DbServices dbServices = DbServicesManager.getDbServices(branchId);
+
+        try (Transaction tx = dbServices.beginTx()) {
+            StatementResult result = dbServices.execute(COUNT_COMPILATIONUNIT_NODES);
+            tx.success();
+
+            return result.single().get("count").asInt();
         }
     }
 
