@@ -1,5 +1,7 @@
+package hu.bme.mit.codemodel.rifle.actions.visualization;
 import java.io.IOException;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import hu.bme.mit.codemodel.rifle.actions.visualization.ExportGraph;
@@ -8,6 +10,7 @@ import neo4j.driver.testkit.EmbeddedTestkitDriver;
 
 public class HelloTest {
 
+    @Ignore
     @Test
     public void helloTest() throws IOException {
         // TODO
