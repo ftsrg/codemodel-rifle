@@ -8,12 +8,13 @@ import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.walk.Visitor;
 import org.neo4j.walk.Walker;
 
-import hu.bme.mit.codemodel.rifle.database.DbServices;
+import hu.bme.mit.codemodel.rifle.database.DbServiceDecorator;
+
 
 public class SimpleWalker extends Walker {
-    private final DbServices dbServices;
+    private final DbServiceDecorator dbServices;
 
-    public SimpleWalker(DbServices dbServices) {
+    public SimpleWalker(DbServiceDecorator dbServices) {
         this.dbServices = dbServices;
     }
 

@@ -15,9 +15,6 @@ public class DbServicesManager {
 
     synchronized public static DbServices getDbServices(String branchId) {
         if (! dbServices.containsKey(branchId)) {
-            // final Driver driver = GraphDatabase.driver("bolt://localhost",
-            // AuthTokens.none());
-            // use our mock driver for testing
             final Driver driver = new EmbeddedTestkitDriver();
             final DbServices dbs = new DbServices(driver);
             dbServices.put(branchId, dbs);

@@ -1,5 +1,6 @@
 dependencies {
+    compile project(':codemodel-rifle')
     compile group: 'org.neo4j', name: 'neo4j-graphviz', version: neo4jVersion
-    compile group: 'com.google.guava', name: 'guava', version: guavaVersion
+    testCompile group: 'junit', name: 'junit', version: jUnitVersion
 }
 

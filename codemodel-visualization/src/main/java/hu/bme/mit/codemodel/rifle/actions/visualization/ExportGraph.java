@@ -13,13 +13,18 @@ import org.neo4j.walk.Walker;
 
 import com.google.common.io.ByteStreams;
 
-import hu.bme.mit.codemodel.rifle.database.DbServices;
+import hu.bme.mit.codemodel.rifle.database.DbServiceDecorator;
 
 public class ExportGraph {
 
+    private DbServiceDecorator dbServices;
+
+    public ExportGraph(DbServiceDecorator dbServices) {
+        this.dbServices = dbServices;
+    }
+
     final OutputStream out = System.out;
     final GraphvizWriter writer = new GraphvizWriter();
-    final DbServices dbServices = null;
 
     public void full(String branchid) throws IOException {
         Transaction transaction = dbServices.beginTx();

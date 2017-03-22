@@ -15,7 +15,7 @@ import org.neo4j.walk.Walker;
 
 import com.google.common.collect.ImmutableMap;
 
-import hu.bme.mit.codemodel.rifle.database.DbServices;
+import hu.bme.mit.codemodel.rifle.database.DbServiceDecorator;
 
 // based on org.neo4j.walk.Walker.crosscut()
 public class SubgraphWalker extends Walker {
@@ -24,7 +24,7 @@ public class SubgraphWalker extends Walker {
     private final boolean simple;
     private final boolean cfg;
 
-    public SubgraphWalker(DbServices dbServices, long rootId, boolean simple, boolean cfg) {
+    public SubgraphWalker(DbServiceDecorator dbServices, long rootId, boolean simple, boolean cfg) {
         this.simple = simple;
         this.cfg = cfg;
 

@@ -14,7 +14,7 @@ import org.neo4j.graphdb.Result;
 import org.neo4j.walk.Visitor;
 import org.neo4j.walk.Walker;
 
-import hu.bme.mit.codemodel.rifle.database.DbServices;
+import hu.bme.mit.codemodel.rifle.database.DbServiceDecorator;
 
 // based on org.neo4j.walk.Walker.crosscut()
 public class CfgWalker extends Walker {
@@ -25,7 +25,7 @@ public class CfgWalker extends Walker {
             .map(before -> before.substring(2, before.length() - 1))
             .collect(Collectors.toList());
 
-    public CfgWalker(DbServices dbServices) {
+    public CfgWalker(DbServiceDecorator dbServices) {
         final Result result = dbServices.execute(
                 String.format(
             		"MATCH (a)-[%s]->(b) RETURN id(a) as a, id(b) as b",
