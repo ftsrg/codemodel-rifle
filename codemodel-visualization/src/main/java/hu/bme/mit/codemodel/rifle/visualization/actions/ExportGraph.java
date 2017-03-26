@@ -1,4 +1,4 @@
-package hu.bme.mit.codemodel.rifle.actions.visualization;
+package hu.bme.mit.codemodel.rifle.visualization.actions;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -7,13 +7,17 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import hu.bme.mit.codemodel.rifle.visualization.database.CfgWalker;
+import hu.bme.mit.codemodel.rifle.visualization.database.SimpleWalker;
+import hu.bme.mit.codemodel.rifle.visualization.database.SubgraphWalker;
+import hu.bme.mit.codemodel.rifle.visualization.utils.NewlineFilterStream;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.visualization.graphviz.GraphvizWriter;
 import org.neo4j.walk.Walker;
 
 import com.google.common.io.ByteStreams;
 
-import hu.bme.mit.codemodel.rifle.database.DbServiceDecorator;
+import hu.bme.mit.codemodel.rifle.visualization.database.DbServiceDecorator;
 
 public class ExportGraph {
 

@@ -17,7 +17,7 @@ import com.shapesecurity.shift.scope.ScopeAnalyzer;
 import hu.bme.mit.codemodel.rifle.database.DbServices;
 import hu.bme.mit.codemodel.rifle.database.DbServicesManager;
 import hu.bme.mit.codemodel.rifle.database.GraphIterator;
-import hu.bme.mit.codemodel.rifle.database.ResourceReader;
+import hu.bme.mit.codemodel.rifle.utils.ResourceReader;
 
 public class HandleChange {
     private static final String SET_COMMIT_HASH = ResourceReader.query("setcommithash");

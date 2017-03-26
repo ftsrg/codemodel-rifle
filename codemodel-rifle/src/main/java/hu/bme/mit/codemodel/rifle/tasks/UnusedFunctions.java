@@ -13,7 +13,7 @@ import org.neo4j.driver.v1.Transaction;
 
 import hu.bme.mit.codemodel.rifle.database.DbServices;
 import hu.bme.mit.codemodel.rifle.database.DbServicesManager;
-import hu.bme.mit.codemodel.rifle.database.ResourceReader;
+import hu.bme.mit.codemodel.rifle.utils.ResourceReader;
 
 public class UnusedFunctions {
     protected final String UNUSED_QUERY = ResourceReader.query("unusedfunctions");

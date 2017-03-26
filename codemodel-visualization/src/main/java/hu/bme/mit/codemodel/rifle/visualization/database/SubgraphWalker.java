@@ -1,4 +1,4 @@
-package hu.bme.mit.codemodel.rifle.actions.visualization;
+package hu.bme.mit.codemodel.rifle.visualization.database;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,7 +15,7 @@ import org.neo4j.walk.Walker;
 
 import com.google.common.collect.ImmutableMap;
 
-import hu.bme.mit.codemodel.rifle.database.DbServiceDecorator;
+import hu.bme.mit.codemodel.rifle.visualization.database.DbServiceDecorator;
 
 // based on org.neo4j.walk.Walker.crosscut()
 public class SubgraphWalker extends Walker {

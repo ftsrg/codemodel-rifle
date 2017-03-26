@@ -1,16 +1,15 @@
-package hu.bme.mit.codemodel.rifle.actions.visualization;
+package hu.bme.mit.codemodel.rifle.visualization;
 import java.io.IOException;
 
 import org.junit.Ignore;
 import org.junit.Test;
 
-import hu.bme.mit.codemodel.rifle.actions.visualization.ExportGraph;
-import hu.bme.mit.codemodel.rifle.database.DbServiceDecorator;
+import hu.bme.mit.codemodel.rifle.visualization.actions.ExportGraph;
+import hu.bme.mit.codemodel.rifle.visualization.database.DbServiceDecorator;
 import neo4j.driver.testkit.EmbeddedTestkitDriver;
 
-public class HelloTest {
+public class HelloTest extends TestCase {
 
-    @Ignore
     @Test
     public void helloTest() throws IOException {
         // TODO

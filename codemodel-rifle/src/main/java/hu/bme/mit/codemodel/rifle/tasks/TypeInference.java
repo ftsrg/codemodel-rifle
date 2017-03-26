@@ -14,7 +14,7 @@ import org.neo4j.driver.v1.Transaction;
 
 import hu.bme.mit.codemodel.rifle.database.DbServices;
 import hu.bme.mit.codemodel.rifle.database.DbServicesManager;
-import hu.bme.mit.codemodel.rifle.database.ResourceReader;
+import hu.bme.mit.codemodel.rifle.utils.ResourceReader;
 import net.jodah.failsafe.Failsafe;
 import net.jodah.failsafe.FailsafeFuture;
 import net.jodah.failsafe.RetryPolicy;

@@ -1,4 +1,4 @@
-package hu.bme.mit.codemodel.rifle.database;
+package hu.bme.mit.codemodel.rifle.utils;
 
 import java.io.File;
 import java.io.IOException;

@@ -1,4 +1,4 @@
-package hu.bme.mit.codemodel.rifle.actions.visualization;
+package hu.bme.mit.codemodel.rifle.visualization.utils;
 
 import java.io.FilterOutputStream;
 import java.io.IOException;

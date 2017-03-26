@@ -1,4 +1,4 @@
-package hu.bme.mit.codemodel.rifle.actions.visualization;
+package hu.bme.mit.codemodel.rifle.visualization.database;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -14,7 +14,7 @@ import org.neo4j.graphdb.Result;
 import org.neo4j.walk.Visitor;
 import org.neo4j.walk.Walker;
 
-import hu.bme.mit.codemodel.rifle.database.DbServiceDecorator;
+import hu.bme.mit.codemodel.rifle.visualization.database.DbServiceDecorator;
 
 // based on org.neo4j.walk.Walker.crosscut()
 public class CfgWalker extends Walker {

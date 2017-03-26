@@ -1,4 +1,4 @@
-package hu.bme.mit.codemodel.rifle.database;
+package hu.bme.mit.codemodel.rifle.visualization.database;
 
 import java.util.Collections;
 import java.util.Map;
