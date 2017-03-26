@@ -16,7 +16,7 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
-public class BasicExportTest extends TestCase {
+public class BasicVisualizationTest extends TestCase {
 
     @Before
     @After
