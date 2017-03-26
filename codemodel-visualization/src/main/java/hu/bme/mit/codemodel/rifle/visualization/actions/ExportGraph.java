@@ -27,8 +27,12 @@ public class ExportGraph {
         this.dbServices = dbServices;
     }
 
-    final OutputStream out = System.out;
+    OutputStream out;
     final GraphvizWriter writer = new GraphvizWriter();
+
+    public void setOutputStream(OutputStream f) {
+        this.out = f;
+    }
 
     public void full(String branchid) throws IOException {
         Transaction transaction = dbServices.beginTx();
