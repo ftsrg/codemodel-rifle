@@ -4,3 +4,6 @@ dependencies {
     testCompile group: 'junit', name: 'junit', version: jUnitVersion
 }
 
+test {
+    exclude 'hu/bme/mit/codemodel/rifle/visualization/**'
+}

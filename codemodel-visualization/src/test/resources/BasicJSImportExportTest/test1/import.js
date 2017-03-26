@@ -1,1 +1,0 @@
-import { exampleVariable } from "export";
