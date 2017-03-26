@@ -13,6 +13,7 @@ import hu.bme.mit.codemodel.rifle.visualization.database.DbServiceDecorator;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class BasicExportTest extends TestCase {
@@ -24,6 +25,7 @@ public class BasicExportTest extends TestCase {
     }
 
     @Test
+    @Ignore
     public void test1() throws IOException {
         DbServices dbServices = DbServicesManager.getDbServices(branchId);
         DbServiceDecorator dbServicesDecorator = new DbServiceDecorator(dbServices.getUnderlyingDatabaseService());
