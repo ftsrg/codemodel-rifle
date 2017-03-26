@@ -10,21 +10,29 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Result;
+import org.neo4j.test.GraphDescription;
 import org.neo4j.walk.Visitor;
 import org.neo4j.walk.Walker;
 
 import com.google.common.collect.ImmutableMap;
 
-import hu.bme.mit.codemodel.rifle.visualization.database.DbServiceDecorator;
-
 // based on org.neo4j.walk.Walker.crosscut()
-public class SubgraphWalker extends Walker {
+public class GraphWalker extends Walker {
 
     private final List<Node> nodes = new ArrayList<>();
     private final boolean simple;
     private final boolean cfg;
 
-    public SubgraphWalker(DbServiceDecorator dbServices, long rootId, boolean simple, boolean cfg) {
+    public GraphWalker(DbServiceDecorator dbServices, boolean simple, boolean cfg) {
+        this.simple = simple;
+        this.cfg = cfg;
+
+        for (Node node : dbServices.getAllNodes()) {
+            this.nodes.add(node);
+        }
+    }
+
+    public GraphWalker(DbServiceDecorator dbServices, long rootId, boolean simple, boolean cfg) {
         this.simple = simple;
         this.cfg = cfg;
 

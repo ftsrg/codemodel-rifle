@@ -9,7 +9,7 @@ import java.io.OutputStream;
 
 import hu.bme.mit.codemodel.rifle.visualization.database.CfgWalker;
 import hu.bme.mit.codemodel.rifle.visualization.database.SimpleWalker;
-import hu.bme.mit.codemodel.rifle.visualization.database.SubgraphWalker;
+import hu.bme.mit.codemodel.rifle.visualization.database.GraphWalker;
 import hu.bme.mit.codemodel.rifle.visualization.utils.NewlineFilterStream;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.visualization.graphviz.GraphvizWriter;
@@ -34,17 +34,17 @@ public class ExportGraph {
         this.out = f;
     }
 
-    public void full(String branchid) throws IOException {
+    public void full(String branchId) throws IOException {
         Transaction transaction = dbServices.beginTx();
         writer.emit(out, Walker.fullGraph(dbServices.getGraphDb()));
     }
 
-    public void simple(String branchid) throws IOException {
+    public void simple(String branchId) throws IOException {
         Transaction transaction = dbServices.beginTx();
         writer.emit(out, new SimpleWalker(dbServices));
     }
 
-    public void svg(String branchid, long nodeid, boolean simple, boolean cfg) throws IOException {
+    public void svg(String branchId, long nodeId, boolean simple, boolean cfg) throws IOException {
         Transaction transaction = dbServices.beginTx();
 
         final File dot = File.createTempFile("dot", null);
@@ -52,10 +52,10 @@ public class ExportGraph {
 
         Walker walker;
 
-        if (nodeid != -1) {
-            walker = new SubgraphWalker(dbServices, nodeid, simple, cfg);
+        if (nodeId != -1) {
+            walker = new GraphWalker(dbServices, nodeId, simple, cfg);
         } else {
-            walker = new SimpleWalker(dbServices);
+            walker = new GraphWalker(dbServices, simple, cfg);
         }
 
         NewlineFilterStream fileOutputStream = new NewlineFilterStream(new FileOutputStream(dot));
@@ -72,7 +72,7 @@ public class ExportGraph {
         ByteStreams.copy(bufferedInputStream, out);
     }
 
-    public void dot(String branchid, long nodeid, boolean simple, boolean cfg) throws IOException {
+    public void dot(String branchId, long nodeId, boolean simple, boolean cfg) throws IOException {
         Transaction transaction = dbServices.beginTx();
 
         final File dot = File.createTempFile("dot", null);
@@ -80,16 +80,16 @@ public class ExportGraph {
 
         Walker walker;
 
-        if (nodeid != -1) {
-            walker = new SubgraphWalker(dbServices, nodeid, simple, cfg);
+        if (nodeId != -1) {
+            walker = new GraphWalker(dbServices, nodeId, simple, cfg);
         } else {
-            walker = new SimpleWalker(dbServices);
+            walker = new GraphWalker(dbServices, simple, cfg);
         }
 
         writer.emit(out, walker);
     }
 
-    public void png(String branchid, long nodeid, boolean simple, boolean cfg) throws IOException {
+    public void png(String branchId, long nodeId, boolean simple, boolean cfg) throws IOException {
         Transaction transaction = dbServices.beginTx();
 
         final File dot = File.createTempFile("dot", null);
@@ -97,10 +97,10 @@ public class ExportGraph {
 
         Walker walker;
 
-        if (nodeid != -1) {
-            walker = new SubgraphWalker(dbServices, nodeid, simple, cfg);
+        if (nodeId != -1) {
+            walker = new GraphWalker(dbServices, nodeId, simple, cfg);
         } else {
-            walker = new SimpleWalker(dbServices);
+            walker = new GraphWalker(dbServices, simple, cfg);
         }
 
         NewlineFilterStream fileOutputStream = new NewlineFilterStream(new FileOutputStream(dot));
@@ -117,7 +117,7 @@ public class ExportGraph {
         ByteStreams.copy(bufferedInputStream, out);
     }
 
-    public void cfg(String branchid) throws IOException {
+    public void cfg(String branchId) throws IOException {
         Transaction transaction = dbServices.beginTx();
 
         final File dot = File.createTempFile("dot", null);
@@ -139,7 +139,7 @@ public class ExportGraph {
         ByteStreams.copy(bufferedInputStream, out);
     }
 
-    public void cfgdot(String branchid) throws IOException {
+    public void cfgdot(String branchId) throws IOException {
         Transaction transaction = dbServices.beginTx();
 
         final File dot = File.createTempFile("dot", null);

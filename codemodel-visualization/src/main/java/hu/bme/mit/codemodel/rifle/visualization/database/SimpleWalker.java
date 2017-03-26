@@ -10,7 +10,7 @@ import org.neo4j.walk.Walker;
 
 import hu.bme.mit.codemodel.rifle.visualization.database.DbServiceDecorator;
 
-
+@Deprecated
 public class SimpleWalker extends Walker {
     private final DbServiceDecorator dbServices;
 
