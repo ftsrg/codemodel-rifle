@@ -460,6 +460,42 @@ public class BasicJSImportExportTest extends TestCase {
     }
 
     @Test
+    public void test16_1() {
+        String path = this.getTestResourcesFolderPath("test16_1");
+        this.doImportExportAndVisualization(path);
+    }
+
+    @Test
+    public void test16_2() {
+        String path = this.getTestResourcesFolderPath("test16_2");
+        this.doImportExportAndVisualization(path);
+    }
+
+    @Test
+    public void test16_7() {
+        String path = this.getTestResourcesFolderPath("test16_7");
+        this.doImportExportAndVisualization(path);
+    }
+
+    @Test
+    public void test16_8() {
+        String path = this.getTestResourcesFolderPath("test16_8");
+        this.doImportExportAndVisualization(path);
+    }
+
+    @Test
+    public void test16_9() {
+        String path = this.getTestResourcesFolderPath("test16_9");
+        this.doImportExportAndVisualization(path);
+    }
+
+    @Test
+    public void test17_1() {
+        String path = this.getTestResourcesFolderPath("test17_1");
+        this.doImportExportAndVisualization(path);
+    }
+
+    @Test
     public void test17_2() {
         String path = this.getTestResourcesFolderPath("test17_2");
         this.doImportExportAndVisualization(path);
@@ -578,4 +614,5 @@ public class BasicJSImportExportTest extends TestCase {
         String path = this.getTestResourcesFolderPath("test19_9");
         this.doImportExportAndVisualization(path);
     }
+
 }
