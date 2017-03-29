@@ -1,15 +1,11 @@
 package hu.bme.mit.codemodel.rifle.database;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.IdentityHashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.driver.v1.StatementResult;
 import org.neo4j.driver.v1.Transaction;
 import org.neo4j.driver.v1.types.Node;
@@ -138,8 +134,9 @@ public class GraphIterator {
      */
     protected void handleIfInSession(String sessionId, Object node) {
         if (sessionId != null) {
-            storeType(node, "Temp");
-            storeProperty(node, "session", sessionId);
+            Map<String, Object> attributes = new HashMap<>();
+            attributes.put("session", sessionId);
+            this.updateNode(node, "Temp", attributes, new HashMap<>());
         }
     }
 
@@ -294,8 +291,13 @@ public class GraphIterator {
     protected void createEndNode(Object node, String sessionId) {
         Object end = new Object();
         storeType(end, "End");
-        storeReference(node, "_end", end);
-        storeProperty(node, "session", sessionId);
+
+        Map<Object, String> referencedNodes = new HashMap<>();
+        referencedNodes.put(end, "_end");
+        Map<String, Object> attributes = new HashMap<>();
+        attributes.put("session", sessionId);
+        this.updateNode(node, null, attributes, referencedNodes);
+
         storeReference(path, "contains", end);
     }
 
@@ -342,8 +344,6 @@ public class GraphIterator {
 
     public void storeReference(Object subject, String predicate, Object object) {
         Preconditions.checkNotNull(subject);
-//        Preconditions.checkNotNull(object);
-        // TODO
 
         Node a = findOrCreate(subject);
         Node b = findOrCreate(object);
@@ -353,13 +353,57 @@ public class GraphIterator {
             ));
     }
 
-    public void storeProperty(Object subject, String predicate, Object object) {
-        Preconditions.checkNotNull(object);
+    protected void updateNode(Object subject, @Nullable String type, Map<String, Object> attributes, Map<Object, String> referencedObjectsWithEdges) {
+        // Set the node instance we are working on
+        Node subjectNode = findOrCreate(subject);
+
+        // Referenced nodes are stored in a map with their edge names.
+        // Referenced nodes are references by the subject node,
+        // this means their direction is outwards from the subject node.
+        Map<Node, String> referencedNodesWithEdges = new HashMap<>();
+        for (Map.Entry<Object, String> referencedObject : referencedObjectsWithEdges.entrySet()) {
+            Node referencedNode = findOrCreate(referencedObject.getKey());
+            referencedNodesWithEdges.put(referencedNode, referencedObject.getValue());
+        }
+
+        List<String> updateStatementParts = new ArrayList<>();
+        updateStatementParts.add(String.format("MATCH (%s) WHERE id(%s) = %d", "_" + subjectNode.toString().hashCode(), "_" + subjectNode.toString().hashCode(), subjectNode.id()));
+
+        for (Map.Entry<Node, String> referencedNode : referencedNodesWithEdges.entrySet()) {
+            Node node = referencedNode.getKey();
+            updateStatementParts.add(String.format("MATCH (%s) WHERE id(%s) = %d", "_" + node.toString().hashCode(), "_" + node.toString().hashCode(), node.id()));
+        }
+
+        // If type is provided, set the type as well, not only the attributes.
+        if (type != null) {
+            updateStatementParts.add(String.format("SET %s:`%s`", "_" + subjectNode.toString().hashCode(), type));
+        }
+
+        // Set the provided attributes.
+        for (Map.Entry<String, Object> attribute : attributes.entrySet()) {
+            String predicate = attribute.getKey();
+            Object value = attribute.getValue();
+            updateStatementParts.add(String.format("SET %s.%s = '%s'", "_" + subjectNode.toString().hashCode(), predicate, value));
+        }
+
+        // Set the provided (outwards going) references.
+        for (Map.Entry<Node, String> referencedNode : referencedNodesWithEdges.entrySet()) {
+            Node node = referencedNode.getKey();
+            String edge = referencedNode.getValue();
+            updateStatementParts.add(String.format("MERGE (%s)-[:`%s`]->(%s)", "_" + subjectNode.toString().hashCode(), edge, "_" + node.toString().hashCode()));
+        }
+
+        String query = String.join(" ", updateStatementParts);
+        dbServices.execute(query);
+    }
+
+    public void storeProperty(Object subject, String predicate, Object value) {
+        Preconditions.checkNotNull(value);
 
         Node node = findOrCreate(subject);
         dbServices.execute(String.format(
                 "MATCH (n) WHERE id(n) = %d SET n.%s = '%s'",
-                node.id(), predicate, object
+                node.id(), predicate, value
             ));
     }
 
