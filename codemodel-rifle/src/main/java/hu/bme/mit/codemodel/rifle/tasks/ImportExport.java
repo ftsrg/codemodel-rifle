@@ -1,5 +1,7 @@
 package hu.bme.mit.codemodel.rifle.tasks;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.logging.Logger;
 
 import org.neo4j.driver.v1.StatementResult;
@@ -10,24 +12,25 @@ import hu.bme.mit.codemodel.rifle.database.DbServicesManager;
 import hu.bme.mit.codemodel.rifle.utils.ResourceReader;
 
 public class ImportExport {
-    private static final String IMPORT_EXPORT = ResourceReader.query("basicimport");
-
     private static final Logger logger = Logger.getLogger("codemodel");
 
-    public String importExport(String branchId) {
+    public boolean importExport(String branchId) {
 
         final DbServices dbServices = DbServicesManager.getDbServices(branchId);
-        long start = System.currentTimeMillis();
+//        long start = System.currentTimeMillis();
+        final Collection<String> importExportQueries = ResourceReader.getImportExportQueries();
 
         try (Transaction tx = dbServices.beginTx()) {
-            StatementResult result = dbServices.execute(IMPORT_EXPORT);
+            for (String query : importExportQueries) {
+                StatementResult result = dbServices.execute(query);
+//                logger.info(" TIME " + (System.currentTimeMillis() - start));
+//                logger.info(result.toString());
+            }
             tx.success();
-            logger.info(" TIME " + (System.currentTimeMillis() - start));
-            logger.info(result.toString());
-            return result.toString();
+            return true;
         } catch (Exception e) {
             e.printStackTrace();
-            return "ERROR";
+            return false;
         }
     }
 }
