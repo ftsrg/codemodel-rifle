@@ -40,8 +40,8 @@ public class GraphWalker extends Walker {
         nodes.add(root);
 
         final Result result = dbServices.execute(
-                "MATCH (root)-[*]->(n) WHERE id(root) = $rootid RETURN id(n) as id",
-                ImmutableMap.of("rootid", rootId)
+                "MATCH (root)-[*]->(n) WHERE id(root) = $rootId RETURN id(n) as id",
+                ImmutableMap.of("rootId", rootId)
             );
 
         while (result.hasNext()) {
