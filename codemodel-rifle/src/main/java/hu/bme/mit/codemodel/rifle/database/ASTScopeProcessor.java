@@ -21,29 +21,76 @@ import com.shapesecurity.shift.ast.SourceSpan;
 import com.shapesecurity.shift.parser.ParserWithLocation;
 import com.shapesecurity.shift.scope.Scope;
 
-public class GraphIterator {
-
-    protected final String path;
-    protected final ParserWithLocation parserWithLocation;
+/**
+ * After processing, the AST becomes an ASG.
+ */
+public class ASTScopeProcessor {
+    /**
+     * DbServices instance for branch.
+     */
     protected final DbServices dbServices;
-    protected final IdentityHashMap<Object, Object> done = new IdentityHashMap<>();
-    protected final Map<Object, Node> nodes = new IdentityHashMap<>();
 
-    protected final BlockingQueue<QueueItem> queue = new LinkedBlockingQueue<>();
+    /**
+     * Path of the parsed file.
+     */
+    protected final String parsedFilePath;
 
-    public GraphIterator(DbServices dbServices, String path, ParserWithLocation parserWithLocation) {
+    /**
+     * A Shape's parser with location.
+     */
+    protected final ParserWithLocation parserWithLocation;
+
+    /**
+     * AST items that are already traversed and processed.
+     */
+    protected final Map<Object, Object> processedAstItems = new IdentityHashMap<>();
+
+    /**
+     * AST objects with ASG nodes.
+     */
+    protected final Map<Object, Node> asgNodes = new IdentityHashMap<>();
+
+    /**
+     * The processing queue.
+     */
+    protected final BlockingQueue<QueueItem> processingQueue = new LinkedBlockingQueue<>();
+
+    /**
+     * Internal class for processing.
+     */
+    protected class QueueItem {
+        public Object parent;
+        public String predicate;
+        public Object node;
+
+        public QueueItem(Object parent, String predicate, Object node) {
+            this.parent = parent;
+            this.predicate = predicate;
+            this.node = node;
+        }
+    }
+
+    public ASTScopeProcessor(DbServices dbServices, String parsedFilePath, ParserWithLocation parserWithLocation) {
         this.dbServices = dbServices;
-        this.path = path;
+        this.parsedFilePath = parsedFilePath;
         this.parserWithLocation = parserWithLocation;
     }
 
-    public void iterate(Scope scope, String sessionId) {
+    /**
+     * Processes a given scope with a sessionId.
+     *
+     * The items (becoming ASG nodes) are stored in a blocking queue.
+     *
+     * @param scope
+     * @param sessionId
+     */
+    public void processScope(Scope scope, String sessionId) {
         try (Transaction tx = dbServices.beginTx()) {
-            createPathNode(sessionId);
-            queue.add(new QueueItem(null, null, scope));
+            this.createFilePathNode(sessionId);
+            processingQueue.add(new QueueItem(null, null, scope));
 
-            while (! queue.isEmpty()) {
-                QueueItem queueItem = queue.take();
+            while (! processingQueue.isEmpty()) {
+                QueueItem queueItem = processingQueue.take();
                 process(queueItem, sessionId);
             }
 
@@ -53,8 +100,8 @@ public class GraphIterator {
         }
     }
 
-    protected void createPathNode(String sessionId) {
-        Node pathNode = this.findOrCreate(path);
+    protected void createFilePathNode(String sessionId) {
+        Node filePathNode = this.findOrCreate(parsedFilePath);
 
         dbServices.execute(String.format(
             "MATCH (n)" +
@@ -63,10 +110,10 @@ public class GraphIterator {
                 "SET n.%s = '%s'" +
                 "SET n.%s = '%s'",
 
-            pathNode.id(),
+            filePathNode.id(),
             "CompilationUnit",
-            "path",
-            path,
+            "parsedFilePath",
+            parsedFilePath,
             "session",
             sessionId
         ));
@@ -103,17 +150,17 @@ public class GraphIterator {
     }
 
     private void handleFunctional(Object parent, String predicate, Object node, String sessionId) {
-        if (done.containsKey(node)) {
+        if (processedAstItems.containsKey(node)) {
             return;
         }
-        done.put(node, node);
+        processedAstItems.put(node, node);
 
         if (node instanceof Maybe) {
             Maybe el = (Maybe) node;
             if (el.isJust()) {
-                queue.add(new QueueItem(parent, predicate, el.fromJust()));
+                processingQueue.add(new QueueItem(parent, predicate, el.fromJust()));
 //            } else {
-//                queue.add(new QueueItem(node, fieldName, "null"));
+//                processingQueue.add(new QueueItem(node, fieldName, "null"));
             }
         } else if (node instanceof Either) {
             Either el = (Either) node;
@@ -141,10 +188,10 @@ public class GraphIterator {
     }
 
     protected void handleCollection(Object parent, String predicate, Object node, String sessionId) {
-        if (done.containsKey(node)) {
+        if (processedAstItems.containsKey(node)) {
             return;
         }
-        done.put(node, node);
+        processedAstItems.put(node, node);
 
         if (node instanceof ImmutableList || node instanceof ConcatList) {
             Iterable list = (Iterable) node;
@@ -152,7 +199,7 @@ public class GraphIterator {
             // id -- [field] -> list
             storeReference(parent, predicate, list);
             storeType(list, "List");
-            storeReference(path, "contains", list);
+            storeReference(parsedFilePath, "contains", list);
             handleIfInSession(sessionId, list);
 
             final Iterator iterator = list.iterator();
@@ -162,15 +209,15 @@ public class GraphIterator {
 
             while (iterator.hasNext()) {
                 Object el = iterator.next();
-                queue.add(new QueueItem(list, Integer.toString(i), el));
+                processingQueue.add(new QueueItem(list, Integer.toString(i), el));
 
                 if (prev != null) {
-                    queue.add(new QueueItem(prev, "_next", el));
+                    processingQueue.add(new QueueItem(prev, "_next", el));
                 }
                 prev = el;
 
                 // connect the children directly
-                queue.add(new QueueItem(parent, predicate, el));
+                processingQueue.add(new QueueItem(parent, predicate, el));
 
                 i++;
             }
@@ -185,12 +232,12 @@ public class GraphIterator {
                 storeReference(parent, predicate, map);
 //                storeType(map, node.getClass().getSimpleName());
                 storeType(map, "Map");
-                storeReference(path, "contains", map);
+                storeReference(parsedFilePath, "contains", map);
                 handleIfInSession(sessionId, map);
 
                 for (Object el : map.entrySet()) {
                     Map.Entry entry = (Map.Entry) el;
-                    queue.add(new QueueItem(map, entry.getKey().toString(), entry.getValue()));
+                    processingQueue.add(new QueueItem(map, entry.getKey().toString(), entry.getValue()));
                 }
             }
 
@@ -202,12 +249,12 @@ public class GraphIterator {
                 // id -- [field] -> table
                 storeReference(parent, predicate, table);
                 storeType(table, "HashTable");
-                storeReference(path, "contains", table);
+                storeReference(parsedFilePath, "contains", table);
                 handleIfInSession(sessionId, table);
 
                 for (Object el : table.entries()) {
                     Pair pair = (Pair) el;
-                    queue.add(new QueueItem(table, pair.left().toString(), pair.right()));
+                    processingQueue.add(new QueueItem(table, pair.left().toString(), pair.right()));
                 }
             }
 
@@ -219,14 +266,14 @@ public class GraphIterator {
             storeReference(parent, predicate, node);
         }
 
-        if (done.containsKey(node)) {
+        if (processedAstItems.containsKey(node)) {
             return;
         }
-        done.put(node, node);
+        processedAstItems.put(node, node);
 
         createEndNode(node, sessionId);
 
-        storeReference(path, "contains", node);
+        storeReference(parsedFilePath, "contains", node);
         handleIfInSession(sessionId, node);
         storeLocation(node);
 
@@ -263,22 +310,22 @@ public class GraphIterator {
                         Object o = field.get(node);
                         if (fieldType.isEnum()) {
 
-                            // queue.add(new QueueItem(node, fieldName, o.toString()));
+                            // processingQueue.add(new QueueItem(node, fieldName, o.toString()));
                             storeProperty(node, fieldName, o.toString());
 
                         } else if (o instanceof Node) {
 
-                            queue.add(new QueueItem(node, fieldName, o));
+                            processingQueue.add(new QueueItem(node, fieldName, o));
 
                         } else if (fieldType.getName().startsWith("com.shapesecurity.functional")) {
 
                             // TODO
-                            queue.add(new QueueItem(node, fieldName, o));
+                            processingQueue.add(new QueueItem(node, fieldName, o));
 
                         } else {
 
                             // TODO
-                            queue.add(new QueueItem(node, fieldName, o));
+                            processingQueue.add(new QueueItem(node, fieldName, o));
 
                         }
                     } catch (IllegalAccessException e) {
@@ -298,14 +345,14 @@ public class GraphIterator {
         attributes.put("session", sessionId);
         this.updateNode(node, null, attributes, referencedNodes);
 
-        storeReference(path, "contains", end);
+        storeReference(parsedFilePath, "contains", end);
     }
 
     protected void storeLocation(Object node) {
         if (node instanceof com.shapesecurity.shift.ast.Node) {
             Maybe<SourceSpan> location = parserWithLocation.getLocation((com.shapesecurity.shift.ast.Node) node);
             if (location.isJust()) {
-                queue.add(new QueueItem(node, "location", location.fromJust()));
+                processingQueue.add(new QueueItem(node, "location", location.fromJust()));
             }
         }
     }
@@ -332,12 +379,12 @@ public class GraphIterator {
     }
 
     protected Node findOrCreate(Object subject) {
-        if (nodes.containsKey(subject)) {
-            return nodes.get(subject);
+        if (asgNodes.containsKey(subject)) {
+            return asgNodes.get(subject);
         } else {
             StatementResult result = dbServices.execute("CREATE (n) RETURN n");
             Node node = result.next().get(0).asNode();
-            nodes.put(subject, node);
+            asgNodes.put(subject, node);
             return node;
         }
     }
@@ -430,17 +477,5 @@ public class GraphIterator {
         }
 
         return fields;
-    }
-
-    protected class QueueItem {
-        public Object parent;
-        public String predicate;
-        public Object node;
-
-        public QueueItem(Object parent, String predicate, Object node) {
-            this.parent = parent;
-            this.predicate = predicate;
-            this.node = node;
-        }
     }
 }

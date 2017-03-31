@@ -16,7 +16,7 @@ import com.shapesecurity.shift.scope.ScopeAnalyzer;
 
 import hu.bme.mit.codemodel.rifle.database.DbServices;
 import hu.bme.mit.codemodel.rifle.database.DbServicesManager;
-import hu.bme.mit.codemodel.rifle.database.GraphIterator;
+import hu.bme.mit.codemodel.rifle.database.ASTScopeProcessor;
 import hu.bme.mit.codemodel.rifle.utils.ResourceReader;
 
 public class HandleChange {
@@ -49,13 +49,13 @@ public class HandleChange {
         long parseDone = stopwatch.elapsed(TimeUnit.MILLISECONDS);
         stopwatch.reset();
 
-        GlobalScope scope = ScopeAnalyzer.analyze(module);
+        GlobalScope globalScope = ScopeAnalyzer.analyze(module);
 
         long scopeDone = stopwatch.elapsed(TimeUnit.MILLISECONDS);
         stopwatch.reset();
 
-        GraphIterator iterator = new GraphIterator(DbServicesManager.getDbServices(branchId), path, parser);
-        iterator.iterate(scope, sessionId);
+        ASTScopeProcessor astScopeProcessor = new ASTScopeProcessor(DbServicesManager.getDbServices(branchId), path, parser);
+        astScopeProcessor.processScope(globalScope, sessionId);
 
         long graphDone = stopwatch.elapsed(TimeUnit.MILLISECONDS);
         stopwatch.reset();
