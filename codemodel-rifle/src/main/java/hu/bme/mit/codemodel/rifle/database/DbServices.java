@@ -36,10 +36,6 @@ public class DbServices {
         return this.transaction.run(statementTemplate, statementParameters);
     }
 
-    public String getQueryBuilderContents() {
-        return this.queryBuilder.getQueryAsString();
-    }
-
     public GraphDatabaseService getUnderlyingDatabaseService() {
         if (driver instanceof EmbeddedTestkitDriver) {
             return ((EmbeddedTestkitDriver) driver).getUnderlyingDatabaseService();
