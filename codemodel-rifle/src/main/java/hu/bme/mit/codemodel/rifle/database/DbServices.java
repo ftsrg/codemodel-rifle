@@ -28,12 +28,12 @@ public class DbServices {
         return this.transaction;
     }
 
-    public StatementResult execute(String query) {
-        return this.transaction.run(query);
+    public StatementResult execute(String statement) {
+        return this.transaction.run(statement);
     }
 
-    public StatementResult execute(String query, Map<String, Object> parameters) {
-        return this.transaction.run(query, parameters);
+    public StatementResult execute(String statementTemplate, Map<String, Object> statementParameters) {
+        return this.transaction.run(statementTemplate, statementParameters);
     }
 
     public String getQueryBuilderContents() {
