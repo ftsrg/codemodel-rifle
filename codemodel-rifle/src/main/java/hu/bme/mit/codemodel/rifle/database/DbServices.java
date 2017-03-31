@@ -16,7 +16,6 @@ import neo4j.driver.testkit.EmbeddedTestkitDriver;
 public class DbServices {
     protected final Driver driver;
     protected Transaction transaction;
-    protected QueryBuilder queryBuilder;
 
     public DbServices(Driver driver) {
         this.driver = driver;
