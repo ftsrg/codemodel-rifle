@@ -16,6 +16,7 @@ import neo4j.driver.testkit.EmbeddedTestkitDriver;
 public class DbServices {
     protected final Driver driver;
     protected Transaction transaction;
+    protected QueryBuilder queryBuilder;
 
     public DbServices(Driver driver) {
         this.driver = driver;
@@ -35,6 +36,10 @@ public class DbServices {
         return this.transaction.run(query, parameters);
     }
 
+    public String getQueryBuilderContents() {
+        return this.queryBuilder.getQueryAsString();
+    }
+
     public GraphDatabaseService getUnderlyingDatabaseService() {
         if (driver instanceof EmbeddedTestkitDriver) {
             return ((EmbeddedTestkitDriver) driver).getUnderlyingDatabaseService();
@@ -42,5 +47,4 @@ public class DbServices {
             throw new IllegalStateException("Cannot get underyling database service.");
         }
     }
-
 }
