@@ -100,7 +100,7 @@ public class QueryBuilder {
      * @return
      */
     public QueryBuilder match(String nodeName) {
-        String queryTemplate = String.format("MATCH (%s)", nodeName);
+        String queryTemplate = String.format("MATCH (`%s`)", nodeName);
 
         Query q = new Query(queryTemplate, new HashMap<>());
         this.addQuery("matchWhere", q);
@@ -116,7 +116,7 @@ public class QueryBuilder {
      * @return
      */
     public QueryBuilder match(String nodeName, String nodeType) {
-        String queryTemplate = String.format("MATCH (%s:%s)", nodeName, nodeType);
+        String queryTemplate = String.format("MATCH (`%s`:`%s`)", nodeName, nodeType);
 
         Query q = new Query(queryTemplate, new HashMap<>());
         this.addQuery("matchWhere", q);
@@ -135,7 +135,7 @@ public class QueryBuilder {
     public QueryBuilder where(String nodeName, String nodeProperty, String value) {
         String parameterBinding = this.createUniqueIdentifierName();
 
-        String queryTemplate = String.format("WHERE %s.%s = {%s}", nodeName, nodeProperty, parameterBinding);
+        String queryTemplate = String.format("WHERE `%s`.`%s` = {`%s`}", nodeName, nodeProperty, parameterBinding);
         Map<String, Object> parameters = new HashMap<>();
         parameters.put(parameterBinding, value);
 
@@ -157,7 +157,7 @@ public class QueryBuilder {
     public QueryBuilder where(String nodeName, String nodeProperty, String operator, String value) {
         String parameterBinding = this.createUniqueIdentifierName();
 
-        String queryTemplate = String.format("WHERE %s.%s %s {%s}", nodeName, nodeProperty, operator, parameterBinding);
+        String queryTemplate = String.format("WHERE `%s`.`%s` `%s` {`%s`}", nodeName, nodeProperty, operator, parameterBinding);
         Map<String, Object> parameters = new HashMap<>();
         parameters.put(parameterBinding, value);
 
@@ -178,7 +178,7 @@ public class QueryBuilder {
     public QueryBuilder andWhere(String nodeName, String nodeProperty, String value) {
         String parameterBinding = this.createUniqueIdentifierName();
 
-        String queryTemplate = String.format("AND %s.%s = {%s}", nodeName, nodeProperty, parameterBinding);
+        String queryTemplate = String.format("AND `%s`.`%s` = {`%s`}", nodeName, nodeProperty, parameterBinding);
         Map<String, Object> parameters = new HashMap<>();
         parameters.put(parameterBinding, value);
 
@@ -200,7 +200,7 @@ public class QueryBuilder {
     public QueryBuilder andWhere(String nodeName, String nodeProperty, String operator, String value) {
         String parameterBinding = this.createUniqueIdentifierName();
 
-        String queryTemplate = String.format("AND %s.%s %s {%s}", nodeName, nodeProperty, operator, parameterBinding);
+        String queryTemplate = String.format("AND `%s`.`%s` `%s` {`%s`}", nodeName, nodeProperty, operator, parameterBinding);
         Map<String, Object> parameters = new HashMap<>();
         parameters.put(parameterBinding, value);
 
@@ -221,7 +221,7 @@ public class QueryBuilder {
     public QueryBuilder orWhere(String nodeName, String nodeProperty, String value) {
         String parameterBinding = this.createUniqueIdentifierName();
 
-        String queryTemplate = String.format("OR %s.%s = {%s}", nodeName, nodeProperty, parameterBinding);
+        String queryTemplate = String.format("OR `%s`.`%s` = {`%s`}", nodeName, nodeProperty, parameterBinding);
         Map<String, Object> parameters = new HashMap<>();
         parameters.put(parameterBinding, value);
 
@@ -243,7 +243,7 @@ public class QueryBuilder {
     public QueryBuilder orWhere(String nodeName, String nodeProperty, String operator, String value) {
         String parameterBinding = this.createUniqueIdentifierName();
 
-        String queryTemplate = String.format("OR %s.%s %s {%s}", nodeName, nodeProperty, operator, parameterBinding);
+        String queryTemplate = String.format("OR `%s`.`%s` `%s` {`%s`}", nodeName, nodeProperty, operator, parameterBinding);
         Map<String, Object> parameters = new HashMap<>();
         parameters.put(parameterBinding, value);
 
@@ -261,7 +261,7 @@ public class QueryBuilder {
      * @return
      */
     public QueryBuilder whereId(String nodeName, long id) {
-        String queryTemplate = String.format("WHERE id(%s) = %d", nodeName, id);
+        String queryTemplate = String.format("WHERE id(`%s`) = `%d`", nodeName, id);
         Map<String, Object> parameters = new HashMap<>();
 
         Query q = new Query(queryTemplate, parameters);
@@ -280,7 +280,7 @@ public class QueryBuilder {
      * @return
      */
     public QueryBuilder setLabel(String nodeName, String newType) {
-        String queryTemplate = String.format("SET %s:%s", nodeName, newType);
+        String queryTemplate = String.format("SET `%s`:`%s`", nodeName, newType);
         Query q = new Query(queryTemplate, new HashMap<>());
         this.addQuery("set", q);
         return this;
@@ -299,7 +299,7 @@ public class QueryBuilder {
     public QueryBuilder set(String nodeName, String propertyName, String propertyValue) {
         String parameterBinding = this.createUniqueIdentifierName();
 
-        String queryTemplate = String.format("SET %s.%s = {%s}", nodeName, propertyName, parameterBinding);
+        String queryTemplate = String.format("SET `%s`.`%s` = {`%s`}", nodeName, propertyName, parameterBinding);
         Map<String, Object> parameters = new HashMap<>();
         // We create a unique parameter binding name for each appended parameters.
         parameters.put(parameterBinding, propertyValue);
