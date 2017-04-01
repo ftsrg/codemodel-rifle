@@ -260,7 +260,7 @@ public class QueryBuilder {
      * @param id
      * @return
      */
-    public QueryBuilder whereId(String nodeName, int id) {
+    public QueryBuilder whereId(String nodeName, long id) {
         String queryTemplate = String.format("WHERE id(%s) = %d", nodeName, id);
         Map<String, Object> parameters = new HashMap<>();
 
