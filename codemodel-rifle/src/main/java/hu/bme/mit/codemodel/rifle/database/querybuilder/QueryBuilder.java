@@ -75,10 +75,20 @@ public class QueryBuilder {
         }
     }
 
+    /**
+     * Creates a unique node identifier.
+     *
+     * @return String
+     */
     public String createUniqueIdentifierName() {
-        return "_" + UUID.randomUUID().toString().replace("-", "");
+        return String.format("node_%s", UUID.randomUUID().toString().replace("-", ""));
     }
 
+    /**
+     * Gets the query built in the query builder.
+     *
+     * @return Query
+     */
     public Query getQuery() {
         Query finalQuery = new Query();
 
