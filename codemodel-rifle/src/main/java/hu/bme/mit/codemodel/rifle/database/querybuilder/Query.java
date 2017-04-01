@@ -2,6 +2,7 @@ package hu.bme.mit.codemodel.rifle.database.querybuilder;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public class Query {
     /**
@@ -46,7 +47,7 @@ public class Query {
      * @param parameters
      */
     public synchronized void append(String template, Map<String, Object> parameters) {
-        StringBuilder builder = new StringBuilder(this.statementTemplate);
+        StringBuilder builder = new StringBuilder(Optional.ofNullable(this.statementTemplate).orElse(""));
         builder.append(template);
         this.statementTemplate = builder.toString();
         this.statementParameters.putAll(parameters);
