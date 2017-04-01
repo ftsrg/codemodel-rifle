@@ -81,7 +81,7 @@ public class QueryBuilder {
      * @return String
      */
     public String createUniqueIdentifierName() {
-        return String.format("node_%s", UUID.randomUUID().toString().replace("-", ""));
+        return String.format("_%s", UUID.randomUUID().toString().replace("-", ""));
     }
 
     /**
