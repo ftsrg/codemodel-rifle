@@ -56,7 +56,6 @@ public class QueryBuilder {
      *
      * @param queryTypeName
      * @param query
-     *
      * @throws IllegalArgumentException
      */
     protected void addQuery(String queryTypeName, Query query) {
@@ -96,33 +95,34 @@ public class QueryBuilder {
         return finalQuery;
     }
 
-    public QueryBuilder matches(Collection<String> nodes, Collection<String> wheres, Map<String, Object> parameters) {
+    public QueryBuilder matches(String node, Collection<String> wheres, Map<String, Object> parameters) {
         StringBuilder queryTemplate = new StringBuilder("MATCH");
         queryTemplate.append(" (");
 
-        // Iterating over nodes to set unique identifier names.
-        for (String node : nodes) {
-
-            // If the node spcification contains a : that means we have a node type value specified, e.g.:
-            // MATCH (n:CompilationUnit) ...
-            if (node.contains(":")) {
-                String nodeType = node.split(":")[1];
-                node = this.createUniqueIdentifierNameWithType(nodeType);
-            } else {
-                node = this.createUniqueIdentifierName();
-            }
-
-            queryTemplate.append(node);
+        // If the node specification contains a : that means we have a node type value specified, e.g.:
+        // MATCH (n:CompilationUnit) ...
+        if (node.contains(":")) {
+            String nodeType = node.split(":")[1];
+            node = this.createUniqueIdentifierNameWithType(nodeType);
+        } else {
+            node = this.createUniqueIdentifierName();
         }
+
+        queryTemplate.append(node);
 
         queryTemplate.append(") ");
 
         // Appending WHERE statements to the query.
-        if (! wheres.isEmpty()) {
-            queryTemplate.append("WHERE");
+        if (!wheres.isEmpty()) {
+            queryTemplate.append("WHERE ");
 
-            for (String where : wheres) {
-                queryTemplate.append(where);
+            Iterator<String> i = wheres.iterator();
+            while (i.hasNext()) {
+                String whereStatement = i.next();
+                queryTemplate.append(whereStatement);
+                if (i.hasNext()) {
+                    queryTemplate.append(" AND ");
+                }
             }
         }
 
