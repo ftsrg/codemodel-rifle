@@ -92,52 +92,33 @@ public class QueryBuilder {
     }
 
     /**
-     * Creates and appends a basic MATCH query to the QueryBuilder.
-     *
+     * Creates and appends a basic match.
+     * <p>
      * Returns self making the builder chainable.
      *
      * @param nodeName
-     * @param nodeType
-     * @param wheres
-     * @param parameters
      * @return
      */
-    public QueryBuilder match(String nodeName, String nodeType, Collection<String> wheres, Map<String, Object> parameters) {
-        StringBuilder queryTemplate = new StringBuilder("MATCH");
-        queryTemplate.append(" (");
+    public QueryBuilder match(String nodeName) {
+        String queryTemplate = String.format("MATCH (%s)", nodeName);
 
-        queryTemplate.append(nodeName);
+        Query q = new Query(queryTemplate, new HashMap<>());
+        this.addQuery("matchWhere", q);
 
-        if (nodeType != null) {
-            queryTemplate.append(":" + nodeType);
-        }
+        return this;
+    }
 
-        queryTemplate.append(") ");
+    /**
+     * Creates a basic match query with a node type specificaiton.
+     *
+     * @param nodeName
+     * @param nodeType
+     * @return
+     */
+    public QueryBuilder match(String nodeName, String nodeType) {
+        String queryTemplate = String.format("MATCH (%s:%s)", nodeName, nodeType);
 
-        // Appending WHERE statements to the query.
-        if (!wheres.isEmpty()) {
-            queryTemplate.append("WHERE ");
-
-            Iterator<String> i = wheres.iterator();
-            while (i.hasNext()) {
-                String whereStatement = i.next();
-                queryTemplate.append(whereStatement);
-                if (i.hasNext()) {
-                    queryTemplate.append(" AND ");
-                }
-            }
-        }
-
-        // Parameters names' (stored as keys in the map) should be unique,
-        // so we remove the parameter from the map by key,
-        // create a new unique name to them, and put
-        // them back to the parameters map.
-        for (Map.Entry<String, Object> parameter : parameters.entrySet()) {
-            String uniqueParameterKey = this.createUniqueIdentifierName();
-            parameters.put(uniqueParameterKey, parameters.remove(parameter.getKey()));
-        }
-
-        Query q = new Query(queryTemplate.toString(), parameters);
+        Query q = new Query(queryTemplate, new HashMap<>());
         this.addQuery("matchWhere", q);
 
         return this;
@@ -291,7 +272,7 @@ public class QueryBuilder {
 
     /**
      * Sets the label of the specified node.
-     *
+     * <p>
      * Returns self making the builder chainable.
      *
      * @param nodeName
@@ -307,7 +288,7 @@ public class QueryBuilder {
 
     /**
      * Sets a property value of a node.
-     *
+     * <p>
      * Returns self, making the builder chainable.
      *
      * @param nodeName
