@@ -10,7 +10,6 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Result;
-import org.neo4j.test.GraphDescription;
 import org.neo4j.walk.Visitor;
 import org.neo4j.walk.Walker;
 
