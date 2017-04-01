@@ -24,7 +24,7 @@ public class QueryBuilder {
      * See: https://s3.amazonaws.com/artifacts.opencypher.org/railroad/Cypher.html
      */
     protected final String[] QUERY_TYPES_AND_ORDERING = {
-        "match",
+        "matchWhere",
         "unwind",
         "merge",
         "create",
@@ -79,10 +79,6 @@ public class QueryBuilder {
         return "_" + UUID.randomUUID().toString().replace("-", "");
     }
 
-    public String createUniqueIdentifierNameWithType(String type) {
-        return this.createUniqueIdentifierName() + ":" + type;
-    }
-
     public Query getQuery() {
         Query finalQuery = new Query();
 
@@ -106,7 +102,7 @@ public class QueryBuilder {
      * @param parameters
      * @return
      */
-    public QueryBuilder matches(String nodeName, String nodeType, Collection<String> wheres, Map<String, Object> parameters) {
+    public QueryBuilder match(String nodeName, String nodeType, Collection<String> wheres, Map<String, Object> parameters) {
         StringBuilder queryTemplate = new StringBuilder("MATCH");
         queryTemplate.append(" (");
 
@@ -142,7 +138,85 @@ public class QueryBuilder {
         }
 
         Query q = new Query(queryTemplate.toString(), parameters);
-        this.addQuery("match", q);
+        this.addQuery("matchWhere", q);
+
+        return this;
+    }
+
+    public QueryBuilder where(String nodeName, String nodeProperty, String value) {
+        String parameterBinding = this.createUniqueIdentifierName();
+
+        String queryTemplate = String.format("WHERE %s.%s = {%s}", nodeName, nodeProperty, parameterBinding);
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put(parameterBinding, value);
+
+        Query q = new Query(queryTemplate, parameters);
+        this.addQuery("matchWhere", q);
+
+        return this;
+    }
+
+    public QueryBuilder where(String nodeName, String nodeProperty, String operator, String value) {
+        String parameterBinding = this.createUniqueIdentifierName();
+
+        String queryTemplate = String.format("WHERE %s.%s %s {%s}", nodeName, nodeProperty, operator, parameterBinding);
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put(parameterBinding, value);
+
+        Query q = new Query(queryTemplate, parameters);
+        this.addQuery("matchWhere", q);
+
+        return this;
+    }
+
+    public QueryBuilder andWhere(String nodeName, String nodeProperty, String value) {
+        String parameterBinding = this.createUniqueIdentifierName();
+
+        String queryTemplate = String.format("AND %s.%s = {%s}", nodeName, nodeProperty, parameterBinding);
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put(parameterBinding, value);
+
+        Query q = new Query(queryTemplate, parameters);
+        this.addQuery("matchWhere", q);
+
+        return this;
+    }
+
+    public QueryBuilder andWhere(String nodeName, String nodeProperty, String operator, String value) {
+        String parameterBinding = this.createUniqueIdentifierName();
+
+        String queryTemplate = String.format("AND %s.%s %s {%s}", nodeName, nodeProperty, operator, parameterBinding);
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put(parameterBinding, value);
+
+        Query q = new Query(queryTemplate, parameters);
+        this.addQuery("matchWhere", q);
+
+        return this;
+    }
+
+    public QueryBuilder orWhere(String nodeName, String nodeProperty, String value) {
+        String parameterBinding = this.createUniqueIdentifierName();
+
+        String queryTemplate = String.format("OR %s.%s = {%s}", nodeName, nodeProperty, parameterBinding);
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put(parameterBinding, value);
+
+        Query q = new Query(queryTemplate, parameters);
+        this.addQuery("matchWhere", q);
+
+        return this;
+    }
+
+    public QueryBuilder orWhere(String nodeName, String nodeProperty, String operator, String value) {
+        String parameterBinding = this.createUniqueIdentifierName();
+
+        String queryTemplate = String.format("OR %s.%s %s {%s}", nodeName, nodeProperty, operator, parameterBinding);
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put(parameterBinding, value);
+
+        Query q = new Query(queryTemplate, parameters);
+        this.addQuery("matchWhere", q);
 
         return this;
     }
@@ -156,7 +230,7 @@ public class QueryBuilder {
      * @param newType
      * @return
      */
-    public QueryBuilder setsNodeLabel(String nodeName, String newType) {
+    public QueryBuilder setLabel(String nodeName, String newType) {
         StringBuilder queryTemplate = new StringBuilder("SET ");
         queryTemplate.append(String.format("%s:`%s`", nodeName, newType));
         Query q = new Query(queryTemplate.toString(), new HashMap<>());
@@ -174,12 +248,11 @@ public class QueryBuilder {
      * @param propertyValue
      * @return
      */
-    public QueryBuilder sets(String nodeName, String propertyName, String propertyValue) {
+    public QueryBuilder set(String nodeName, String propertyName, String propertyValue) {
         String parameterBinding = this.createUniqueIdentifierName();
 
         String queryTemplate = String.format("SET %s.%s = {%s}", nodeName, propertyName, parameterBinding);
         Map<String, Object> parameters = new HashMap<>();
-
         // We create a unique parameter binding name for each appended parameters.
         parameters.put(parameterBinding, propertyValue);
 
