@@ -95,6 +95,17 @@ public class QueryBuilder {
         return finalQuery;
     }
 
+    /**
+     * Creates and appends a basic MATCH query to the QueryBuilder.
+     *
+     * Returns self making the builder chainable.
+     *
+     * @param nodeName
+     * @param nodeType
+     * @param wheres
+     * @param parameters
+     * @return
+     */
     public QueryBuilder matches(String nodeName, String nodeType, Collection<String> wheres, Map<String, Object> parameters) {
         StringBuilder queryTemplate = new StringBuilder("MATCH");
         queryTemplate.append(" (");
@@ -133,6 +144,23 @@ public class QueryBuilder {
         Query q = new Query(queryTemplate.toString(), parameters);
         this.addQuery("match", q);
 
+        return this;
+    }
+
+    /**
+     * Sets the label of the specified node.
+     *
+     * Returns self making the builder chainable.
+     *
+     * @param nodeName
+     * @param newType
+     * @return
+     */
+    public QueryBuilder setsNodeLabel(String nodeName, String newType) {
+        StringBuilder queryTemplate = new StringBuilder("SET ");
+        queryTemplate.append(String.format("%s:`%s`", nodeName, newType));
+        Query q = new Query(queryTemplate.toString(), new HashMap<>());
+        this.addQuery("set", q);
         return this;
     }
 }
