@@ -163,4 +163,28 @@ public class QueryBuilder {
         this.addQuery("set", q);
         return this;
     }
+
+    /**
+     * Sets a property of a node.
+     *
+     * Returns self, making the builder chainable.
+     *
+     * @param nodeName
+     * @param propertyName
+     * @param propertyValue
+     * @return
+     */
+    public QueryBuilder sets(String nodeName, String propertyName, String propertyValue) {
+        String parameterBinding = this.createUniqueIdentifierName();
+
+        String queryTemplate = String.format("SET %s.%s = {%s}", nodeName, propertyName, parameterBinding);
+        Map<String, Object> parameters = new HashMap<>();
+
+        // We create a unique parameter binding name for each appended parameters.
+        parameters.put(parameterBinding, propertyValue);
+
+        Query q = new Query(queryTemplate, parameters);
+        this.addQuery("set", q);
+        return this;
+    }
 }
