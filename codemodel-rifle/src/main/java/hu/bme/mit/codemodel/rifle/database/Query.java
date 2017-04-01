@@ -9,10 +9,6 @@ public class Query {
 
     public Query() {}
 
-    public Query(String template) {
-        this.statementTemplate = template;
-    }
-
     public Query(String template, Map<String, Object> parameters) {
         this.statementTemplate = template;
         this.statementParameters = parameters;
