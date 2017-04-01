@@ -299,15 +299,14 @@ public class QueryBuilder {
      * @return
      */
     public QueryBuilder setLabel(String nodeName, String newType) {
-        StringBuilder queryTemplate = new StringBuilder("SET ");
-        queryTemplate.append(String.format("%s:`%s`", nodeName, newType));
-        Query q = new Query(queryTemplate.toString(), new HashMap<>());
+        String queryTemplate = String.format("SET %s:%s", nodeName, newType);
+        Query q = new Query(queryTemplate, new HashMap<>());
         this.addQuery("set", q);
         return this;
     }
 
     /**
-     * Sets a property of a node.
+     * Sets a property value of a node.
      *
      * Returns self, making the builder chainable.
      *
