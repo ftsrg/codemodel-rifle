@@ -143,6 +143,14 @@ public class QueryBuilder {
         return this;
     }
 
+    /**
+     * Adds a where statement to the query.
+     *
+     * @param nodeName
+     * @param nodeProperty
+     * @param value
+     * @return
+     */
     public QueryBuilder where(String nodeName, String nodeProperty, String value) {
         String parameterBinding = this.createUniqueIdentifierName();
 
@@ -156,6 +164,15 @@ public class QueryBuilder {
         return this;
     }
 
+    /**
+     * Adds a where statement to the query with a custom operator.
+     *
+     * @param nodeName
+     * @param nodeProperty
+     * @param operator
+     * @param value
+     * @return
+     */
     public QueryBuilder where(String nodeName, String nodeProperty, String operator, String value) {
         String parameterBinding = this.createUniqueIdentifierName();
 
@@ -169,6 +186,14 @@ public class QueryBuilder {
         return this;
     }
 
+    /**
+     * Adds an additional where statement to the query with the AND logical operator.
+     *
+     * @param nodeName
+     * @param nodeProperty
+     * @param value
+     * @return
+     */
     public QueryBuilder andWhere(String nodeName, String nodeProperty, String value) {
         String parameterBinding = this.createUniqueIdentifierName();
 
@@ -182,6 +207,15 @@ public class QueryBuilder {
         return this;
     }
 
+    /**
+     * Adds an additional where statement to the query with the AND logical operator with a custom operator.
+     *
+     * @param nodeName
+     * @param nodeProperty
+     * @param operator
+     * @param value
+     * @return
+     */
     public QueryBuilder andWhere(String nodeName, String nodeProperty, String operator, String value) {
         String parameterBinding = this.createUniqueIdentifierName();
 
@@ -195,6 +229,14 @@ public class QueryBuilder {
         return this;
     }
 
+    /**
+     * Adds an additional where statement to the query with the OR logical operator.
+     *
+     * @param nodeName
+     * @param nodeProperty
+     * @param value
+     * @return
+     */
     public QueryBuilder orWhere(String nodeName, String nodeProperty, String value) {
         String parameterBinding = this.createUniqueIdentifierName();
 
@@ -208,12 +250,38 @@ public class QueryBuilder {
         return this;
     }
 
+    /**
+     * Adds an additional where statement to the query with the OR logical operator with a custom operator.
+     *
+     * @param nodeName
+     * @param nodeProperty
+     * @param operator
+     * @param value
+     * @return
+     */
     public QueryBuilder orWhere(String nodeName, String nodeProperty, String operator, String value) {
         String parameterBinding = this.createUniqueIdentifierName();
 
         String queryTemplate = String.format("OR %s.%s %s {%s}", nodeName, nodeProperty, operator, parameterBinding);
         Map<String, Object> parameters = new HashMap<>();
         parameters.put(parameterBinding, value);
+
+        Query q = new Query(queryTemplate, parameters);
+        this.addQuery("matchWhere", q);
+
+        return this;
+    }
+
+    /**
+     * Adds a where statement for finding a node by id.
+     *
+     * @param nodeName
+     * @param id
+     * @return
+     */
+    public QueryBuilder whereId(String nodeName, int id) {
+        String queryTemplate = String.format("WHERE id(%s) = %d", nodeName, id);
+        Map<String, Object> parameters = new HashMap<>();
 
         Query q = new Query(queryTemplate, parameters);
         this.addQuery("matchWhere", q);
