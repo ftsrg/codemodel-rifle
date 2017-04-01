@@ -75,11 +75,11 @@ public class QueryBuilder {
         }
     }
 
-    protected String createUniqueIdentifierName() {
+    public String createUniqueIdentifierName() {
         return "_" + UUID.randomUUID().toString().replace("-", "");
     }
 
-    protected String createUniqueIdentifierNameWithType(String type) {
+    public String createUniqueIdentifierNameWithType(String type) {
         return this.createUniqueIdentifierName() + ":" + type;
     }
 
@@ -95,20 +95,15 @@ public class QueryBuilder {
         return finalQuery;
     }
 
-    public QueryBuilder matches(String node, Collection<String> wheres, Map<String, Object> parameters) {
+    public QueryBuilder matches(String nodeName, String nodeType, Collection<String> wheres, Map<String, Object> parameters) {
         StringBuilder queryTemplate = new StringBuilder("MATCH");
         queryTemplate.append(" (");
 
-        // If the node specification contains a : that means we have a node type value specified, e.g.:
-        // MATCH (n:CompilationUnit) ...
-        if (node.contains(":")) {
-            String nodeType = node.split(":")[1];
-            node = this.createUniqueIdentifierNameWithType(nodeType);
-        } else {
-            node = this.createUniqueIdentifierName();
-        }
+        queryTemplate.append(nodeName);
 
-        queryTemplate.append(node);
+        if (nodeType != null) {
+            queryTemplate.append(":" + nodeType);
+        }
 
         queryTemplate.append(") ");
 
