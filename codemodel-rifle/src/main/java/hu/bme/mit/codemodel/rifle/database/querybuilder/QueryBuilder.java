@@ -321,4 +321,19 @@ public class QueryBuilder {
         this.addQuery("set", q);
         return this;
     }
+
+    /**
+     * Creates a node.
+     *
+     * @param nodeName
+     * @return
+     */
+    public QueryBuilder create(String nodeName) {
+        String queryTemplate = String.format("CREATE (%s)", nodeName);
+
+        Query q = new Query(queryTemplate, new HashMap<>());
+        this.addQuery("create", q);
+
+        return this;
+    }
 }
