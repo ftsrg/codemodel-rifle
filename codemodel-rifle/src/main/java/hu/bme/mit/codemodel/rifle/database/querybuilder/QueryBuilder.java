@@ -1,4 +1,4 @@
-package hu.bme.mit.codemodel.rifle.database;
+package hu.bme.mit.codemodel.rifle.database.querybuilder;
 
 import java.util.*;
 
@@ -59,7 +59,7 @@ public class QueryBuilder {
      *
      * @throws IllegalArgumentException
      */
-    public void addQuery(String queryTypeName, Query query) {
+    protected void addQuery(String queryTypeName, Query query) {
         try {
             this.queriesMappedByType.get(queryTypeName).add(query);
         } catch (ClassCastException e) {
@@ -76,6 +76,14 @@ public class QueryBuilder {
         }
     }
 
+    protected String createUniqueIdentifierName() {
+        return "_" + UUID.randomUUID().toString().replace("-", "");
+    }
+
+    protected String createUniqueIdentifierNameWithType(String type) {
+        return this.createUniqueIdentifierName() + ":" + type;
+    }
+
     public Query getQuery() {
         Query finalQuery = new Query();
 
@@ -86,5 +94,50 @@ public class QueryBuilder {
         }
 
         return finalQuery;
+    }
+
+    public QueryBuilder matches(Collection<String> nodes, Collection<String> wheres, Map<String, Object> parameters) {
+        StringBuilder queryTemplate = new StringBuilder("MATCH");
+        queryTemplate.append(" (");
+
+        // Iterating over nodes to set unique identifier names.
+        for (String node : nodes) {
+
+            // If the node spcification contains a : that means we have a node type value specified, e.g.:
+            // MATCH (n:CompilationUnit) ...
+            if (node.contains(":")) {
+                String nodeType = node.split(":")[1];
+                node = this.createUniqueIdentifierNameWithType(nodeType);
+            } else {
+                node = this.createUniqueIdentifierName();
+            }
+
+            queryTemplate.append(node);
+        }
+
+        queryTemplate.append(") ");
+
+        // Appending WHERE statements to the query.
+        if (! wheres.isEmpty()) {
+            queryTemplate.append("WHERE");
+
+            for (String where : wheres) {
+                queryTemplate.append(where);
+            }
+        }
+
+        // Parameters names' (stored as keys in the map) should be unique,
+        // so we remove the parameter from the map by key,
+        // create a new unique name to them, and put
+        // them back to the parameters map.
+        for (Map.Entry<String, Object> parameter : parameters.entrySet()) {
+            String uniqueParameterKey = this.createUniqueIdentifierName();
+            parameters.put(uniqueParameterKey, parameters.remove(parameter.getKey()));
+        }
+
+        Query q = new Query(queryTemplate.toString(), parameters);
+        this.addQuery("match", q);
+
+        return this;
     }
 }

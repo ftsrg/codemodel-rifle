@@ -5,6 +5,8 @@ import java.util.*;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import hu.bme.mit.codemodel.rifle.database.querybuilder.Query;
+import hu.bme.mit.codemodel.rifle.database.querybuilder.QueryBuilder;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.driver.v1.StatementResult;
 import org.neo4j.driver.v1.Transaction;
@@ -56,6 +58,11 @@ public class ASTScopeProcessor {
     protected final BlockingQueue<QueueItem> processingQueue = new LinkedBlockingQueue<>();
 
     /**
+     * QueryBuilder used during parsing a file.
+     */
+    protected final QueryBuilder queryBuilder = new QueryBuilder();
+
+    /**
      * Internal class for processing.
      */
     protected class QueueItem {
@@ -70,6 +77,13 @@ public class ASTScopeProcessor {
         }
     }
 
+    /**
+     * Default constructor.
+     *
+     * @param dbServices
+     * @param parsedFilePath
+     * @param parserWithLocation
+     */
     public ASTScopeProcessor(DbServices dbServices, String parsedFilePath, ParserWithLocation parserWithLocation) {
         this.dbServices = dbServices;
         this.parsedFilePath = parsedFilePath;

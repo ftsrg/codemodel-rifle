@@ -2,6 +2,7 @@ package hu.bme.mit.codemodel.rifle.database;
 
 import java.util.Map;
 
+import hu.bme.mit.codemodel.rifle.database.querybuilder.Query;
 import org.neo4j.driver.v1.Driver;
 import org.neo4j.driver.v1.Session;
 import org.neo4j.driver.v1.StatementResult;

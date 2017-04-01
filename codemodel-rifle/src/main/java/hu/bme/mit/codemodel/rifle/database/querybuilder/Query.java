@@ -1,4 +1,4 @@
-package hu.bme.mit.codemodel.rifle.database;
+package hu.bme.mit.codemodel.rifle.database.querybuilder;
 
 import java.util.HashMap;
 import java.util.Map;
