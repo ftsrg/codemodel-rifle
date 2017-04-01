@@ -271,8 +271,11 @@ public class QueryBuilder {
      * @return
      */
     public QueryBuilder whereId(String nodeName, long id) {
-        String queryTemplate = String.format("WHERE id(`%s`) = `%d`", nodeName, id);
+        String parameterBinding = this.createUniqueIdentifierName();
+
+        String queryTemplate = String.format("WHERE id(`%s`) = {`%s`}", nodeName, parameterBinding);
         Map<String, Object> parameters = new HashMap<>();
+        parameters.put(parameterBinding, id);
 
         Query q = new Query(queryTemplate, parameters);
         this.addQuery("matchWhere", q);

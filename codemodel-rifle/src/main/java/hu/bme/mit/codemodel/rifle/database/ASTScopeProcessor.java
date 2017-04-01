@@ -114,23 +114,24 @@ public class ASTScopeProcessor {
         }
     }
 
+    /**
+     * Creates the file path node with the label CompilationUnit.
+     *
+     * @param sessionId
+     */
     protected void createFilePathNode(String sessionId) {
         Node filePathNode = this.findOrCreate(parsedFilePath);
+        String nodeName = this.queryBuilder.createUniqueIdentifierName();
 
-        dbServices.execute(String.format(
-            "MATCH (n)" +
-                "WHERE id(n) = %d " +
-                "SET n :`%s`" +
-                "SET n.%s = '%s'" +
-                "SET n.%s = '%s'",
+        this.queryBuilder
+            .match(nodeName)
+            .whereId(nodeName, filePathNode.id())
+            .setLabel(nodeName, "CompilationUnit")
+            .set(nodeName, "parsedFilePath", parsedFilePath)
+            .set(nodeName, "session", sessionId);
 
-            filePathNode.id(),
-            "CompilationUnit",
-            "parsedFilePath",
-            parsedFilePath,
-            "session",
-            sessionId
-        ));
+        Query q = this.queryBuilder.getQuery();
+        this.dbServices.execute(q.getStatementTemplate(), q.getStatementParameters());
     }
 
     protected void process(QueueItem queueItem, String sessionId) {

@@ -52,4 +52,11 @@ public class Query {
         this.statementTemplate = builder.toString();
         this.statementParameters.putAll(parameters);
     }
+
+    /**
+     * @return String
+     */
+    public String toString() {
+        return this.statementTemplate;
+    }
 }
