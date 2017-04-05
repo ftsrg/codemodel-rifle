@@ -37,8 +37,8 @@ public class DbServices {
     }
 
     public StatementResult execute(Query q) {
-        return this.transaction.run(q.getStatementTemplate(), q.getStatementParameters());
-    };
+        return this.execute(q.getStatementTemplate(), q.getStatementParameters());
+    }
 
     public GraphDatabaseService getUnderlyingDatabaseService() {
         if (driver instanceof EmbeddedTestkitDriver) {

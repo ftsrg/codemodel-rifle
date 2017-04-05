@@ -5,12 +5,11 @@ import java.util.*;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import hu.bme.mit.codemodel.rifle.database.querybuilder.Node;
 import hu.bme.mit.codemodel.rifle.database.querybuilder.Query;
 import hu.bme.mit.codemodel.rifle.database.querybuilder.QueryBuilder;
 import org.neo4j.driver.v1.Transaction;
-import org.neo4j.driver.v1.types.Node;
 
-import com.google.common.base.Preconditions;
 import com.shapesecurity.functional.Pair;
 import com.shapesecurity.functional.data.ConcatList;
 import com.shapesecurity.functional.data.Either;
@@ -22,56 +21,51 @@ import com.shapesecurity.shift.parser.ParserWithLocation;
 import com.shapesecurity.shift.scope.Scope;
 
 /**
- * After processing, the AST becomes an ASG.
+ * After processing, the parsed AST becomes an ASG.
  */
 public class ASTScopeProcessor {
     /**
      * DbServices instance for branch.
      */
-    protected final DbServices dbServices;
+    private final DbServices dbServices;
 
     /**
      * Path of the parsed file.
      */
-    protected final String parsedFilePath;
+    private final String parsedFilePath;
 
     /**
      * A Shape's parser with location.
      */
-    protected final ParserWithLocation parserWithLocation;
+    private final ParserWithLocation parserWithLocation;
 
     /**
      * AST items that are already traversed and processed.
      */
-    protected final Map<Object, Object> processedAstItems = new IdentityHashMap<>();
+    private final Map<Object, Object> processedAstItems = new IdentityHashMap<>();
 
     /**
      * AST objects with ASG nodes.
      */
-    protected final Map<Object, String> objectsWithAsgNodeIds = new HashMap<>();
+    private final Map<Object, Node> objectsWithAsgNodes = new HashMap<>();
 
     /**
      * The processing queue.
      */
-    protected final BlockingQueue<QueueItem> processingQueue = new LinkedBlockingQueue<>();
-
-    /**
-     * QueryBuilder used during parsing a file.
-     */
-    protected final QueryBuilder queryBuilder = new QueryBuilder();
+    private final BlockingQueue<QueueItem> processingQueue = new LinkedBlockingQueue<>();
 
     /**
      * Internal class for processing.
      */
     protected class QueueItem {
-        public Object parent;
-        public String predicate;
-        public Object node;
+        Object subject;
+        Object parent;
+        String label;
 
-        public QueueItem(Object parent, String predicate, Object node) {
+        QueueItem(Object subject, Object parent, String label) {
+            this.subject = subject;
             this.parent = parent;
-            this.predicate = predicate;
-            this.node = node;
+            this.label = label;
         }
     }
 
@@ -97,21 +91,27 @@ public class ASTScopeProcessor {
      * @param sessionId
      */
     public void processScope(Scope scope, String sessionId) {
-        try (Transaction tx = dbServices.beginTx()) {
-            this.createFilePathNode(sessionId);
-            processingQueue.add(new QueueItem(null, null, scope));
+        this.createFilePathNode(sessionId);
+        processingQueue.add(new QueueItem(scope, null, null));
 
+        try {
             while (!processingQueue.isEmpty()) {
                 QueueItem queueItem = processingQueue.take();
                 process(queueItem, sessionId);
             }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
-            Query q = this.queryBuilder.getQuery();
-            dbServices.execute(q.getStatementTemplate(), q.getStatementParameters());
-            this.queryBuilder.clearBuilder();
+        try (Transaction tx = dbServices.beginTx()) {
+            List<Query> queriesToRun = QueryBuilder.getQueries(this.objectsWithAsgNodes.values());
+            for (Query q : queriesToRun) {
+                dbServices.execute(q);
+                System.out.println(q.toString());
+            }
 
             tx.success();
-        } catch (InterruptedException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -121,38 +121,53 @@ public class ASTScopeProcessor {
      *
      * @param sessionId
      */
-    protected void createFilePathNode(String sessionId) {
-        this.findOrCreate(parsedFilePath, new String[]{ "CompilationUnit" }, new String[]{ "parsedFilePath:" + parsedFilePath, "session:" + sessionId });
-
-//        Query q = this.queryBuilder.getQuery();
-//        this.dbServices.execute(q.getStatementTemplate(), q.getStatementParameters());
+    private void createFilePathNode(String sessionId) {
+        this.findOrCreate(parsedFilePath, new String[]{ "CompilationUnit" }, new String[]{ "parsedFilePath:" +
+            parsedFilePath, "session:" + sessionId });
     }
 
-    protected void process(QueueItem queueItem, String sessionId) {
+    /**
+     * Processes an item from the queue, creates the ASG nodes, sets labels, properties and connections.
+     *
+     * @param queueItem
+     * @param sessionId
+     */
+    private void process(QueueItem queueItem, String sessionId) {
+        Object subject = queueItem.subject;
         Object parent = queueItem.parent;
-        String predicate = queueItem.predicate;
-        Object node = queueItem.node;
+        String label = queueItem.label;
 
         // TODO for presentation reasons the Nil node is hidden
-        if (node == null) {
+        if (subject == null) {
             return;
         }
 
-        if (isPrimitive(node.getClass())) {
-            storeProperty(parent, predicate, node);
-        } else if (isCollection(node)) {
-            handleCollection(parent, predicate, node, sessionId);
-        } else if (node instanceof Maybe || node instanceof Either) {
-            handleFunctional(parent, predicate, node, sessionId);
-        } else if (node.getClass().getName().startsWith("com.shapesecurity")) {
-            handleAstNode(parent, predicate, node, sessionId);
+        if (isPrimitive(subject.getClass())) {
+            // If it is a primitive type, we have to simply store it with its parent.
+            this.storeProperty(parent, label, subject);
+        } else if (isCollection(subject)) {
+            // If it is a collection, we have to open it up and store all members.
+            this.processCollection(subject, parent, label, sessionId);
+        } else if (subject instanceof Maybe || subject instanceof Either) {
+            // If it is a functional (if, else, etc.), we have to look at each branches.
+            this.processFunctional(subject, parent, label, sessionId);
+        } else if (subject.getClass().getName().startsWith("com.shapesecurity")) {
+            // In every other general cases, we have to handle it as an AST node.
+            this.processAstNode(subject, parent, label, sessionId);
         } else {
-            System.err.println("WTF");
+            System.err.println("Unexpected object type.");
         }
     }
 
-    // http://stackoverflow.com/questions/209366/how-can-i-generically-tell-if-a-java-class-is-a-primitive-type
-    public static boolean isPrimitive(Class c) {
+    /**
+     * Tells if a Class is primitive. We consider String as primitive as well.
+     * <p>
+     * See: http://stackoverflow.com/questions/209366/how-can-i-generically-tell-if-a-java-class-is-a-primitive-type
+     *
+     * @param c
+     * @return
+     */
+    private static boolean isPrimitive(Class c) {
         if (c.isPrimitive()) {
             return true;
         } else if (c == Byte.class
@@ -162,156 +177,180 @@ public class ASTScopeProcessor {
             || c == Float.class
             || c == Double.class
             || c == Boolean.class
-            || c == Character.class) {
-            return true;
-        } else if (c == String.class) {
+            || c == Character.class
+            || c == String.class
+            ) {
             return true;
         } else {
             return false;
         }
     }
 
-    protected static boolean isCollection(Object node) {
-        return node instanceof ImmutableList
-            || node instanceof Map
-            || node instanceof HashTable
-            || node instanceof ConcatList;
+    /**
+     * Tells if an Object is a Collection or not.
+     *
+     * @param subject
+     * @return
+     */
+    private static boolean isCollection(Object subject) {
+        return subject instanceof ImmutableList
+            || subject instanceof Map
+            || subject instanceof HashTable
+            || subject instanceof ConcatList;
     }
 
-    protected void handleCollection(Object parent, String predicate, Object node, String sessionId) {
-        if (this.processedAstItems.containsKey(node)) {
+    /**
+     * Processes a collection.
+     *
+     * @param subject
+     * @param parent
+     * @param label
+     * @param sessionId
+     */
+    private void processCollection(Object subject, Object parent, String label, String sessionId) {
+        if (this.processedAstItems.containsKey(subject)) {
             return;
         }
 
-        this.processedAstItems.put(node, node);
+        this.processedAstItems.put(subject, subject);
 
-        if (node instanceof ImmutableList || node instanceof ConcatList) {
-            Iterable list = (Iterable)node;
+        if (subject instanceof ImmutableList || subject instanceof ConcatList) {
+            Iterable list = (Iterable)subject;
 
             // id -- [field] -> list
-            this.storeReference(parent, predicate, list);
+            this.storeReference(parent, list, label);
             this.storeType(list, "List");
-            this.storeReference(parsedFilePath, "contains", list);
+            this.storeReference(parsedFilePath, list, "contains");
             this.handleIfInSession(sessionId, list);
 
             final Iterator iterator = list.iterator();
             int i = 0;
-
             Object prev = null;
-
             while (iterator.hasNext()) {
                 Object el = iterator.next();
-                this.processingQueue.add(new QueueItem(list, Integer.toString(i), el));
+                this.processingQueue.add(new QueueItem(el, list, Integer.toString(i)));
 
                 if (prev != null) {
-                    this.processingQueue.add(new QueueItem(prev, "_next", el));
+                    this.processingQueue.add(new QueueItem(el, prev, "_next"));
                 }
                 prev = el;
 
                 // connect the children directly
-                this.processingQueue.add(new QueueItem(parent, predicate, el));
+                this.processingQueue.add(new QueueItem(el, parent, label));
 
                 i++;
             }
 
-            this.storeReference(list, "last", prev);
-//            createEndNode(list, sessionId);
-        } else if (node instanceof Map) {
-            Map map = (Map)node;
+            this.storeReference(list, prev, "last");
+            this.createEndNode(list, sessionId);
+        } else if (subject instanceof Map) {
+            Map map = (Map)subject;
 
             if (!map.isEmpty()) {
                 // id -- [field] -> table
-                this.storeReference(parent, predicate, map);
-//                storeType(map, node.getClass().getSimpleName());
+                this.storeReference(parent, map, label);
+//                this.storeType(map, parent.getClass().getSimpleName());
                 this.storeType(map, "Map");
-                this.storeReference(parsedFilePath, "contains", map);
-                handleIfInSession(sessionId, map);
+                this.storeReference(parsedFilePath, map, "contains");
+                this.handleIfInSession(sessionId, map);
 
                 for (Object el : map.entrySet()) {
                     Map.Entry entry = (Map.Entry)el;
-                    this.processingQueue.add(new QueueItem(map, entry.getKey().toString(), entry.getValue()));
+                    this.processingQueue.add(new QueueItem(entry.getValue(), map, entry.getKey().toString()));
                 }
             }
-
-        } else if (node instanceof HashTable) {
-
-            HashTable table = (HashTable)node;
+        } else if (subject instanceof HashTable) {
+            HashTable table = (HashTable)subject;
 
             if (table.length > 0) {
                 // id -- [field] -> table
-                this.storeReference(parent, predicate, table);
+                this.storeReference(parent, table, label);
                 this.storeType(table, "HashTable");
-                this.storeReference(parsedFilePath, "contains", table);
+                this.storeReference(parsedFilePath, table, "contains");
                 this.handleIfInSession(sessionId, table);
 
                 for (Object el : table.entries()) {
                     Pair pair = (Pair)el;
-                    this.processingQueue.add(new QueueItem(table, pair.left().toString(), pair.right()));
+                    this.processingQueue.add(new QueueItem(pair.right(), table, pair.left().toString()));
                 }
             }
-
         }
     }
 
-    private void handleFunctional(Object parent, String predicate, Object node, String sessionId) {
-        if (this.processedAstItems.containsKey(node)) {
+    /**
+     * Processes a functional item like an if.
+     *
+     * @param subject
+     * @param parent
+     * @param label
+     * @param sessionId
+     */
+    private void processFunctional(Object subject, Object parent, String label, String sessionId) {
+        if (this.processedAstItems.containsKey(subject)) {
             return;
         }
 
-        this.processedAstItems.put(node, node);
+        this.processedAstItems.put(subject, subject);
 
-        if (node instanceof Maybe) {
-            Maybe el = (Maybe)node;
+        if (subject instanceof Maybe) {
+            Maybe el = (Maybe)subject;
             if (el.isJust()) {
-                this.processingQueue.add(new QueueItem(parent, predicate, el.fromJust()));
+                this.processingQueue.add(new QueueItem(el.fromJust(), parent, label));
 //            } else {
 //                processingQueue.add(new QueueItem(node, fieldName, "null"));
             }
-        } else if (node instanceof Either) {
-            Either el = (Either)node;
+        } else if (subject instanceof Either) {
+            Either el = (Either)subject;
             if (el.isLeft()) {
-                this.handleFunctional(parent, predicate, el.left(), sessionId);
+                this.processFunctional(el.left(), parent, label, sessionId);
             }
             if (el.isRight()) {
-                this.handleFunctional(parent, predicate, el.right(), sessionId);
+                this.processFunctional(el.right(), parent, label, sessionId);
             }
         }
     }
 
-    protected void handleAstNode(Object parent, String predicate, Object node, String sessionId) {
+    /**
+     * Processes an AST node.
+     *
+     * @param subject
+     * @param parent
+     * @param sessionId
+     */
+    protected void processAstNode(Object subject, Object parent, String label, String sessionId) {
         if (parent != null) {
-            this.storeReference(parent, predicate, node);
+            this.storeReference(parent, subject, label);
         }
 
-        if (this.processedAstItems.containsKey(node)) {
+        if (this.processedAstItems.containsKey(subject)) {
             return;
         }
 
-        this.processedAstItems.put(node, node);
+        this.processedAstItems.put(subject, subject);
 
-//        createEndNode(node, sessionId);
+        createEndNode(subject, sessionId);
 
-        this.storeReference(parsedFilePath, "contains", node);
-        this.handleIfInSession(sessionId, node);
-        this.storeLocation(node);
+        this.storeReference(parsedFilePath, subject, "contains");
+        this.handleIfInSession(sessionId, subject);
+        this.storeLocation(subject);
 
-        Class<?> nodeType = node.getClass();
+        Class<?> nodeType = subject.getClass();
 
-        this.storeType(node, nodeType.getSimpleName());
+        this.storeType(subject, nodeType.getSimpleName());
         // list superclasses, interfaces
         List<Class<?>> interfaces = Arrays.asList(nodeType.getInterfaces());
         interfaces.forEach(elem -> {
             final String interfaceName = elem.getSimpleName();
-            storeType(node, interfaceName);
+            storeType(subject, interfaceName);
 
             if (interfaceName.startsWith("Literal")) {
-                storeType(node, "Literal");
+                storeType(subject, "Literal");
             }
         });
 
         Class<?> superclass = nodeType.getSuperclass();
         while (superclass != Object.class) {
-            this.storeType(node, superclass.getSimpleName());
+            this.storeType(subject, superclass.getSimpleName());
             superclass = superclass.getSuperclass();
         }
 
@@ -325,25 +364,25 @@ public class ASTScopeProcessor {
 
 
                 try {
-                    Object o = field.get(node);
+                    Object o = field.get(subject);
                     if (fieldType.isEnum()) {
 
                         // processingQueue.add(new QueueItem(node, fieldName, o.toString()));
-                        this.storeProperty(node, fieldName, o.toString());
+                        this.storeProperty(subject, fieldName, o.toString());
 
                     } else if (o instanceof Node) {
 
-                        this.processingQueue.add(new QueueItem(node, fieldName, o));
+                        this.processingQueue.add(new QueueItem(o, subject, fieldName));
 
                     } else if (fieldType.getName().startsWith("com.shapesecurity.functional")) {
 
                         // TODO
-                        this.processingQueue.add(new QueueItem(node, fieldName, o));
+                        this.processingQueue.add(new QueueItem(o, subject, fieldName));
 
                     } else {
 
                         // TODO
-                        this.processingQueue.add(new QueueItem(node, fieldName, o));
+                        this.processingQueue.add(new QueueItem(o, subject, fieldName));
 
                     }
                 } catch (IllegalAccessException e) {
@@ -358,88 +397,141 @@ public class ASTScopeProcessor {
      * Since we are only iterating one AST, there is no way a Node from another graph is mislabeled.
      *
      * @param sessionId
-     * @param node
+     * @param subject
      */
-    protected void handleIfInSession(String sessionId, Object node) {
+    private void handleIfInSession(String sessionId, Object subject) {
         if (sessionId != null) {
-            String nodeId = this.findOrCreate(node);
-            this.queryBuilder.setLabel(nodeId, "Temp");
-            this.queryBuilder.set(nodeId, "session", sessionId);
+            Node node = this.findOrCreate(subject);
+            node.addLabel("Temp");
+            node.addProperty("session", sessionId);
         }
     }
 
-//    protected void createEndNode(Object node, String sessionId) {
-//        Object end = new Object();
-//        storeType(end, "End");
-//        storeReference(node, "_end", end);
-//        storeProperty(node, "session", sessionId);
-//        storeReference(this.parsedFilePath, "contains", end);
-//    }
-
-    protected void storeLocation(Object node) {
-        if (node instanceof com.shapesecurity.shift.ast.Node) {
-            Maybe<SourceSpan> location = parserWithLocation.getLocation((com.shapesecurity.shift.ast.Node)node);
+    /**
+     * Stores the location property of an AST object.
+     *
+     * @param subject
+     */
+    private void storeLocation(Object subject) {
+        if (subject instanceof com.shapesecurity.shift.ast.Node) {
+            Maybe<SourceSpan> location = parserWithLocation.getLocation((com.shapesecurity.shift.ast.Node)subject);
             if (location.isJust()) {
-                this.processingQueue.add(new QueueItem(node, "location", location.fromJust()));
+                this.processingQueue.add(new QueueItem(location.fromJust(), subject, "location"));
             }
         }
     }
 
-    protected String findOrCreate(Object subject) {
-        if (this.objectsWithAsgNodeIds.containsKey(subject)) {
-            return this.objectsWithAsgNodeIds.get(subject);
+    /**
+     * Finds or creates a Node object for the AST object.
+     *
+     * @param subject
+     * @return Node
+     */
+    private Node findOrCreate(Object subject) {
+        if (this.objectsWithAsgNodes.containsKey(subject)) {
+            return this.objectsWithAsgNodes.get(subject);
         } else {
-            String nodeId = this.queryBuilder.createUniqueIdentifierName();
-            this.queryBuilder.merge(nodeId);
-            this.objectsWithAsgNodeIds.put(subject, nodeId);
-            return nodeId;
+            Node node = new Node();
+            this.objectsWithAsgNodes.put(subject, node);
+            return node;
         }
     }
 
-    protected String findOrCreate(Object subject, String[] labels, String[] attributes) {
-        if (this.objectsWithAsgNodeIds.containsKey(subject)) {
-            return this.objectsWithAsgNodeIds.get(subject);
+    /**
+     * Finds or creates a Node object for the AST object with attributes.
+     *
+     * @param subject
+     * @param labels
+     * @param properties
+     * @return Node
+     */
+    private Node findOrCreate(Object subject, String[] labels, String[] properties) {
+        if (this.objectsWithAsgNodes.containsKey(subject)) {
+            return this.objectsWithAsgNodes.get(subject);
         } else {
-            String nodeId = this.queryBuilder.createUniqueIdentifierName();
-            this.queryBuilder.merge(nodeId, labels, attributes);
-            this.objectsWithAsgNodeIds.put(subject, nodeId);
-            return nodeId;
+            Node node = new Node();
+            Arrays.asList(labels).forEach(node::addLabel);
+            Arrays.asList(properties).forEach(property -> {
+                String[] propertySplit = property.split(":");
+                String propertyName = propertySplit[0];
+                String propertyValue = propertySplit[1];
+                node.addProperty(propertyName, propertyValue);
+            });
+            this.objectsWithAsgNodes.put(subject, node);
+            return node;
         }
     }
 
-    public void storeReference(Object subject, String predicate, Object object) {
-        Preconditions.checkNotNull(subject);
+    /**
+     * Stores a reference to another node.
+     *
+     * @param from
+     * @param to
+     * @param referenceLabel
+     */
+    private void storeReference(Object from, Object to, String referenceLabel) {
+        Node nodeFrom = this.findOrCreate(from);
+        Node nodeTo = this.findOrCreate(to);
 
-        String nodeIdA = this.findOrCreate(subject);
-        String nodeIdB = this.findOrCreate(object);
-
-        this.queryBuilder.mergeConnection(nodeIdA, nodeIdB, predicate);
+        nodeFrom.addReference(nodeTo, referenceLabel);
     }
 
-    public void storeProperty(Object subject, String predicate, Object value) {
-        Preconditions.checkNotNull(value);
+    /**
+     * Stores a property of an AST object.
+     *
+     * @param subject
+     * @param propertyName
+     * @param propertyValue
+     */
+    private void storeProperty(Object subject, String propertyName, Object propertyValue) {
+        if (subject == null) {
+            return;
+        }
 
-        String nodeId = findOrCreate(subject);
-        this.queryBuilder.set(nodeId, predicate, value.toString());
+        Node node = this.findOrCreate(subject);
+        node.addProperty(propertyName, propertyValue.toString());
     }
 
-    public void storeType(Object subject, String type) {
-        Preconditions.checkNotNull(type);
-        Preconditions.checkArgument(type.length() != 0);
-
-        String nodeId = findOrCreate(subject);
-        this.queryBuilder.setLabel(nodeId, type);
+    /**
+     * Stores the type of an AST object.
+     *
+     * @param subject
+     * @param type
+     */
+    private void storeType(Object subject, String type) {
+        Node node = this.findOrCreate(subject);
+        node.addLabel(type);
     }
 
-    // http://stackoverflow.com/questions/3567372/access-to-private-inherited-fields-via-reflection-in-java
-    protected List<Field> getAllFields(Class clazz) {
-        List<Field> fields = new ArrayList<Field>();
+    /**
+     * Creates and end node for the CFG.
+     *
+     * @param subject
+     * @param sessionId
+     */
+    private void createEndNode(Object subject, String sessionId) {
+        Object end = new Object();
+        this.storeType(end, "End");
+        this.storeReference(subject, end, "_end");
+        this.storeProperty(subject, "session", sessionId);
+        this.storeProperty(this.parsedFilePath, "contains", end);
+    }
 
-        fields.addAll(Arrays.asList(clazz.getDeclaredFields()));
+    /**
+     * Gets all (incl. private) fields of a class, and returns it in a list.
+     * <p>
+     * See: http://stackoverflow.com/questions/3567372/access-to-private-inherited-fields-via-reflection-in-java
+     *
+     * @param subjectClass
+     * @return List
+     */
+    private List<Field> getAllFields(Class subjectClass) {
+        List<Field> fields = new ArrayList<>();
+        fields.addAll(Arrays.asList(subjectClass.getDeclaredFields()));
 
-        Class superClazz = clazz.getSuperclass();
-        if (superClazz != null) {
-            fields.addAll(getAllFields(superClazz));
+        Class superClass = subjectClass.getSuperclass();
+        if (superClass != null) {
+            fields.addAll(getAllFields(superClass));
         }
 
         return fields;

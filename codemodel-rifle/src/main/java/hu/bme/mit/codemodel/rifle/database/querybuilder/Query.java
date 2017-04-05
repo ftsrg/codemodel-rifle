@@ -19,8 +19,6 @@ public class Query {
      */
     private Map<String, Object> statementParameters = new HashMap<>();
 
-    public Query() {}
-
     public Query(String template, Map<String, Object> parameters) {
         this.statementTemplate = template;
         this.statementParameters = parameters;
@@ -38,19 +36,6 @@ public class Query {
      */
     public Map<String, Object> getStatementParameters() {
         return statementParameters;
-    }
-
-    /**
-     * Appends a query to self.
-     *
-     * @param template
-     * @param parameters
-     */
-    public synchronized void append(String template, Map<String, Object> parameters) {
-        StringBuilder builder = new StringBuilder(Optional.ofNullable(this.statementTemplate).orElse(""));
-        builder.append(template);
-        this.statementTemplate = builder.toString();
-        this.statementParameters.putAll(parameters);
     }
 
     /**

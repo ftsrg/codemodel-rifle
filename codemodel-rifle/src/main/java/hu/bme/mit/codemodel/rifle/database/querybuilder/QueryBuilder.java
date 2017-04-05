@@ -1,279 +1,166 @@
 package hu.bme.mit.codemodel.rifle.database.querybuilder;
 
+import com.google.common.collect.Lists;
+
 import java.util.*;
 
 /**
- * Optimizing queries' count by merging multiple queries into one queriesMappedByType.
+ * Optimizing queries' count by merging multiple queries into one fewer.
  * <p>
- * Planning to do merging by file-level granularity.
+ * This custom QueryBuilder is built to support the ASTScopeProcessor making it more efficient.
+ * It is not intended to be a general Cypher query builder engine.
+ * <p>
+ * We hand over the nodes we built in the ASTScopeProcessor to the QueryBuilder,
+ * and the QueryBuilder generates efficient Cypher queries by merging and sorting,
+ * e.g.: all node label and property can be set in one query, why should they be separated?
+ * <p>
+ * We try to execute as few queries as possible while having a balance between
+ * query length and executed query number.
  */
 public class QueryBuilder {
-
-    protected Map<String, List<String>> nodesWithTypeSettings = new HashMap<>();
-    protected Map<String, List<String>> nodesWithPropertySettings = new HashMap<>();
-
     /**
-     * Queries are separated by parts, see:
-     * https://neo4j.com/docs/cypher-refcard/current/
+     * Settings to fine tune the builder.
      * <p>
-     * Every query type has an individual list in which queries are stored as a Query.
+     * Configures how many query body should be run in one query execution.
      */
-    public Map<String, List<Query>> queriesMappedByType = new HashMap<>();
+    private static int createNodesQueriesIterationCount = 20;
+//    private static int setRelationsQueriesIterationCount = 1;
 
     /**
-     * The builder is configurable by specifying the queriesMappedByType types and the ordering
-     * of the individual types.
+     * Creates a new query body for creating a node.
+     *
+     * @param node
+     * @return
+     */
+    private static Query createCreateNodeQueryBody(Node node) {
+        StringBuilder stringBuilder = new StringBuilder();
+
+        // (
+        stringBuilder.append("(");
+
+        // (`identifier`
+        stringBuilder.append(String.format("`%s`", node.getId()));
+
+        if (!node.getLabels().isEmpty()) {
+            // (`identifier`:
+            stringBuilder.append(":");
+
+            String labelsAsString = String.join(":", node.getLabels().stream().map(label -> String.format("`%s`",
+                label)).toArray(String[]::new));
+            // (`identifier`:`label1`:`label2`...
+            stringBuilder.append(labelsAsString);
+        }
+
+        Map<String, Object> statementParameters = new HashMap<>();
+        List<String> propertiesWithParameterBindings = new ArrayList<>();
+        if (!node.getProperties().isEmpty()) {
+            // (`identifier`:`label1`:`label2`...{
+            stringBuilder.append("{");
+
+            for (Map.Entry<String, Object> property : node.getProperties().entrySet()) {
+                String propertyName = property.getKey();
+                String parameterBindingKey = Utils.createUniqueIdentifierName();
+                String propertyString = String.format("`%s`:$`%s`", propertyName, parameterBindingKey);
+
+                Object propertyValue = property.getValue();
+                statementParameters.put(parameterBindingKey, propertyValue);
+
+                propertiesWithParameterBindings.add(propertyString);
+            }
+
+            stringBuilder.append(String.join(",", propertiesWithParameterBindings));
+
+            // (`identifier`:`label1`:`label2`...{`prop1`:$`prop1ParamBinding`,`prop2`:$`prop2ParamBinding`}
+            stringBuilder.append("}");
+        }
+
+        // We will use the below seen body with a CREATE
+        // (`identifier`:`label1`:`label2`...{`prop1`:$`prop1ParamBinding`',`prop2`:$`prop2ParamBinding`})
+        stringBuilder.append(")");
+
+        String statementTemplate = stringBuilder.toString();
+
+        return new Query(statementTemplate, statementParameters);
+    }
+
+    /**
+     * We assemble the create queries for every node.
      * <p>
-     * See: https://s3.amazonaws.com/artifacts.opencypher.org/railroad/Cypher.html
-     */
-    public final String[] QUERY_TYPES_AND_ORDERING = {
-        "merge",
-        "set",
-    };
-
-    protected void initialize() {
-        for (String queryTypeName : this.QUERY_TYPES_AND_ORDERING) {
-            this.queriesMappedByType.put(queryTypeName, new ArrayList<>());
-        }
-    }
-
-    /**
-     * At initializing the QueryBuilder, we initialize the individual query types' lists.
-     */
-    public QueryBuilder() {
-        this.initialize();
-    }
-
-    /**
-     * Add a new queriesMappedByType to the builder.
+     * We create query bodies with query parameters in the following form:
+     * (`identifier`:`label1`:`label2`...{`prop1`:'{`prop1ParamBinding`}',`prop2`:'{`prop2ParamBinding`}'})
+     * so we get a list of query bodies with the bound parameters.
      * <p>
-     * This method expects a queriesMappedByType type name *match, merge, etc, see above)
-     * and the queriesMappedByType itself as a full queriesMappedByType.
+     * This way we can configure later how many queries to run at once.
      *
-     * @param queryTypeName
-     * @param query
-     * @throws IllegalArgumentException
+     * @return List
      */
-    protected void addQuery(String queryTypeName, Query query) {
-        try {
-            this.queriesMappedByType.get(queryTypeName).add(query);
-            System.out.println(query.toString());
-        } catch (ClassCastException e) {
-            throw new IllegalArgumentException("The specified queryTypeName does not exist.");
-        }
+    private static List<Query> getCreateNodesQueryBodies(Collection<Node> nodes) {
+        List<Query> ret = new ArrayList<>();
+
+        nodes.forEach(node -> ret.add(createCreateNodeQueryBody(node)));
+
+        return ret;
     }
 
     /**
-     * Clear all queries from the builder.
+     * Creates a relationship query body between two nodes.
+     *
+     * @param from
+     * @param to
+     * @param relationshipLabel
+     * @return
      */
-    public void clearBuilder() {
-        for (Map.Entry<String, List<Query>> queryType : this.queriesMappedByType.entrySet()) {
-            queryType.getValue().clear();
-        }
+    private static Query createRelationQueryBetweenNodes(Node from, Node to, String relationshipLabel) {
+        String statementTemplate = String.format("MATCH(`from`{`id`:$`fromId`}),(`to`{`id`:$`toId`})CREATE(`from`)" +
+                "-[:`%s`]->(`to`)", relationshipLabel);
+
+        Map<String, Object> statementParameters = new HashMap<>();
+        statementParameters.put("fromId", from.getId());
+        statementParameters.put("toId", to.getId());
+
+        return new Query(statementTemplate, statementParameters);
     }
 
-    /**
-     * Creates a unique node identifier.
-     *
-     * @return String
-     */
-    public String createUniqueIdentifierName() {
-        return String.format("_%s", UUID.randomUUID().toString().replace("-", ""));
-    }
+    public static List<Query> getQueries(Collection<Node> nodes) {
+        List<Query> ret = new ArrayList<>();
 
-    /**
-     * Gets the query built in the query builder.
-     *
-     * @return Query
-     */
-    public Query getQuery() {
-        Query finalQuery = new Query();
+        // ===========================================
+        // CREATE THE NODES WITH LABELS AND PROPERTIES
+        // ===========================================
+        List<Query> createNodesQueryBodies = getCreateNodesQueryBodies(nodes);
+        // We slice up the query bodies' list by the configured number,
+        // so this many queries will be executed in one turn.
+        Lists.partition(createNodesQueryBodies, createNodesQueriesIterationCount).forEach(queryBodiesPartitionedList
+            -> {
+            String statementTemplate = "CREATE" + String.join(",", queryBodiesPartitionedList.stream().map
+                (Query::getStatementTemplate).toArray(String[]::new));
+            Map<String, Object> statementParameters = new HashMap<>();
+            queryBodiesPartitionedList.forEach(query -> statementParameters.putAll(query.getStatementParameters()));
 
-        for (Query q : this.queriesMappedByType.get("merge")) {
-            finalQuery.append(q.getStatementTemplate(), q.getStatementParameters());
-        }
-
-        for (Map.Entry<String, List<String>> nodeWithTypes : this.nodesWithTypeSettings.entrySet()) {
-            String[] types = Arrays.copyOf(nodeWithTypes.getValue().toArray(), nodeWithTypes.getValue().toArray()
-                .length, String[].class);
-            Query q = this.createSetLabelsQuery(nodeWithTypes.getKey(), types);
+            Query q = new Query(statementTemplate, statementParameters);
             System.out.println(q.toString());
-            finalQuery.append(q.getStatementTemplate(), q.getStatementParameters());
+            ret.add(q);
+        });
+
+
+        // =====================
+        // SET THE RELATIONSHIPS
+        // =====================
+        for (Node node : nodes) {
+            if (node.getReferences().isEmpty()) {
+                continue;
+            }
+
+            for (Map.Entry<Node, String> relation : node.getReferences().entrySet()) {
+                Node referencedNode = relation.getKey();
+                String referenceLabel = relation.getValue();
+
+                Query q = createRelationQueryBetweenNodes(node, referencedNode, referenceLabel);
+                System.out.println(q.toString());
+                ret.add(q);
+            }
         }
 
-        for (Map.Entry<String, List<String>> nodeWithProperties : this.nodesWithPropertySettings.entrySet()) {
-            String[] properties = Arrays.copyOf(nodeWithProperties.getValue().toArray(), nodeWithProperties.getValue
-                ().toArray().length, String[].class);
-            Query q = this.createSetPropertiesQuery(nodeWithProperties.getKey(), properties);
-            System.out.println(q.toString());
-            finalQuery.append(q.getStatementTemplate(), q.getStatementParameters());
-        }
-
-        System.out.println();
-        System.out.println();
-        System.out.println();
-        System.out.println();
-        System.out.println();
-        System.out.println(finalQuery.toString());
-
-        return finalQuery;
-    }
-
-    protected Query createSetLabelsQuery(String nodeId, String[] labels) {
-        String labelsAsString = String.join(":", Arrays.stream(labels).map(label -> String.format("`%s`", label))
-            .toArray(String[]::new));
-
-        String queryTemplate = String.format("SET `%s`:%s", nodeId, labelsAsString);
-        Query q = new Query(queryTemplate, new HashMap<>());
-        return q;
-    }
-
-    protected Query createSetPropertiesQuery(String nodeId, String[] properties) {
-        Map<String, Object> parameters = new HashMap<>();
-        List<String> propertiesWithParameterBindingKeys = new ArrayList<>();
-        for (String property : properties) {
-            String[] propertySplit = property.split(":");
-            String propertyName = propertySplit[0];
-
-            String parameterBindingKey = this.createUniqueIdentifierName();
-            String propertyValue = propertySplit[1];
-            parameters.put(parameterBindingKey, propertyValue);
-
-            String propertyString = String.format("`%s`.`%s` = {`%s`}", nodeId, propertyName, parameterBindingKey);
-            propertiesWithParameterBindingKeys.add(propertyString);
-        }
-
-        String queryTemplate = String.format("SET %s", String.join(", ",
-            propertiesWithParameterBindingKeys));
-        Query q = new Query(queryTemplate, parameters);
-        return q;
-    }
-
-    /**
-     * Sets a property value of a node.
-     * <p>
-     * Returns self, making the builder chainable.
-     *
-     * @param nodeId
-     * @param propertyName
-     * @param propertyValue
-     * @return
-     */
-    public QueryBuilder set(String nodeId, String propertyName, String propertyValue) {
-//        String parameterBinding = this.createUniqueIdentifierName();
-//
-//        String queryTemplate = String.format("SET `%s`.`%s` = {`%s`}", nodeId, propertyName, parameterBinding);
-//        Map<String, Object> parameters = new HashMap<>();
-//        // We create a unique parameter binding name for each appended parameters.
-//        parameters.put(parameterBinding, propertyValue);
-//
-//        Query q = new Query(queryTemplate, parameters);
-//        this.addQuery("set", q);
-//        return this;
-
-        if (!this.nodesWithPropertySettings.containsKey(nodeId)) {
-            List<String> properties = new ArrayList<>();
-            properties.add(String.format("%s:%s", propertyName, propertyValue));
-            this.nodesWithPropertySettings.put(nodeId, properties);
-        } else {
-            this.nodesWithPropertySettings.get(nodeId).add(String.format("%s:%s", propertyName, propertyValue));
-        }
-
-        return this;
-    }
-
-    /**
-     * Sets the label of the specified node.
-     * <p>
-     * Returns self making the builder chainable.
-     *
-     * @param nodeId
-     * @param newType
-     * @return
-     */
-    public QueryBuilder setLabel(String nodeId, String newType) {
-        if (!this.nodesWithTypeSettings.containsKey(nodeId)) {
-            List<String> list = new ArrayList<>();
-            list.add(newType);
-            this.nodesWithTypeSettings.put(nodeId, list);
-        } else {
-            this.nodesWithTypeSettings.get(nodeId).add(newType);
-        }
-
-        return this;
-    }
-
-    /**
-     * Creates a node with the given ID.
-     *
-     * @param nodeId
-     * @return
-     */
-    public QueryBuilder merge(String nodeId) {
-        String parameterBindingKey = this.createUniqueIdentifierName();
-        String queryTemplate = String.format("MERGE (`%s` {`id`: {`%s`}})", nodeId, parameterBindingKey);
-
-        Map<String, Object> parameters = new HashMap<>();
-        parameters.put(parameterBindingKey, nodeId);
-
-        Query q = new Query(queryTemplate, parameters);
-        this.addQuery("merge", q);
-
-        return this;
-    }
-
-    /**
-     * Merges a node with the given labels and properties.
-     * <p>
-     * Properties should be in the following form:
-     * { "propertyName1:propertyValue1", "propertyName2:propertyValue2", "propertyName3:propertyValue3" }
-     *
-     * @param nodeId
-     * @return
-     */
-    public QueryBuilder merge(String nodeId, String[] labels, String[] properties) {
-        String labelsAsString = String.join(":", Arrays.stream(labels).map(label -> String.format("`%s`", label))
-            .toArray(String[]::new));
-
-        Map<String, Object> parameters = new HashMap<>();
-        List<String> propertiesWithParameterBindingKeys = new ArrayList<>();
-        for (String property : properties) {
-            String[] propertySplit = property.split(":");
-            String propertyName = propertySplit[0];
-
-            String parameterBindingKey = this.createUniqueIdentifierName();
-            String propertyValue = propertySplit[1];
-            parameters.put(parameterBindingKey, propertyValue);
-
-            String propertyString = String.format("`%s`: {`%s`}", propertyName, parameterBindingKey);
-            propertiesWithParameterBindingKeys.add(propertyString);
-        }
-
-        String queryTemplate = String.format("MERGE (`%s`:%s {%s})", nodeId, labelsAsString, String.join(", ",
-            propertiesWithParameterBindingKeys));
-
-        Query q = new Query(queryTemplate, parameters);
-        this.addQuery("merge", q);
-
-        return this;
-    }
-
-    /**
-     * Creates a connection between two nodes.
-     * <p>
-     * Does not explicitly check node ID, can be used only chained after a merge or a match.
-     *
-     * @param nodeIdFrom
-     * @param nodeIdTo
-     * @param connectionLabel
-     * @return
-     */
-    public QueryBuilder mergeConnection(String nodeIdFrom, String nodeIdTo, String connectionLabel) {
-        String queryTemplate = String.format("MERGE (`%s`)-[:`%s`]->(`%s`)", nodeIdFrom, connectionLabel, nodeIdTo);
-
-        Query q = new Query(queryTemplate, new HashMap<>());
-        this.addQuery("merge", q);
-
-        return this;
+        return ret;
     }
 }
