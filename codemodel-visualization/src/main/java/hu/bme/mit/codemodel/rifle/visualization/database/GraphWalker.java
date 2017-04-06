@@ -47,6 +47,7 @@ public class GraphWalker extends Walker {
             final Map<String, Object> next = result.next();
             nodes.add(dbServices.getNodeById(Long.valueOf(next.get("id").toString())));
         }
+
 //            nodes = dbServices.graphDb
 //                    .traversalDescription()
 //                    .breadthFirst()
