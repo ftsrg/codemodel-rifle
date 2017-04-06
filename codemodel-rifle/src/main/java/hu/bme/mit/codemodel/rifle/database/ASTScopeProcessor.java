@@ -112,7 +112,7 @@ public class ASTScopeProcessor {
         long scopeDone = stopwatch.elapsed(TimeUnit.MILLISECONDS);
         logger.info(String.format("%s %s %dms", parsedFilePath, "SCOPING", scopeDone));
 
-        final Collection<AsgNode> asgNodes = this.objectsWithAsgNodes.values();
+        final List<AsgNode> asgNodes = new ArrayList<>(this.objectsWithAsgNodes.values());
 
         try (Transaction tx = dbServices.beginTx()) {
             List<Query> queriesToRun = new ArrayList<>();
@@ -502,7 +502,7 @@ public class ASTScopeProcessor {
         AsgNode nodeFrom = this.findOrCreate(from);
         AsgNode nodeTo = this.findOrCreate(to);
 
-        nodeFrom.addReference(nodeTo, referenceLabel);
+        nodeFrom.addRelation(nodeTo, referenceLabel);
     }
 
     /**

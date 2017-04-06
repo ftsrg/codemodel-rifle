@@ -24,7 +24,7 @@ public class AsgNode {
     /**
      * References with reference labels.
      */
-    private Map<AsgNode, String> references = new HashMap<>();
+    private List<AsgRelation> relations = new ArrayList<>();
 
     /**
      * Default constructor.
@@ -85,16 +85,16 @@ public class AsgNode {
      * @param node
      * @param label
      */
-    public void addReference(AsgNode node, String label) {
-        this.references.put(node, label);
+    public void addRelation(AsgNode node, String label) {
+        this.relations.add(new AsgRelation(this, node, label));
     }
 
     /**
-     * Getter for references.
+     * Getter for relations.
      *
      * @return Map
      */
-    public Map<AsgNode, String> getReferences() {
-        return this.references;
+    public List<AsgRelation> getRelations() {
+        return this.relations;
     }
 }

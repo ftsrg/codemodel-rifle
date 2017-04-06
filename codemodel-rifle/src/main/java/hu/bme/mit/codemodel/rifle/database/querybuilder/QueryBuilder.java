@@ -25,7 +25,7 @@ public class QueryBuilder {
      * Configures how many query body should be run in one query execution.
      */
     private static int createNodesQueriesIterationCount = 20;
-//    private static int setRelationsQueriesIterationCount = 1;
+    private static int setRelationsQueriesMaximumSetRelationshipCount = 1;
 
     /**
      * Creates a new query body for creating a node.
@@ -104,65 +104,23 @@ public class QueryBuilder {
     }
 
     /**
-     * Creates a relationship query body between two nodes.
+     * Creates a relationship query.
      *
      * MATCH (`from` {`id`: $`fromId`}), (`to`: {`id`: $`toId`})
      * CREATE (`from`)-[:`relationshipLabel`]->(`to`)
      *
-     * @param from
-     * @param to
-     * @param relationshipLabel
+     * @param relation
      * @return
      */
-    private static Query createRelationQueryBetweenNodes(AsgNode from, AsgNode to, String relationshipLabel) {
+    private static Query createRelationSingleQuery(AsgRelation relation) {
         String statementTemplate = String.format("MATCH(`from`{`id`:$`fromId`}),(`to`{`id`:$`toId`})CREATE(`from`)" +
-                "-[:`%s`]->(`to`)", relationshipLabel);
+                "-[:`%s`]->(`to`)", relation.getRelationshipLabel());
 
         Map<String, Object> statementParameters = new HashMap<>();
-        statementParameters.put("fromId", from.getId());
-        statementParameters.put("toId", to.getId());
+        statementParameters.put("fromId", relation.getFromNode().getId());
+        statementParameters.put("toId", relation.getToNode().getId());
 
         return new Query(statementTemplate, statementParameters);
-    }
-
-    /**
-     * Creates a relationship query matching the node and all related nodes,
-     * and then creating the relationships.
-     *
-     * MATCH (`node` {`id`: $`nodeId`}), (`relatedNode1`: {`id`: $`relatedNode1Id`}), (`relatedNode2`: {`id`: $`relatedNode2Id`}), ...
-     * CREATE (`node`)-[:`relationshipLabel`]->(`relatedNode1`), (`node`)-[:`relationshipLabel`]->(`relatedNode2`), ...
-     *
-     * @param node
-     * @return
-     */
-    private static Query createRelationQueryBetweenNodeAndAllRelatedNode(AsgNode node) {
-        StringBuilder statementTemplate = new StringBuilder();
-        Map<String, Object> statementParameters = new HashMap<>();
-
-        // We have to match all nodes before we can create the relationships.
-        // At first we the node itself.
-        String nodeId = node.getId();
-        String nodeIdBinding = Utils.createUniqueIdentifierName();
-        statementTemplate.append(String.format("MATCH(`%s`{`id`:$`%s`}),", nodeId, nodeIdBinding));
-        statementParameters.put(nodeIdBinding, nodeId);
-
-        // After that, we match the related nodes.
-        statementTemplate.append(node.getReferences().entrySet().stream().map(relation -> {
-            String relatedNodeId = relation.getKey().getId();
-            String relatedNodeIdBinding = Utils.createUniqueIdentifierName();
-            statementParameters.put(relatedNodeIdBinding, relatedNodeId);
-            return String.format("(`%s`{`id`:$`%s`})", relatedNodeId, relatedNodeIdBinding);
-        }).collect(Collectors.joining(",")));
-
-        // Then, we can start creating the relationships.
-        statementTemplate.append("CREATE");
-        statementTemplate.append(node.getReferences().entrySet().stream().map(relation -> {
-            String relatedNodeId = relation.getKey().getId();
-            String relationshipLabel = relation.getValue();
-            return String.format("(`%s`)-[:`%s`]->(`%s`)", nodeId, relationshipLabel, relatedNodeId);
-        }).collect(Collectors.joining(",")));
-
-        return new Query(statementTemplate.toString(), statementParameters);
     }
 
     /**
@@ -175,7 +133,7 @@ public class QueryBuilder {
      * @param nodes
      * @return
      */
-    public static List<Query> getCreateNodeQueries(Collection<AsgNode> nodes) {
+    public static List<Query> getCreateNodeQueries(List<AsgNode> nodes) {
         List<Query> ret = new ArrayList<>();
 
         List<Query> createNodesQueryBodies = getCreateNodesQueryBodies(nodes);
@@ -204,28 +162,15 @@ public class QueryBuilder {
      * @param nodes
      * @return
      */
-    public static List<Query> getSetRelationshipQueries(Collection<AsgNode> nodes) {
+    public static List<Query> getSetRelationshipQueries(List<AsgNode> nodes) {
         List<Query> ret = new ArrayList<>();
 
-        for (AsgNode node : nodes) {
-            // If the node has no related nodes, we simply skip to the next.
-            if (node.getReferences().isEmpty()) {
-                continue;
-            }
+        // Collecting all node-node relations into a list.
+        List<AsgRelation> relations = new ArrayList<>();
+        nodes.forEach(node -> relations.addAll(node.getRelations()));
 
-            // Creating one query for each node-node relation.
-            for (Map.Entry<AsgNode, String> relation : node.getReferences().entrySet()) {
-                AsgNode referencedNode = relation.getKey();
-                String referenceLabel = relation.getValue();
-
-                Query q = createRelationQueryBetweenNodes(node, referencedNode, referenceLabel);
-                ret.add(q);
-            }
-
-            // Creating one bigger query for relating a node with all its related nodes.
-            // About 2x slower than the one query/node-node relation version.
-//            ret.add(createRelationQueryBetweenNodeAndAllRelatedNode(node));
-        }
+        // Executing one relationship setting query for each node.
+        relations.forEach(relation -> ret.add(createRelationSingleQuery(relation)));
 
         return ret;
     }
