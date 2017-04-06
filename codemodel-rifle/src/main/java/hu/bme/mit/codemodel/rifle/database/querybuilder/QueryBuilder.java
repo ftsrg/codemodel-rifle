@@ -137,9 +137,7 @@ public class QueryBuilder {
             Map<String, Object> statementParameters = new HashMap<>();
             queryBodiesPartitionedList.forEach(query -> statementParameters.putAll(query.getStatementParameters()));
 
-            Query q = new Query(statementTemplate, statementParameters);
-            System.out.println(q.toString());
-            ret.add(q);
+            ret.add(new Query(statementTemplate, statementParameters));
         });
 
 
@@ -156,7 +154,6 @@ public class QueryBuilder {
                 String referenceLabel = relation.getValue();
 
                 Query q = createRelationQueryBetweenNodes(node, referencedNode, referenceLabel);
-                System.out.println(q.toString());
                 ret.add(q);
             }
         }

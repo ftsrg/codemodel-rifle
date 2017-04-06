@@ -107,7 +107,6 @@ public class ASTScopeProcessor {
             List<Query> queriesToRun = QueryBuilder.getQueries(this.objectsWithAsgNodes.values());
             for (Query q : queriesToRun) {
                 dbServices.execute(q);
-                System.out.println(q.toString());
             }
 
             tx.success();
