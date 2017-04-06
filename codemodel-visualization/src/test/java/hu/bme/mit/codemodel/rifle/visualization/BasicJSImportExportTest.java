@@ -3,7 +3,10 @@ package hu.bme.mit.codemodel.rifle.visualization;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 
+import com.google.common.base.Stopwatch;
 import hu.bme.mit.codemodel.rifle.actions.repository.SynchronizeRepository;
 import hu.bme.mit.codemodel.rifle.actions.utils.DeleteGraph;
 import hu.bme.mit.codemodel.rifle.database.DbServices;
@@ -21,17 +24,19 @@ import org.junit.Test;
  * For the complete reference, check:
  * - https://developer.mozilla.org/hu/docs/Web/JavaScript/Reference/Statements/export
  * - https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import
- *
+ * <p>
  * For a systematic summary and for decoding the testcases, check:
  * https://docs.google.com/spreadsheets/d/1Du9TV8l2FY-eD3j5LumuNgZCYMAJY6z9pSUoQ_p0D50/edit?usp=sharing
  */
 public class BasicJSImportExportTest extends TestCase {
+    private static final Logger logger = Logger.getLogger("codemodel");
 
     @Before
     @After
     public void deleteDb() {
         new DeleteGraph().delete(branchId);
     }
+
 
     protected void doImportExportAndVisualization(String path) {
         DbServices dbServices = DbServicesManager.getDbServices(branchId);
@@ -54,28 +59,43 @@ public class BasicJSImportExportTest extends TestCase {
             e.printStackTrace();
         }
 
+        Stopwatch stopwatch = Stopwatch.createUnstarted();
+
         try (FileOutputStream fop = new FileOutputStream(beforePng)) {
             eg.setOutputStream(fop);
+            stopwatch.start();
             eg.png(branchId, -1, true, false);
-        } catch (IOException|NullPointerException e) {
+            long exportedBefore = stopwatch.elapsed(TimeUnit.MILLISECONDS);
+            logger.info(String.format("%s %dms", "EXPORTBEFORE", exportedBefore));
+            stopwatch.reset();
+        } catch (IOException | NullPointerException e) {
             e.printStackTrace();
         }
 
         ImportExport importExport = new ImportExport();
+        stopwatch.start();
         importExport.importExport(branchId);
+        long impex = stopwatch.elapsed(TimeUnit.MILLISECONDS);
+        stopwatch.reset();
+        logger.info(String.format("%s %dms", "IMPEX", impex));
+
 
         try {
             afterPng = new File(path + File.separator + "after.png");
             if (!afterPng.exists()) {
                 afterPng.createNewFile();
             }
-        } catch (IOException|NullPointerException e) {
+        } catch (IOException | NullPointerException e) {
             e.printStackTrace();
         }
 
         try (FileOutputStream fop = new FileOutputStream(afterPng)) {
             eg.setOutputStream(fop);
+            stopwatch.start();
             eg.png(branchId, -1, true, false);
+            long exportedAfter = stopwatch.elapsed(TimeUnit.MILLISECONDS);
+            stopwatch.reset();
+            logger.info(String.format("%s %dms", "EXPORTAFTER", exportedAfter));
         } catch (IOException e) {
             e.printStackTrace();
         }
