@@ -3,6 +3,7 @@ package hu.bme.mit.codemodel.rifle.database.querybuilder;
 import com.google.common.collect.Lists;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Optimizing queries' count by merging multiple queries into one fewer.
@@ -105,6 +106,9 @@ public class QueryBuilder {
     /**
      * Creates a relationship query body between two nodes.
      *
+     * MATCH (`from` {`id`: $`fromId`}), (`to`: {`id`: $`toId`})
+     * CREATE (`from`)-[:`relationshipLabel`]->(`to`)
+     *
      * @param from
      * @param to
      * @param relationshipLabel
@@ -121,12 +125,59 @@ public class QueryBuilder {
         return new Query(statementTemplate, statementParameters);
     }
 
-    public static List<Query> getQueries(Collection<AsgNode> nodes) {
+    /**
+     * Creates a relationship query matching the node and all related nodes,
+     * and then creating the relationships.
+     *
+     * MATCH (`node` {`id`: $`nodeId`}), (`relatedNode1`: {`id`: $`relatedNode1Id`}), (`relatedNode2`: {`id`: $`relatedNode2Id`}), ...
+     * CREATE (`node`)-[:`relationshipLabel`]->(`relatedNode1`), (`node`)-[:`relationshipLabel`]->(`relatedNode2`), ...
+     *
+     * @param node
+     * @return
+     */
+    private static Query createRelationQueryBetweenNodeAndAllRelatedNode(AsgNode node) {
+        StringBuilder statementTemplate = new StringBuilder();
+        Map<String, Object> statementParameters = new HashMap<>();
+
+        // We have to match all nodes before we can create the relationships.
+        // At first we the node itself.
+        String nodeId = node.getId();
+        String nodeIdBinding = Utils.createUniqueIdentifierName();
+        statementTemplate.append(String.format("MATCH(`%s`{`id`:$`%s`}),", nodeId, nodeIdBinding));
+        statementParameters.put(nodeIdBinding, nodeId);
+
+        // After that, we match the related nodes.
+        statementTemplate.append(node.getReferences().entrySet().stream().map(relation -> {
+            String relatedNodeId = relation.getKey().getId();
+            String relatedNodeIdBinding = Utils.createUniqueIdentifierName();
+            statementParameters.put(relatedNodeIdBinding, relatedNodeId);
+            return String.format("(`%s`{`id`:$`%s`})", relatedNodeId, relatedNodeIdBinding);
+        }).collect(Collectors.joining(",")));
+
+        // Then, we can start creating the relationships.
+        statementTemplate.append("CREATE");
+        statementTemplate.append(node.getReferences().entrySet().stream().map(relation -> {
+            String relatedNodeId = relation.getKey().getId();
+            String relationshipLabel = relation.getValue();
+            return String.format("(`%s`)-[:`%s`]->(`%s`)", nodeId, relationshipLabel, relatedNodeId);
+        }).collect(Collectors.joining(",")));
+
+        return new Query(statementTemplate.toString(), statementParameters);
+    }
+
+    /**
+     * The query builder has two basic jobs: the first is to create queries
+     * to create the nodes with the provided labels and properties.
+     *
+     * This returns a list of queries: each one can be executed without further modifications.
+     * Multiple node creating queries merged into fewer queries configured above.
+     *
+     * @param nodes
+     * @return
+     */
+    public static List<Query> getCreateNodeQueries(Collection<AsgNode> nodes) {
         List<Query> ret = new ArrayList<>();
 
-        // ===========================================
-        // CREATE THE NODES WITH LABELS AND PROPERTIES
-        // ===========================================
         List<Query> createNodesQueryBodies = getCreateNodesQueryBodies(nodes);
         // We slice up the query bodies' list by the configured number,
         // so this many queries will be executed in one turn.
@@ -140,15 +191,29 @@ public class QueryBuilder {
             ret.add(new Query(statementTemplate, statementParameters));
         });
 
+        return ret;
+    }
 
-        // =====================
-        // SET THE RELATIONSHIPS
-        // =====================
+    /**
+     * The query builder has two basic jobs: the second if to create queries
+     * to set the relationships between nodes.
+     *
+     * This returns a list of queries: each one can be executed without further modifications.
+     * Multiple relationship setting queries are merged into fewer queries configured above.
+     *
+     * @param nodes
+     * @return
+     */
+    public static List<Query> getSetRelationshipQueries(Collection<AsgNode> nodes) {
+        List<Query> ret = new ArrayList<>();
+
         for (AsgNode node : nodes) {
+            // If the node has no related nodes, we simply skip to the next.
             if (node.getReferences().isEmpty()) {
                 continue;
             }
 
+            // Creating one query for each node-node relation.
             for (Map.Entry<AsgNode, String> relation : node.getReferences().entrySet()) {
                 AsgNode referencedNode = relation.getKey();
                 String referenceLabel = relation.getValue();
@@ -156,6 +221,10 @@ public class QueryBuilder {
                 Query q = createRelationQueryBetweenNodes(node, referencedNode, referenceLabel);
                 ret.add(q);
             }
+
+            // Creating one bigger query for relating a node with all its related nodes.
+            // About 2x slower than the one query/node-node relation version.
+//            ret.add(createRelationQueryBetweenNodeAndAllRelatedNode(node));
         }
 
         return ret;

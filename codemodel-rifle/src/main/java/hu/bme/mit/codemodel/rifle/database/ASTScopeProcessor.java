@@ -100,6 +100,7 @@ public class ASTScopeProcessor {
         final Logger logger = Logger.getLogger("codemodel");
 
         Stopwatch stopwatch = Stopwatch.createStarted();
+
         try {
             while (!processingQueue.isEmpty()) {
                 QueueItem queueItem = processingQueue.take();
@@ -109,24 +110,39 @@ public class ASTScopeProcessor {
             e.printStackTrace();
         }
         long scopeDone = stopwatch.elapsed(TimeUnit.MILLISECONDS);
+        logger.info(String.format("%s %s %dms", parsedFilePath, "SCOPING", scopeDone));
 
-        stopwatch.reset();
-        stopwatch.start();
+        final Collection<AsgNode> asgNodes = this.objectsWithAsgNodes.values();
+
         try (Transaction tx = dbServices.beginTx()) {
-            List<Query> queriesToRun = QueryBuilder.getQueries(this.objectsWithAsgNodes.values());
+            List<Query> queriesToRun = new ArrayList<>();
+
+            queriesToRun.addAll(QueryBuilder.getCreateNodeQueries(asgNodes));
+
+            stopwatch.reset();
+            stopwatch.start();
             for (Query q : queriesToRun) {
                 dbServices.execute(q);
             }
+            long createDone = stopwatch.elapsed(TimeUnit.MILLISECONDS);
+            logger.info(String.format("%s %s (%s query executed) %dms", parsedFilePath, "CREATE", queriesToRun.size(), createDone));
+
+            queriesToRun.clear();
+            queriesToRun.addAll(QueryBuilder.getSetRelationshipQueries(asgNodes));
+
+            stopwatch.reset();
+            stopwatch.start();
+            for (Query q : queriesToRun) {
+                dbServices.execute(q);
+            }
+            long relationshipDone = stopwatch.elapsed(TimeUnit.MILLISECONDS);
+            logger.info(String.format("%s %s (%s query executed) %dms", parsedFilePath, "RELATIONSHIPS", queriesToRun.size(), relationshipDone));
 
             tx.success();
         } catch (Exception e) {
             e.printStackTrace();
         }
-        long transactionDone = stopwatch.elapsed(TimeUnit.MILLISECONDS);
         stopwatch.reset();
-
-        logger.info(String.format("%s %s %dms", parsedFilePath, "SCOPING", scopeDone));
-        logger.info(String.format("%s %s %dms", parsedFilePath, "TRANSACTION", transactionDone));
     }
 
     /**
