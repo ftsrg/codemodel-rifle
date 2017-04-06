@@ -4,7 +4,10 @@ import java.lang.reflect.Field;
 import java.util.*;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 
+import com.google.common.base.Stopwatch;
 import hu.bme.mit.codemodel.rifle.database.querybuilder.AsgNode;
 import hu.bme.mit.codemodel.rifle.database.querybuilder.Query;
 import hu.bme.mit.codemodel.rifle.database.querybuilder.QueryBuilder;
@@ -94,6 +97,9 @@ public class ASTScopeProcessor {
         this.createFilePathNode(sessionId);
         processingQueue.add(new QueueItem(scope, null, null));
 
+        final Logger logger = Logger.getLogger("codemodel");
+
+        Stopwatch stopwatch = Stopwatch.createStarted();
         try {
             while (!processingQueue.isEmpty()) {
                 QueueItem queueItem = processingQueue.take();
@@ -102,7 +108,10 @@ public class ASTScopeProcessor {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+        long scopeDone = stopwatch.elapsed(TimeUnit.MILLISECONDS);
 
+        stopwatch.reset();
+        stopwatch.start();
         try (Transaction tx = dbServices.beginTx()) {
             List<Query> queriesToRun = QueryBuilder.getQueries(this.objectsWithAsgNodes.values());
             for (Query q : queriesToRun) {
@@ -113,6 +122,11 @@ public class ASTScopeProcessor {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        long transactionDone = stopwatch.elapsed(TimeUnit.MILLISECONDS);
+        stopwatch.reset();
+
+        logger.info(String.format("%s %s %dms", parsedFilePath, "SCOPING", scopeDone));
+        logger.info(String.format("%s %s %dms", parsedFilePath, "TRANSACTION", transactionDone));
     }
 
     /**
