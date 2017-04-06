@@ -117,7 +117,11 @@ public class ASTScopeProcessor {
         try (Transaction tx = dbServices.beginTx()) {
             List<Query> queriesToRun = new ArrayList<>();
 
+            stopwatch.reset();
+            stopwatch.start();
             queriesToRun.addAll(QueryBuilder.getCreateNodeQueries(asgNodes));
+            long assembleDone = stopwatch.elapsed(TimeUnit.MILLISECONDS);
+            logger.info(String.format("%s %s (%s query assembled) %dms", parsedFilePath, "ASSEMBLE", queriesToRun.size(), assembleDone));
 
             stopwatch.reset();
             stopwatch.start();
