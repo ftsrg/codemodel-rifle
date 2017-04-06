@@ -5,7 +5,7 @@ import java.util.*;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import hu.bme.mit.codemodel.rifle.database.querybuilder.Node;
+import hu.bme.mit.codemodel.rifle.database.querybuilder.AsgNode;
 import hu.bme.mit.codemodel.rifle.database.querybuilder.Query;
 import hu.bme.mit.codemodel.rifle.database.querybuilder.QueryBuilder;
 import org.neo4j.driver.v1.Transaction;
@@ -47,7 +47,7 @@ public class ASTScopeProcessor {
     /**
      * AST objects with ASG nodes.
      */
-    private final Map<Object, Node> objectsWithAsgNodes = new HashMap<>();
+    private final Map<Object, AsgNode> objectsWithAsgNodes = new HashMap<>();
 
     /**
      * The processing queue.
@@ -370,7 +370,7 @@ public class ASTScopeProcessor {
                         // processingQueue.add(new QueueItem(node, fieldName, o.toString()));
                         this.storeProperty(subject, fieldName, o.toString());
 
-                    } else if (o instanceof Node) {
+                    } else if (o instanceof AsgNode) {
 
                         this.processingQueue.add(new QueueItem(o, subject, fieldName));
 
@@ -394,14 +394,14 @@ public class ASTScopeProcessor {
 
     /**
      * If the sessionId is set, mark the node temporal and store the id.
-     * Since we are only iterating one AST, there is no way a Node from another graph is mislabeled.
+     * Since we are only iterating one AST, there is no way a AsgNode from another graph is mislabeled.
      *
      * @param sessionId
      * @param subject
      */
     private void handleIfInSession(String sessionId, Object subject) {
         if (sessionId != null) {
-            Node node = this.findOrCreate(subject);
+            AsgNode node = this.findOrCreate(subject);
             node.addLabel("Temp");
             node.addProperty("session", sessionId);
         }
@@ -422,34 +422,34 @@ public class ASTScopeProcessor {
     }
 
     /**
-     * Finds or creates a Node object for the AST object.
+     * Finds or creates a AsgNode object for the AST object.
      *
      * @param subject
-     * @return Node
+     * @return AsgNode
      */
-    private Node findOrCreate(Object subject) {
+    private AsgNode findOrCreate(Object subject) {
         if (this.objectsWithAsgNodes.containsKey(subject)) {
             return this.objectsWithAsgNodes.get(subject);
         } else {
-            Node node = new Node();
+            AsgNode node = new AsgNode();
             this.objectsWithAsgNodes.put(subject, node);
             return node;
         }
     }
 
     /**
-     * Finds or creates a Node object for the AST object with attributes.
+     * Finds or creates a AsgNode object for the AST object with attributes.
      *
      * @param subject
      * @param labels
      * @param properties
-     * @return Node
+     * @return AsgNode
      */
-    private Node findOrCreate(Object subject, String[] labels, String[] properties) {
+    private AsgNode findOrCreate(Object subject, String[] labels, String[] properties) {
         if (this.objectsWithAsgNodes.containsKey(subject)) {
             return this.objectsWithAsgNodes.get(subject);
         } else {
-            Node node = new Node();
+            AsgNode node = new AsgNode();
             Arrays.asList(labels).forEach(node::addLabel);
             Arrays.asList(properties).forEach(property -> {
                 String[] propertySplit = property.split(":");
@@ -470,8 +470,8 @@ public class ASTScopeProcessor {
      * @param referenceLabel
      */
     private void storeReference(Object from, Object to, String referenceLabel) {
-        Node nodeFrom = this.findOrCreate(from);
-        Node nodeTo = this.findOrCreate(to);
+        AsgNode nodeFrom = this.findOrCreate(from);
+        AsgNode nodeTo = this.findOrCreate(to);
 
         nodeFrom.addReference(nodeTo, referenceLabel);
     }
@@ -488,7 +488,7 @@ public class ASTScopeProcessor {
             return;
         }
 
-        Node node = this.findOrCreate(subject);
+        AsgNode node = this.findOrCreate(subject);
         node.addProperty(propertyName, propertyValue.toString());
     }
 
@@ -499,7 +499,7 @@ public class ASTScopeProcessor {
      * @param type
      */
     private void storeType(Object subject, String type) {
-        Node node = this.findOrCreate(subject);
+        AsgNode node = this.findOrCreate(subject);
         node.addLabel(type);
     }
 

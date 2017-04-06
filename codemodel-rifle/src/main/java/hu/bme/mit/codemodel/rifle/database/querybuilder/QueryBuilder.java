@@ -32,7 +32,7 @@ public class QueryBuilder {
      * @param node
      * @return
      */
-    private static Query createCreateNodeQueryBody(Node node) {
+    private static Query createCreateNodeQueryBody(AsgNode node) {
         StringBuilder stringBuilder = new StringBuilder();
 
         // (
@@ -94,7 +94,7 @@ public class QueryBuilder {
      *
      * @return List
      */
-    private static List<Query> getCreateNodesQueryBodies(Collection<Node> nodes) {
+    private static List<Query> getCreateNodesQueryBodies(Collection<AsgNode> nodes) {
         List<Query> ret = new ArrayList<>();
 
         nodes.forEach(node -> ret.add(createCreateNodeQueryBody(node)));
@@ -110,7 +110,7 @@ public class QueryBuilder {
      * @param relationshipLabel
      * @return
      */
-    private static Query createRelationQueryBetweenNodes(Node from, Node to, String relationshipLabel) {
+    private static Query createRelationQueryBetweenNodes(AsgNode from, AsgNode to, String relationshipLabel) {
         String statementTemplate = String.format("MATCH(`from`{`id`:$`fromId`}),(`to`{`id`:$`toId`})CREATE(`from`)" +
                 "-[:`%s`]->(`to`)", relationshipLabel);
 
@@ -121,7 +121,7 @@ public class QueryBuilder {
         return new Query(statementTemplate, statementParameters);
     }
 
-    public static List<Query> getQueries(Collection<Node> nodes) {
+    public static List<Query> getQueries(Collection<AsgNode> nodes) {
         List<Query> ret = new ArrayList<>();
 
         // ===========================================
@@ -146,13 +146,13 @@ public class QueryBuilder {
         // =====================
         // SET THE RELATIONSHIPS
         // =====================
-        for (Node node : nodes) {
+        for (AsgNode node : nodes) {
             if (node.getReferences().isEmpty()) {
                 continue;
             }
 
-            for (Map.Entry<Node, String> relation : node.getReferences().entrySet()) {
-                Node referencedNode = relation.getKey();
+            for (Map.Entry<AsgNode, String> relation : node.getReferences().entrySet()) {
+                AsgNode referencedNode = relation.getKey();
                 String referenceLabel = relation.getValue();
 
                 Query q = createRelationQueryBetweenNodes(node, referencedNode, referenceLabel);

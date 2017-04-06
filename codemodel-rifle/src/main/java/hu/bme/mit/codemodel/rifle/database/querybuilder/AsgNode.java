@@ -3,9 +3,9 @@ package hu.bme.mit.codemodel.rifle.database.querybuilder;
 import java.util.*;
 
 /**
- * Our Node business entity.
+ * Our AsgNode business entity.
  */
-public class Node {
+public class AsgNode {
     /**
      * The ID of the node which we reference the node.
      */
@@ -24,12 +24,12 @@ public class Node {
     /**
      * References with reference labels.
      */
-    private Map<Node, String> references = new HashMap<>();
+    private Map<AsgNode, String> references = new HashMap<>();
 
     /**
      * Default constructor.
      */
-    public Node() {
+    public AsgNode() {
         this.addProperty("id", this.id);
     }
 
@@ -85,7 +85,7 @@ public class Node {
      * @param node
      * @param label
      */
-    public void addReference(Node node, String label) {
+    public void addReference(AsgNode node, String label) {
         this.references.put(node, label);
     }
 
@@ -94,7 +94,7 @@ public class Node {
      *
      * @return Map
      */
-    public Map<Node, String> getReferences() {
+    public Map<AsgNode, String> getReferences() {
         return this.references;
     }
 }
