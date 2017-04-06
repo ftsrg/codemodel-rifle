@@ -3,7 +3,6 @@ package hu.bme.mit.codemodel.rifle.database.querybuilder;
 import com.google.common.collect.Lists;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Optimizing queries' count by merging multiple queries into one fewer.
@@ -24,8 +23,8 @@ public class QueryBuilder {
      * <p>
      * Configures how many query body should be run in one query execution.
      */
-    private static int createNodesQueriesIterationCount = 20;
-    private static int setRelationsQueriesMaximumSetRelationshipCount = 1;
+    private static int createThisManyAsgNodeWithOneQuery = 20;
+    private static int setThisManyAsgRelationsWithOneQuery = 1;
 
     /**
      * Creates a new query body for creating a node.
@@ -138,7 +137,7 @@ public class QueryBuilder {
 
         // We slice up the query bodies' list by the configured number,
         // so this many queries will be executed in one turn.
-        Lists.partition(nodes, createNodesQueriesIterationCount).forEach(fewerNodes -> ret.add(getCreateNodesQuery(fewerNodes)));
+        Lists.partition(nodes, createThisManyAsgNodeWithOneQuery).forEach(fewerNodes -> ret.add(getCreateNodesQuery(fewerNodes)));
 
         return ret;
     }
