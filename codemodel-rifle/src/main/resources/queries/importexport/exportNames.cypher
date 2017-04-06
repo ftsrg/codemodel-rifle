@@ -1,5 +1,5 @@
 MATCH
-    (exporter:CompilationUnit)-[:contains]->(exportDeclaration:ExportDeclaration)-[:namedExports]->(exportSpecifier:ExportSpecifier),
+    (exporterFile:CompilationUnit)-[:contains]->(exportDeclaration:ExportDeclaration)-[:namedExports]->(exportSpecifier:ExportSpecifier),
     (exporterModule:Module)-[:items]->(exportDeclaration),
     (exporterModule)-[:items]->(:VariableDeclarationStatement)-[:declaration]->(:VariableDeclaration)-[:declarators]->(:VariableDeclarator)-[:binding]->(bindingIdentifier:BindingIdentifier),
     (importDeclaration:ImportDeclaration)-[:namespaceBinding]->(importIdentifier:BindingIdentifier),
