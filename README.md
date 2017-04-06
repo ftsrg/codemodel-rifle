@@ -1,6 +1,7 @@
 # codemodel-rifle
 
 [![Build Status](https://travis-ci.org/FTSRG/codemodel-rifle.svg?branch=master)](https://travis-ci.org/FTSRG/codemodel-rifle)
+[![License](https://img.shields.io/badge/license-EPL%201.0-lightgrey.svg)](https://github.com/FTSRG/codemodel-rifle/blob/master/LICENSE)
 
 Graph-based static analysis of ECMAScript 6 source code repositories.
 
