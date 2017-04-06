@@ -85,22 +85,22 @@ public class QueryBuilder {
     }
 
     /**
-     * We assemble the create queries for every node.
+     * We assemble the create queries for a list of nodes.
      * <p>
-     * We create query bodies with query parameters in the following form:
-     * (`identifier`:`label1`:`label2`...{`prop1`:'{`prop1ParamBinding`}',`prop2`:'{`prop2ParamBinding`}'})
-     * so we get a list of query bodies with the bound parameters.
-     * <p>
-     * This way we can configure later how many queries to run at once.
+     * We create a query which creates the given nodes in the following form:
+     * CREATE (`identifier`:`label1`:`label2`...{`prop1`:'{`prop1ParamBinding`}',`prop2`:'{`prop2ParamBinding`}'}), etc.
      *
-     * @return List
+     * @return Query
      */
-    private static List<Query> getCreateNodesQueryBodies(Collection<AsgNode> nodes) {
-        List<Query> ret = new ArrayList<>();
+    private static Query getCreateNodesQuery(Collection<AsgNode> nodes) {
+        List<Query> queryBodies = new ArrayList<>();
+        nodes.forEach(node -> queryBodies.add(createCreateNodeQueryBody(node)));
 
-        nodes.forEach(node -> ret.add(createCreateNodeQueryBody(node)));
+        String statementTemplate = "CREATE" + String.join(",", queryBodies.stream().map(Query::getStatementTemplate).toArray(String[]::new));
+        Map<String, Object> statementParameters = new HashMap<>();
+        queryBodies.forEach(queryBody -> statementParameters.putAll(queryBody.getStatementParameters()));
 
-        return ret;
+        return new Query(statementTemplate, statementParameters);
     }
 
     /**
@@ -131,23 +131,14 @@ public class QueryBuilder {
      * Multiple node creating queries merged into fewer queries configured above.
      *
      * @param nodes
-     * @return
+     * @return List
      */
     public static List<Query> getCreateNodeQueries(List<AsgNode> nodes) {
         List<Query> ret = new ArrayList<>();
 
-        List<Query> createNodesQueryBodies = getCreateNodesQueryBodies(nodes);
         // We slice up the query bodies' list by the configured number,
         // so this many queries will be executed in one turn.
-        Lists.partition(createNodesQueryBodies, createNodesQueriesIterationCount).forEach(queryBodiesPartitionedList
-            -> {
-            String statementTemplate = "CREATE" + String.join(",", queryBodiesPartitionedList.stream().map
-                (Query::getStatementTemplate).toArray(String[]::new));
-            Map<String, Object> statementParameters = new HashMap<>();
-            queryBodiesPartitionedList.forEach(query -> statementParameters.putAll(query.getStatementParameters()));
-
-            ret.add(new Query(statementTemplate, statementParameters));
-        });
+        Lists.partition(nodes, createNodesQueriesIterationCount).forEach(fewerNodes -> ret.add(getCreateNodesQuery(fewerNodes)));
 
         return ret;
     }
