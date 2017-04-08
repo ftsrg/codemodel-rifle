@@ -1,12 +1,26 @@
 MATCH
-    (exporterModule:Module)-[:items]->(:ExportDeclaration)-[:namedExports]->(exportSpecifier:ExportSpecifier),
-    (exporterModule)-[:items]->(:VariableDeclarationStatement)-[:declaration]->(:VariableDeclaration)-[:declarators]->(:VariableDeclarator)-[:binding]->(exportBindingIdentifier:BindingIdentifier),
-    (importerModule:Module)-[:items]->(:ImportDeclaration)-[:namedImports]->(importSpecifier:ImportSpecifier)-[:binding]->(importBindingIdentifier:BindingIdentifier)<-[:node]-(variableImportDeclaration:Declaration)
-WHERE
-    exportSpecifier.exportedName = exportBindingIdentifier.name
-    AND importBindingIdentifier.name = exportBindingIdentifier.name
+    (exporter:CompilationUnit)-[:contains]->(:ExportDeclaration)-[:namedExports]->(exportSpecifier:ExportSpecifier),
+    (exporter)-[:contains]->(exportedVariable:Variable)-[:declarations]->(declarationToMerge:Declaration)
+        -[:node]->(exportBindingIdentifierToMerge:BindingIdentifier),
+    (exportedVariable)-[:declarations]->(declarationListToMerge:List),
+
+    (importer:CompilationUnit)-[:contains]->(importDeclaration:ImportDeclaration)
+        -[:namedImports]->(importSpecifier:ImportSpecifier)
+        -[:binding]->(importBindingIdentifierToDelete:BindingIdentifier),
+    (importer)-[:contains]->(importedVariable:Variable),
+
+    (importedVariable)-[:declarations]->(declarationToDelete:Declaration),
+    (importedVariable)-[:declarations]->(declarationListToDelete:List)
+
+    WHERE
+    exporter.parsedFilePath CONTAINS importDeclaration.moduleSpecifier
+    AND exportSpecifier.exportedName = exportedVariable.name = importBindingIdentifierToDelete.name = importedVariable.
+        name = exportBindingIdentifierToMerge.name
+
 CREATE UNIQUE
-    (importSpecifier)-[:binding]->(exportBindingIdentifier),
-    (variableImportDeclaration)-[:node]->(exportBindingIdentifier)
-DETACH DELETE importBindingIdentifier
+    (importedVariable)-[:declarations]->(declarationToMerge),
+    (importedVariable)-[:declarations]->(declarationListToMerge),
+    (importSpecifier)-[:binding]->(exportBindingIdentifierToMerge)
+
+DETACH DELETE declarationToDelete, declarationListToDelete, importBindingIdentifierToDelete
 ;
