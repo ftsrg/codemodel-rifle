@@ -1,34 +1,33 @@
 MATCH
 // export.js: export { name1 };
-    (simpleNamedExport_exporter:CompilationUnit)-[:contains]->(:ExportDeclaration)
-        -[:namedExports]->(simpleNamedExport_exportSpecifier:ExportSpecifier),
-    (simpleNamedExport_exporter)-[:contains]->(simpleNamedExport_exportedVariable:Variable)
-        -[:declarations]->(simpleNamedExport_declarationToMerge:Declaration)
-        -[:node]->(simpleNamedExport_exportBindingIdentifierToMerge:BindingIdentifier),
-    (simpleNamedExport_exportedVariable)-[:declarations]->(simpleNamedExport_declarationListToMerge:List),
+    (exporter:CompilationUnit)-[:contains]->(:ExportDeclaration)-[:namedExports]->(exportSpecifier:ExportSpecifier),
+    (exporter)-[:contains]->(exportedVariable:Variable)-[:declarations]->(declarationToMerge:Declaration)
+        -[:node]->(exportBindingIdentifierToMerge:BindingIdentifier),
+    (exportedVariable)-[:declarations]->(declarationListToMerge:List),
 
 // import.js: import { name1 } from "export";
-    (simpleNamedImport_importer:CompilationUnit)-[:contains]->(simpleNamedImport_importDeclaration:ImportDeclaration)
-        -[:namedImports]->(simpleNamedImport_importSpecifier:ImportSpecifier)
-        -[:binding]->(simpleNamedImport_importBindingIdentifierToDelete:BindingIdentifier),
-    (simpleNamedImport_importer)-[:contains]->(simpleNamedImport_importedVariable:Variable),
-    (simpleNamedImport_importedVariable)-[:declarations]->(simpleNamedImport_declarationToDelete:Declaration),
-    (simpleNamedImport_importedVariable)-[:declarations]->(simpleNamedImport_declarationListToDelete:List)
+    (importer:CompilationUnit)-[:contains]->(importDeclaration:ImportDeclaration)
+        -[:namedImports]->(importSpecifier:ImportSpecifier)
+        -[:binding]->(importBindingIdentifierToDelete:BindingIdentifier),
+    (importer)-[:contains]->(importedVariable:Variable),
+
+    (importedVariable)-[:declarations]->(declarationToDelete:Declaration),
+    (importedVariable)-[:declarations]->(declarationListToDelete:List)
 
     WHERE
-    simpleNamedExport_exporter.parsedFilePath CONTAINS simpleNamedImport_importDeclaration.moduleSpecifier
-    AND simpleNamedExport_exportSpecifier.exportedName = simpleNamedExport_exportedVariable.name
-    AND simpleNamedExport_exportSpecifier.exportedName = simpleNamedImport_importBindingIdentifierToDelete.name
-    AND simpleNamedExport_exportSpecifier.exportedName = simpleNamedImport_importedVariable.name
-    AND simpleNamedExport_exportSpecifier.exportedName = simpleNamedExport_exportBindingIdentifierToMerge.name
+    exporter.parsedFilePath CONTAINS importDeclaration.moduleSpecifier
+    AND exportSpecifier.exportedName = exportedVariable.name
+    AND exportSpecifier.exportedName = importBindingIdentifierToDelete.name
+    AND exportSpecifier.exportedName = importedVariable.name
+    AND exportSpecifier.exportedName = exportBindingIdentifierToMerge.name
 
 CREATE UNIQUE
-    (simpleNamedImport_importedVariable)-[:declarations]->(simpleNamedExport_declarationToMerge),
-    (simpleNamedImport_importedVariable)-[:declarations]->(simpleNamedExport_declarationListToMerge),
-    (simpleNamedImport_importSpecifier)-[:binding]->(simpleNamedExport_exportBindingIdentifierToMerge)
+    (importedVariable)-[:declarations]->(declarationToMerge),
+    (importedVariable)-[:declarations]->(declarationListToMerge),
+    (importSpecifier)-[:binding]->(exportBindingIdentifierToMerge)
 
 DETACH DELETE
-simpleNamedImport_declarationToDelete,
-simpleNamedImport_declarationListToDelete,
-simpleNamedImport_importBindingIdentifierToDelete
+declarationToDelete,
+declarationListToDelete,
+importBindingIdentifierToDelete
 ;
