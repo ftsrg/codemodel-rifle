@@ -156,158 +156,158 @@ public class BasicJSImportExportTest extends TestCase {
     }
 
     @Test
-    public void test_9_importDefault() {
-        String path = this.getTestResourcesFolderPath("test_9_importDefault");
+    public void test_exportDefaultExpression_importDefault() {
+        String path = this.getTestResourcesFolderPath("test_exportDefaultExpression_importDefault");
         this.doImportExportAndVisualization(path);
     }
 
     @Test
-    public void test_9_importNamespace() {
-        String path = this.getTestResourcesFolderPath("test_9_importNamespace");
+    public void test_exportDefaultExpression_importNamespace() {
+        String path = this.getTestResourcesFolderPath("test_exportDefaultExpression_importNamespace");
         this.doImportExportAndVisualization(path);
     }
 
     @Test
-    public void test_10_importDefault() {
-        String path = this.getTestResourcesFolderPath("test_10_importDefault");
+    public void test_exportDefaultFunction_importDefault() {
+        String path = this.getTestResourcesFolderPath("test_exportDefaultFunction_importDefault");
         this.doImportExportAndVisualization(path);
     }
 
     @Test
-    public void test_10_importNamespace() {
-        String path = this.getTestResourcesFolderPath("test_10_importNamespace");
+    public void test_exportDefaultFunction_importNamespace() {
+        String path = this.getTestResourcesFolderPath("test_exportDefaultFunction_importNamespace");
         this.doImportExportAndVisualization(path);
     }
 
     @Test
-    public void test_11_importDefault() {
-        String path = this.getTestResourcesFolderPath("test_11_importDefault");
+    public void test_exportDefaultClass_importDefault() {
+        String path = this.getTestResourcesFolderPath("test_exportDefaultClass_importDefault");
         this.doImportExportAndVisualization(path);
     }
 
     @Test
-    public void test_11_importNamespace() {
-        String path = this.getTestResourcesFolderPath("test_11_importNamespace");
+    public void test_exportDefaultClass_importNamespace() {
+        String path = this.getTestResourcesFolderPath("test_exportDefaultClass_importNamespace");
         this.doImportExportAndVisualization(path);
     }
 
     @Test
-    public void test_12_importDefault() {
-        String path = this.getTestResourcesFolderPath("test_12_importDefault");
+    public void test_exportDefaultGenerator_importDefault() {
+        String path = this.getTestResourcesFolderPath("test_exportDefaultGenerator_importDefault");
         this.doImportExportAndVisualization(path);
     }
 
     @Test
-    public void test_12_importNamespace() {
-        String path = this.getTestResourcesFolderPath("test_12_importNamespace");
+    public void test_exportDefaultGenerator_importNamespace() {
+        String path = this.getTestResourcesFolderPath("test_exportDefaultGenerator_importNamespace");
         this.doImportExportAndVisualization(path);
     }
 
     @Test
-    public void test_13_importDefault() {
-        String path = this.getTestResourcesFolderPath("test_13_importDefault");
+    public void test_exportDefaultFunctionWithName_importDefault() {
+        String path = this.getTestResourcesFolderPath("test_exportDefaultFunctionWithName_importDefault");
         this.doImportExportAndVisualization(path);
     }
 
     @Test
-    public void test_13_importNamespace() {
-        String path = this.getTestResourcesFolderPath("test_13_importNamespace");
+    public void test_exportDefaultFunctionWithName_importNamespace() {
+        String path = this.getTestResourcesFolderPath("test_exportDefaultFunctionWithName_importNamespace");
         this.doImportExportAndVisualization(path);
     }
 
     @Test
-    public void test_14_importDefault() {
-        String path = this.getTestResourcesFolderPath("test_14_importDefault");
+    public void test_exportDefaultClassWithName_importDefault() {
+        String path = this.getTestResourcesFolderPath("test_exportDefaultClassWithName_importDefault");
         this.doImportExportAndVisualization(path);
     }
 
     @Test
-    public void test_14_importNamespace() {
-        String path = this.getTestResourcesFolderPath("test_14_importNamespace");
+    public void test_exportDefaultClassWithName_importNamespace() {
+        String path = this.getTestResourcesFolderPath("test_exportDefaultClassWithName_importNamespace");
         this.doImportExportAndVisualization(path);
     }
 
     @Test
-    public void test_15_importDefault() {
-        String path = this.getTestResourcesFolderPath("test_15_importDefault");
+    public void test_exportDefaultGeneratorWithName_importDefault() {
+        String path = this.getTestResourcesFolderPath("test_exportDefaultGeneratorWithName_importDefault");
         this.doImportExportAndVisualization(path);
     }
 
     @Test
-    public void test_15_importNamespace() {
-        String path = this.getTestResourcesFolderPath("test_15_importNamespace");
+    public void test_exportDefaultGeneratorWithName_importNamespace() {
+        String path = this.getTestResourcesFolderPath("test_exportDefaultGeneratorWithName_importNamespace");
         this.doImportExportAndVisualization(path);
     }
 
     @Test
-    public void test_16_importDefault() {
-        String path = this.getTestResourcesFolderPath("test_16_importDefault");
+    public void test_exportAsDefault_importDefault() {
+        String path = this.getTestResourcesFolderPath("test_exportAsDefault_importDefault");
         this.doImportExportAndVisualization(path);
     }
 
     @Test
-    public void test_16_importNamespace() {
-        String path = this.getTestResourcesFolderPath("test_16_importNamespace");
+    public void test_exportAsDefault_importNamespace() {
+        String path = this.getTestResourcesFolderPath("test_exportAsDefault_importNamespace");
         this.doImportExportAndVisualization(path);
     }
 
     @Test
-    public void test_17_importDefault() {
-        String path = this.getTestResourcesFolderPath("test_17_importDefault");
+    public void test_reexportNamespace_importDefault() {
+        String path = this.getTestResourcesFolderPath("test_reexportNamespace_importDefault");
         this.doImportExportAndVisualization(path);
     }
 
     @Test
-    public void test_17_importNamespace() {
-        String path = this.getTestResourcesFolderPath("test_17_importNamespace");
+    public void test_reexportNamespace_importNamespace() {
+        String path = this.getTestResourcesFolderPath("test_reexportNamespace_importNamespace");
         this.doImportExportAndVisualization(path);
     }
 
     @Test
-    public void test_17_importName() {
-        String path = this.getTestResourcesFolderPath("test_17_importName");
+    public void test_reexportNamespace_importName() {
+        String path = this.getTestResourcesFolderPath("test_reexportNamespace_importName");
         this.doImportExportAndVisualization(path);
     }
 
     @Test
-    public void test_17_importAlias() {
-        String path = this.getTestResourcesFolderPath("test_17_importAlias");
+    public void test_reexportNamespace_importAlias() {
+        String path = this.getTestResourcesFolderPath("test_reexportNamespace_importAlias");
         this.doImportExportAndVisualization(path);
     }
 
     @Test
-    public void test_18_importNamespace() {
-        String path = this.getTestResourcesFolderPath("test_18_importNamespace");
+    public void test_reexportName_importNamespace() {
+        String path = this.getTestResourcesFolderPath("test_reexportName_importNamespace");
         this.doImportExportAndVisualization(path);
     }
 
     @Test
-    public void test_18_importName() {
-        String path = this.getTestResourcesFolderPath("test_18_importName");
+    public void test_reexportName_importName() {
+        String path = this.getTestResourcesFolderPath("test_reexportName_importName");
         this.doImportExportAndVisualization(path);
     }
 
     @Test
-    public void test_18_importAlias() {
-        String path = this.getTestResourcesFolderPath("test_18_importAlias");
+    public void test_reexportName_importAlias() {
+        String path = this.getTestResourcesFolderPath("test_reexportName_importAlias");
         this.doImportExportAndVisualization(path);
     }
 
     @Test
-    public void test_19_importNamespace() {
-        String path = this.getTestResourcesFolderPath("test_19_importNamespace");
+    public void test_reexportAlias_importNamespace() {
+        String path = this.getTestResourcesFolderPath("test_reexportAlias_importNamespace");
         this.doImportExportAndVisualization(path);
     }
 
     @Test
-    public void test_19_importName() {
-        String path = this.getTestResourcesFolderPath("test_19_importName");
+    public void test_reexportAlias_importName() {
+        String path = this.getTestResourcesFolderPath("test_reexportAlias_importName");
         this.doImportExportAndVisualization(path);
     }
 
     @Test
-    public void test_19_importAlias() {
-        String path = this.getTestResourcesFolderPath("test_19_importAlias");
+    public void test_reexportAlias_importAlias() {
+        String path = this.getTestResourcesFolderPath("test_reexportAlias_importAlias");
         this.doImportExportAndVisualization(path);
     }
 }
