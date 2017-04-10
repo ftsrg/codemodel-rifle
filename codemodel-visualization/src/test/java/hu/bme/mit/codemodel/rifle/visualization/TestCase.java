@@ -9,8 +9,14 @@ public abstract class TestCase {
 
     protected String getTestResourcesFolderPath(String testMethodName) {
         try {
-            String testResourceFolderWithinResources = this.testFolderPrefix + File.separator + this.getClass().getSimpleName() +
-                File.separator + testMethodName;
+            String testResourceFolderWithinResources = this.getClass().getSimpleName() + File.separator +
+                testMethodName;
+            
+            if (!this.testFolderPrefix.equals("")) {
+                testResourceFolderWithinResources = this.testFolderPrefix + File.separator +
+                    testResourceFolderWithinResources;
+            }
+
             String path = this.getClass().getClassLoader().getResource(testResourceFolderWithinResources).getPath();
             return path;
         } catch (NullPointerException e) {
