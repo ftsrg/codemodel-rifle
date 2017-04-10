@@ -210,42 +210,6 @@ public class BasicJSImportExportTest extends TestCase {
     }
 
     @Test
-    public void test4_2() {
-        String path = this.getTestResourcesFolderPath("test4_2");
-        this.doImportExportAndVisualization(path);
-    }
-
-    @Test
-    public void test4_3() {
-        String path = this.getTestResourcesFolderPath("test4_3");
-        this.doImportExportAndVisualization(path);
-    }
-
-    @Test
-    public void test4_4() {
-        String path = this.getTestResourcesFolderPath("test4_4");
-        this.doImportExportAndVisualization(path);
-    }
-
-    @Test
-    public void test4_5() {
-        String path = this.getTestResourcesFolderPath("test4_5");
-        this.doImportExportAndVisualization(path);
-    }
-
-    @Test
-    public void test4_6() {
-        String path = this.getTestResourcesFolderPath("test4_6");
-        this.doImportExportAndVisualization(path);
-    }
-
-    @Test
-    public void test4_9() {
-        String path = this.getTestResourcesFolderPath("test4_9");
-        this.doImportExportAndVisualization(path);
-    }
-
-    @Test
     public void test5_2() {
         String path = this.getTestResourcesFolderPath("test5_2");
         this.doImportExportAndVisualization(path);
