@@ -2,7 +2,7 @@ package hu.bme.mit.codemodel.rifle;
 
 import java.io.File;
 
-public class TestCase {
+public abstract class TestCase {
 
     protected static final String branchId = "dummyTest";
     protected static final String sessionId = "dummyTest";
