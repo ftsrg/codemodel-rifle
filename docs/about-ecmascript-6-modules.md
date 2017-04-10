@@ -69,6 +69,24 @@ export { name1 as exportedName1 };
 export { name1 as exportedName1, name2 as exportedName2, … };
 ```
 
+* **exportAsDefault**
+
+```JavaScript
+export { name1 as default, … };
+```
+
+* **exportDefaultClass**
+
+```JavaScript
+export default class (…) { … }
+```
+
+* **exportDefaultClassWithName**
+
+```JavaScript
+export default class name1(…) { … }
+```
+
 * **exportDeclaration**
 
 ```JavaScript
@@ -84,6 +102,44 @@ export const name1 = …;
 export const name1 = …, name2 = …, …;
 ```
 
+* **exportDefaultExpression**
+
+```JavaScript
+export default expression;
+```
+
+* **exportDefaultFunction**
+
+```JavaScript
+export default function (…) { … }
+```
+
+* **exportDefaultFunctionWithName**
+
+```JavaScript
+export default function name1(…) { … }
+```
+
+* **exportDefaultGenerator**
+
+```JavaScript
+export default function* (…) { … }
+```
+
+* **exportDefaultGeneratorWithName**
+
+```JavaScript
+export default function* name1(…) { … }
+```
+
+* **exportExpression** (omitted)
+
+*Omitted: can not be imported.*
+
+```JavaScript
+export expression;
+```
+
 * **exportName**
 
 ```JavaScript
@@ -91,7 +147,24 @@ export { name1 };
 export { name1, name2, … };
 ```
 
-**Work in progress…**
+* **reexportAlias**
+
+```JavaScript
+export { import1 as importedName1, import2 as importedName2, … } from …;
+```
+
+* **reexportName**
+
+```JavaScript
+export { name1, name2, … } from … ;
+{ import1 as importedName1, import2 as importedName2, … } from …;
+```
+
+* **reexportNamespace**
+
+```JavaScript
+export * from … ;
+```
 
 #### Import cases
 
