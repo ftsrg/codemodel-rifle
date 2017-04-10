@@ -60,14 +60,7 @@ We distinguish different import-export *syntaxes* (above) from different import-
 
 #### Export cases
 
-The case-names are used in the code consistently.
-
-* **exportName**
-
-```JavaScript
-export { name1 };
-export { name1, name2, … };
-```
+These names are used in the code consistently.
 
 * **exportAlias**
 
@@ -91,11 +84,24 @@ export const name1 = …;
 export const name1 = …, name2 = …, …;
 ```
 
+* **exportName**
+
+```JavaScript
+export { name1 };
+export { name1, name2, … };
+```
+
 **Work in progress…**
 
 #### Import cases
 
-The case-names are used in the code consistently.
+These names are used in the code consistently.
+
+* **importAlias**
+
+```JavaScript
+import { name1 as importedName1, … } from "exporter";
+```
 
 * **importDefault**
 
@@ -103,10 +109,12 @@ The case-names are used in the code consistently.
 import defaultName from "exporter";
 ```
 
-* **importNamespace**
+* **importModule** (omitted)
+
+*Omitted: in this case, no bindings are made between the two module. The first such import executes the imported module's body. See [here](http://exploringjs.com/es6/ch_modules.html#_importing-styles).*
 
 ```JavaScript
-import * as exportedModule from "exporter";
+import "exporter";
 ```
 
 * **importName**
@@ -115,18 +123,10 @@ import * as exportedModule from "exporter";
 import { name1, … } from "exporter";
 ```
 
-* **importAlias**
+* **importNamespace**
 
 ```JavaScript
-import { name1 as importedName1, … } from "exporter";
-```
-
-* **importModule** (omitted)
-
-*Omitted: in this case, no bindings are made between the two module. The first such import executes the module's body. See [here](http://exploringjs.com/es6/ch_modules.html#_importing-styles).*
-
-```JavaScript
-import "exporter";
+import * as exportedModule from "exporter";
 ```
 
 Since there are multiple default exports, this code is not valid. Thus the graph may also be incorrect.
