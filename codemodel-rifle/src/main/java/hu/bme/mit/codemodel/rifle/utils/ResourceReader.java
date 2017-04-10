@@ -33,12 +33,12 @@ public class ResourceReader {
     public static Collection<String> getImportExportQueries() {
         final String[] extensions = new String[]{ "cypher" };
 
-        File importExportQueriesDirectory = new File(ResourceReader.class.getClassLoader().getResource("queries" + File.separator + "importexport").getPath());
+        File importExportQueriesDirectory = new File(ResourceReader.class.getClassLoader().getResource("queries" + File.separator + "impex").getPath());
         Collection<File> importExportQueryFiles = FileUtils.listFiles(importExportQueriesDirectory, extensions, false);
         Collection<String> importExportQueries = new ArrayList<>();
 
         for (File file : importExportQueryFiles) {
-            importExportQueries.add(readFromResource("queries" + File.separator + "importexport" + File.separator + file.getName()));
+            importExportQueries.add(readFromResource("queries" + File.separator + "impex" + File.separator + file.getName()));
         }
 
         return importExportQueries;
