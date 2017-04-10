@@ -19,7 +19,7 @@ import com.shapesecurity.functional.data.Either;
 import com.shapesecurity.functional.data.HashTable;
 import com.shapesecurity.functional.data.ImmutableList;
 import com.shapesecurity.functional.data.Maybe;
-import com.shapesecurity.shift.ast.SourceSpan;
+import com.shapesecurity.shift.parser.SourceSpan;
 import com.shapesecurity.shift.parser.ParserWithLocation;
 import com.shapesecurity.shift.scope.Scope;
 
