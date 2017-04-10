@@ -56,7 +56,7 @@ Codemodel-Rifle should be able to process multiple related JavaScript files (mod
 
 ### Distinct cases of import-export on AST-/ASG-level
 
-We distinguish different import-export *syntaxes* (above) from different import-export *cases*. We do not care about the syntax, we are only interested in the AST- (and thus ASG-) representation of a certain case. The individual cases are detailed below. Within a case, all syntaxes are represented in the same way.
+We distinguish different import-export *syntaxes* (above) from different import-export *cases*. We do not care about the syntax, we are only interested in the AST- (and thus ASG-) representation of a certain case. The individual cases are detailed below. Within a case, all syntaxes are AST-indifferent.
 
 #### Export cases
 
