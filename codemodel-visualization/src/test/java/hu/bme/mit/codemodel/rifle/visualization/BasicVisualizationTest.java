@@ -24,10 +24,10 @@ public class BasicVisualizationTest extends TestCase {
     }
 
     @Test
-    public void test1() throws IOException {
+    public void test() throws IOException {
         DbServices dbServices = DbServicesManager.getDbServices(branchId);
         DbServiceDecorator dbServicesDecorator = new DbServiceDecorator(dbServices.getUnderlyingDatabaseService());
-        String path = this.getTestResourcesFolderPath("test1");
+        String path = this.getTestResourcesFolderPath("test");
 
         SynchronizeRepository synchronizeRepository = new SynchronizeRepository(path, branchId, sessionId);
         synchronizeRepository.sync();
