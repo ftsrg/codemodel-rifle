@@ -1,1 +1,0 @@
-import defaultMember from "export";
