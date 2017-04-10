@@ -23,7 +23,7 @@ import org.junit.Test;
  * There are many cases regarding ECMA6 imports and exports.
  * For the complete reference, check:
  * - https://developer.mozilla.org/hu/docs/Web/JavaScript/Reference/Statements/export
- * - https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import
+ * - https://developer.mozilla.org/hu/docs/Web/JavaScript/Reference/Statements/import
  * <p>
  * For a systematic summary and for decoding the testcases, check:
  * https://docs.google.com/spreadsheets/d/1Du9TV8l2FY-eD3j5LumuNgZCYMAJY6z9pSUoQ_p0D50/edit?usp=sharing
