@@ -50,8 +50,11 @@ public class BasicJSImportExportTest extends TestCase {
 
         ExportGraph eg = new ExportGraph(dbServicesDecorator);
 
+        String[] testNameSplit = path.split(File.separator);
+        String testName = testNameSplit[testNameSplit.length - 1];
+
         try {
-            beforePng = new File(path + File.separator + "before.png");
+            beforePng = new File(path + File.separator + testName + ".png");
             if (!beforePng.exists()) {
                 beforePng.createNewFile();
             }
@@ -81,7 +84,7 @@ public class BasicJSImportExportTest extends TestCase {
 
 
         try {
-            afterPng = new File(path + File.separator + "after.png");
+            afterPng = new File(path + File.separator + testName + ".png");
             if (!afterPng.exists()) {
                 afterPng.createNewFile();
             }
