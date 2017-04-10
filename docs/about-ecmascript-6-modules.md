@@ -71,6 +71,8 @@ export { name1 as exportedName1, name2 as exportedName2, … };
 
 * **exportAsDefault**
 
+Known issue of Shift parser: `name1` gets exported not as default, but as a standard variable with the name `default`.
+
 ```JavaScript
 export { name1 as default, … };
 ```
@@ -182,6 +184,12 @@ import { name1 as importedName1, … } from "exporter";
 import defaultName from "exporter";
 ```
 
+* **importName**
+
+```JavaScript
+import { name1, … } from "exporter";
+```
+
 * **importModule** (omitted)
 
 *Omitted: in this case, no bindings are made between the two module. The first such import executes the imported module's body. See [here](http://exploringjs.com/es6/ch_modules.html#_importing-styles).*
@@ -190,13 +198,9 @@ import defaultName from "exporter";
 import "exporter";
 ```
 
-* **importName**
+* **importNamespace** (omitted)
 
-```JavaScript
-import { name1, … } from "exporter";
-```
-
-* **importNamespace**
+*Temporarily omitted.*
 
 ```JavaScript
 import * as exportedModule from "exporter";
