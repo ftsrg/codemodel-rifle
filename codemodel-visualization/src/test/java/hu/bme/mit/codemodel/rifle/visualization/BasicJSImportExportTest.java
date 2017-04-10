@@ -102,435 +102,212 @@ public class BasicJSImportExportTest extends TestCase {
     }
 
     @Test
-    public void test1_2() {
-        String path = this.getTestResourcesFolderPath("test1_2");
+    public void test_exportName_importNamespace() {
+        String path = this.getTestResourcesFolderPath("test_exportName_importNamespace");
         this.doImportExportAndVisualization(path);
     }
 
     @Test
-    public void test1_3() {
-        String path = this.getTestResourcesFolderPath("test1_3");
+    public void test_exportName_importName() {
+        String path = this.getTestResourcesFolderPath("test_exportName_importName");
         this.doImportExportAndVisualization(path);
     }
 
     @Test
-    public void test1_4() {
-        String path = this.getTestResourcesFolderPath("test1_4");
+    public void test_exportName_importAlias() {
+        String path = this.getTestResourcesFolderPath("test_exportName_importAlias");
         this.doImportExportAndVisualization(path);
     }
 
     @Test
-    public void test1_5() {
-        String path = this.getTestResourcesFolderPath("test1_5");
+    public void test_exportAlias_importNamespace() {
+        String path = this.getTestResourcesFolderPath("test_exportAlias_importNamespace");
         this.doImportExportAndVisualization(path);
     }
 
     @Test
-    public void test1_6() {
-        String path = this.getTestResourcesFolderPath("test1_6");
+    public void test_exportAlias_importName() {
+        String path = this.getTestResourcesFolderPath("test_exportAlias_importName");
         this.doImportExportAndVisualization(path);
     }
 
     @Test
-    public void test1_9() {
-        String path = this.getTestResourcesFolderPath("test1_9");
+    public void test_exportAlias_importAlias() {
+        String path = this.getTestResourcesFolderPath("test_exportAlias_importAlias");
         this.doImportExportAndVisualization(path);
     }
 
     @Test
-    public void test2_2() {
-        String path = this.getTestResourcesFolderPath("test2_2");
+    public void test_exportDeclaration_importNamespace() {
+        String path = this.getTestResourcesFolderPath("test_exportDeclaration_importNamespace");
         this.doImportExportAndVisualization(path);
     }
 
     @Test
-    public void test2_3() {
-        String path = this.getTestResourcesFolderPath("test2_3");
+    public void test_exportDeclaration_importName() {
+        String path = this.getTestResourcesFolderPath("test_exportDeclaration_importName");
         this.doImportExportAndVisualization(path);
     }
 
     @Test
-    public void test2_4() {
-        String path = this.getTestResourcesFolderPath("test2_4");
+    public void test_exportDeclaration_importAlias() {
+        String path = this.getTestResourcesFolderPath("test_exportDeclaration_importAlias");
         this.doImportExportAndVisualization(path);
     }
 
     @Test
-    public void test2_5() {
-        String path = this.getTestResourcesFolderPath("test2_5");
+    public void test_9_importDefault() {
+        String path = this.getTestResourcesFolderPath("test_9_importDefault");
         this.doImportExportAndVisualization(path);
     }
 
     @Test
-    public void test2_6() {
-        String path = this.getTestResourcesFolderPath("test2_6");
+    public void test_9_importNamespace() {
+        String path = this.getTestResourcesFolderPath("test_9_importNamespace");
         this.doImportExportAndVisualization(path);
     }
 
     @Test
-    public void test2_9() {
-        String path = this.getTestResourcesFolderPath("test2_9");
+    public void test_10_importDefault() {
+        String path = this.getTestResourcesFolderPath("test_10_importDefault");
         this.doImportExportAndVisualization(path);
     }
 
     @Test
-    public void test3_2() {
-        String path = this.getTestResourcesFolderPath("test3_2");
+    public void test_10_importNamespace() {
+        String path = this.getTestResourcesFolderPath("test_10_importNamespace");
         this.doImportExportAndVisualization(path);
     }
 
     @Test
-    public void test3_3() {
-        String path = this.getTestResourcesFolderPath("test3_3");
+    public void test_11_importDefault() {
+        String path = this.getTestResourcesFolderPath("test_11_importDefault");
         this.doImportExportAndVisualization(path);
     }
 
     @Test
-    public void test3_4() {
-        String path = this.getTestResourcesFolderPath("test3_4");
+    public void test_11_importNamespace() {
+        String path = this.getTestResourcesFolderPath("test_11_importNamespace");
         this.doImportExportAndVisualization(path);
     }
 
     @Test
-    public void test3_5() {
-        String path = this.getTestResourcesFolderPath("test3_5");
+    public void test_12_importDefault() {
+        String path = this.getTestResourcesFolderPath("test_12_importDefault");
         this.doImportExportAndVisualization(path);
     }
 
     @Test
-    public void test3_6() {
-        String path = this.getTestResourcesFolderPath("test3_6");
+    public void test_12_importNamespace() {
+        String path = this.getTestResourcesFolderPath("test_12_importNamespace");
         this.doImportExportAndVisualization(path);
     }
 
     @Test
-    public void test3_9() {
-        String path = this.getTestResourcesFolderPath("test3_9");
+    public void test_13_importDefault() {
+        String path = this.getTestResourcesFolderPath("test_13_importDefault");
         this.doImportExportAndVisualization(path);
     }
 
     @Test
-    public void test6_2() {
-        String path = this.getTestResourcesFolderPath("test6_2");
+    public void test_13_importNamespace() {
+        String path = this.getTestResourcesFolderPath("test_13_importNamespace");
         this.doImportExportAndVisualization(path);
     }
 
     @Test
-    public void test6_3() {
-        String path = this.getTestResourcesFolderPath("test6_3");
+    public void test_14_importDefault() {
+        String path = this.getTestResourcesFolderPath("test_14_importDefault");
         this.doImportExportAndVisualization(path);
     }
 
     @Test
-    public void test6_4() {
-        String path = this.getTestResourcesFolderPath("test6_4");
+    public void test_14_importNamespace() {
+        String path = this.getTestResourcesFolderPath("test_14_importNamespace");
         this.doImportExportAndVisualization(path);
     }
 
     @Test
-    public void test6_5() {
-        String path = this.getTestResourcesFolderPath("test6_5");
+    public void test_15_importDefault() {
+        String path = this.getTestResourcesFolderPath("test_15_importDefault");
         this.doImportExportAndVisualization(path);
     }
 
     @Test
-    public void test6_6() {
-        String path = this.getTestResourcesFolderPath("test6_6");
+    public void test_15_importNamespace() {
+        String path = this.getTestResourcesFolderPath("test_15_importNamespace");
         this.doImportExportAndVisualization(path);
     }
 
     @Test
-    public void test6_9() {
-        String path = this.getTestResourcesFolderPath("test6_9");
+    public void test_16_importDefault() {
+        String path = this.getTestResourcesFolderPath("test_16_importDefault");
         this.doImportExportAndVisualization(path);
     }
 
     @Test
-    public void test7_2() {
-        String path = this.getTestResourcesFolderPath("test7_2");
+    public void test_16_importNamespace() {
+        String path = this.getTestResourcesFolderPath("test_16_importNamespace");
         this.doImportExportAndVisualization(path);
     }
 
     @Test
-    public void test9_1() {
-        String path = this.getTestResourcesFolderPath("test9_1");
+    public void test_17_importDefault() {
+        String path = this.getTestResourcesFolderPath("test_17_importDefault");
         this.doImportExportAndVisualization(path);
     }
 
     @Test
-    public void test9_2() {
-        String path = this.getTestResourcesFolderPath("test9_2");
+    public void test_17_importNamespace() {
+        String path = this.getTestResourcesFolderPath("test_17_importNamespace");
         this.doImportExportAndVisualization(path);
     }
 
     @Test
-    public void test9_9() {
-        String path = this.getTestResourcesFolderPath("test9_9");
+    public void test_17_importName() {
+        String path = this.getTestResourcesFolderPath("test_17_importName");
         this.doImportExportAndVisualization(path);
     }
 
     @Test
-    public void test10_1() {
-        String path = this.getTestResourcesFolderPath("test10_1");
+    public void test_17_importAlias() {
+        String path = this.getTestResourcesFolderPath("test_17_importAlias");
         this.doImportExportAndVisualization(path);
     }
 
     @Test
-    public void test10_2() {
-        String path = this.getTestResourcesFolderPath("test10_2");
+    public void test_18_importNamespace() {
+        String path = this.getTestResourcesFolderPath("test_18_importNamespace");
         this.doImportExportAndVisualization(path);
     }
 
     @Test
-    public void test10_9() {
-        String path = this.getTestResourcesFolderPath("test10_9");
+    public void test_18_importName() {
+        String path = this.getTestResourcesFolderPath("test_18_importName");
         this.doImportExportAndVisualization(path);
     }
 
     @Test
-    public void test11_1() {
-        String path = this.getTestResourcesFolderPath("test11_1");
+    public void test_18_importAlias() {
+        String path = this.getTestResourcesFolderPath("test_18_importAlias");
         this.doImportExportAndVisualization(path);
     }
 
     @Test
-    public void test11_2() {
-        String path = this.getTestResourcesFolderPath("test11_2");
+    public void test_19_importNamespace() {
+        String path = this.getTestResourcesFolderPath("test_19_importNamespace");
         this.doImportExportAndVisualization(path);
     }
 
     @Test
-    public void test11_9() {
-        String path = this.getTestResourcesFolderPath("test11_9");
+    public void test_19_importName() {
+        String path = this.getTestResourcesFolderPath("test_19_importName");
         this.doImportExportAndVisualization(path);
     }
 
     @Test
-    public void test12_1() {
-        String path = this.getTestResourcesFolderPath("test12_1");
+    public void test_19_importAlias() {
+        String path = this.getTestResourcesFolderPath("test_19_importAlias");
         this.doImportExportAndVisualization(path);
     }
-
-    @Test
-    public void test12_2() {
-        String path = this.getTestResourcesFolderPath("test12_2");
-        this.doImportExportAndVisualization(path);
-    }
-
-    @Test
-    public void test12_9() {
-        String path = this.getTestResourcesFolderPath("test12_9");
-        this.doImportExportAndVisualization(path);
-    }
-
-    @Test
-    public void test13_1() {
-        String path = this.getTestResourcesFolderPath("test13_1");
-        this.doImportExportAndVisualization(path);
-    }
-
-    @Test
-    public void test13_2() {
-        String path = this.getTestResourcesFolderPath("test13_2");
-        this.doImportExportAndVisualization(path);
-    }
-
-    @Test
-    public void test13_9() {
-        String path = this.getTestResourcesFolderPath("test13_9");
-        this.doImportExportAndVisualization(path);
-    }
-
-    @Test
-    public void test14_1() {
-        String path = this.getTestResourcesFolderPath("test14_1");
-        this.doImportExportAndVisualization(path);
-    }
-
-    @Test
-    public void test14_2() {
-        String path = this.getTestResourcesFolderPath("test14_2");
-        this.doImportExportAndVisualization(path);
-    }
-
-    @Test
-    public void test14_9() {
-        String path = this.getTestResourcesFolderPath("test14_9");
-        this.doImportExportAndVisualization(path);
-    }
-
-    @Test
-    public void test15_1() {
-        String path = this.getTestResourcesFolderPath("test15_1");
-        this.doImportExportAndVisualization(path);
-    }
-
-    @Test
-    public void test15_2() {
-        String path = this.getTestResourcesFolderPath("test15_2");
-        this.doImportExportAndVisualization(path);
-    }
-
-    @Test
-    public void test15_9() {
-        String path = this.getTestResourcesFolderPath("test15_9");
-        this.doImportExportAndVisualization(path);
-    }
-
-    @Test
-    public void test16_1() {
-        String path = this.getTestResourcesFolderPath("test16_1");
-        this.doImportExportAndVisualization(path);
-    }
-
-    @Test
-    public void test16_2() {
-        String path = this.getTestResourcesFolderPath("test16_2");
-        this.doImportExportAndVisualization(path);
-    }
-
-    @Test
-    public void test16_7() {
-        String path = this.getTestResourcesFolderPath("test16_7");
-        this.doImportExportAndVisualization(path);
-    }
-
-    @Test
-    public void test16_8() {
-        String path = this.getTestResourcesFolderPath("test16_8");
-        this.doImportExportAndVisualization(path);
-    }
-
-    @Test
-    public void test16_9() {
-        String path = this.getTestResourcesFolderPath("test16_9");
-        this.doImportExportAndVisualization(path);
-    }
-
-    @Test
-    public void test17_1() {
-        String path = this.getTestResourcesFolderPath("test17_1");
-        this.doImportExportAndVisualization(path);
-    }
-
-    @Test
-    public void test17_2() {
-        String path = this.getTestResourcesFolderPath("test17_2");
-        this.doImportExportAndVisualization(path);
-    }
-
-    @Test
-    public void test17_3() {
-        String path = this.getTestResourcesFolderPath("test17_3");
-        this.doImportExportAndVisualization(path);
-    }
-
-    @Test
-    public void test17_4() {
-        String path = this.getTestResourcesFolderPath("test17_4");
-        this.doImportExportAndVisualization(path);
-    }
-
-    @Test
-    public void test17_5() {
-        String path = this.getTestResourcesFolderPath("test17_5");
-        this.doImportExportAndVisualization(path);
-    }
-
-    @Test
-    public void test17_6() {
-        String path = this.getTestResourcesFolderPath("test17_6");
-        this.doImportExportAndVisualization(path);
-    }
-
-    @Test
-    public void test17_7() {
-        String path = this.getTestResourcesFolderPath("test17_7");
-        this.doImportExportAndVisualization(path);
-    }
-
-    @Test
-    public void test17_8() {
-        String path = this.getTestResourcesFolderPath("test17_8");
-        this.doImportExportAndVisualization(path);
-    }
-
-    @Test
-    public void test17_9() {
-        String path = this.getTestResourcesFolderPath("test17_9");
-        this.doImportExportAndVisualization(path);
-    }
-
-    @Test
-    public void test18_2() {
-        String path = this.getTestResourcesFolderPath("test18_2");
-        this.doImportExportAndVisualization(path);
-    }
-
-    @Test
-    public void test18_3() {
-        String path = this.getTestResourcesFolderPath("test18_3");
-        this.doImportExportAndVisualization(path);
-    }
-
-    @Test
-    public void test18_4() {
-        String path = this.getTestResourcesFolderPath("test18_4");
-        this.doImportExportAndVisualization(path);
-    }
-
-    @Test
-    public void test18_5() {
-        String path = this.getTestResourcesFolderPath("test18_5");
-        this.doImportExportAndVisualization(path);
-    }
-
-    @Test
-    public void test18_6() {
-        String path = this.getTestResourcesFolderPath("test18_6");
-        this.doImportExportAndVisualization(path);
-    }
-
-    @Test
-    public void test18_9() {
-        String path = this.getTestResourcesFolderPath("test18_9");
-        this.doImportExportAndVisualization(path);
-    }
-
-    @Test
-    public void test19_2() {
-        String path = this.getTestResourcesFolderPath("test19_2");
-        this.doImportExportAndVisualization(path);
-    }
-
-    @Test
-    public void test19_3() {
-        String path = this.getTestResourcesFolderPath("test19_3");
-        this.doImportExportAndVisualization(path);
-    }
-
-    @Test
-    public void test19_4() {
-        String path = this.getTestResourcesFolderPath("test19_4");
-        this.doImportExportAndVisualization(path);
-    }
-
-    @Test
-    public void test19_5() {
-        String path = this.getTestResourcesFolderPath("test19_5");
-        this.doImportExportAndVisualization(path);
-    }
-
-    @Test
-    public void test19_6() {
-        String path = this.getTestResourcesFolderPath("test19_6");
-        this.doImportExportAndVisualization(path);
-    }
-
-    @Test
-    public void test19_9() {
-        String path = this.getTestResourcesFolderPath("test19_9");
-        this.doImportExportAndVisualization(path);
-    }
-
 }
