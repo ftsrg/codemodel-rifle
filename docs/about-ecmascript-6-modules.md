@@ -63,18 +63,21 @@ We distinguish different import-export *syntaxes* (above) from different import-
 The case-names are used in the code consistently.
 
 * **exportName**
+
 ```JavaScript
 export { name1 };
 export { name1, name2, … };
 ```
 
 * **exportAlias**
+
 ```JavaScript
 export { name1 as exportedName1 };
 export { name1 as exportedName1, name2 as exportedName2, … };
 ```
 
 * **exportDeclaration**
+
 ```JavaScript
 export let name1;
 export let name1, name2, …;
@@ -116,12 +119,6 @@ import { name1, … } from "exporter";
 
 ```JavaScript
 import { name1 as importedName1, … } from "exporter";
-```
-
-* **importDefault**
-
-```JavaScript
-import defaultName from "exporter";
 ```
 
 * **importModule** (omitted)
