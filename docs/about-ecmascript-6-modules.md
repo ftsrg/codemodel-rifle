@@ -95,37 +95,42 @@ export const name1 = …, name2 = …, …;
 The case-names are used in the code consistently.
 
 * **importDefault**
+
 ```JavaScript
 import defaultName from "exporter";
 ```
 
 * **importNamespace**
+
 ```JavaScript
 import * as exportedModule from "exporter";
 ```
 
 * **importName**
+
 ```JavaScript
 import { name1, … } from "exporter";
 ```
 
 * **importAlias**
+
 ```JavaScript
 import { name1 as importedName1, … } from "exporter";
 ```
 
 * **importDefault**
+
 ```JavaScript
 import defaultName from "exporter";
 ```
 
 * **importModule** (omitted)
 
+*Omitted: in this case, no bindings are made between the two module. The first such import executes the module's body. See [here](http://exploringjs.com/es6/ch_modules.html#_importing-styles).*
+
 ```JavaScript
 import "exporter";
 ```
-
-Omitted: in this case, no bindings are made between the two module. The first such import executes the module's body. See [here](http://exploringjs.com/es6/ch_modules.html#_importing-styles).
 
 Since there are multiple default exports, this code is not valid. Thus the graph may also be incorrect.
 
