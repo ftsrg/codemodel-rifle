@@ -25,8 +25,7 @@ import org.junit.Test;
  * - https://developer.mozilla.org/hu/docs/Web/JavaScript/Reference/Statements/export
  * - https://developer.mozilla.org/hu/docs/Web/JavaScript/Reference/Statements/import
  * <p>
- * For a systematic summary and for decoding the testcases, check:
- * https://docs.google.com/spreadsheets/d/1Du9TV8l2FY-eD3j5LumuNgZCYMAJY6z9pSUoQ_p0D50/edit?usp=sharing
+ * For a systematic summary and for decoding the testcases, check the documentation.
  */
 public class BasicJSImportExportTest extends TestCase {
     private static final Logger logger = Logger.getLogger("codemodel");
@@ -36,7 +35,6 @@ public class BasicJSImportExportTest extends TestCase {
     public void deleteDb() {
         new DeleteGraph().delete(branchId);
     }
-
 
     protected void doImportExportAndVisualization(String path) {
         DbServices dbServices = DbServicesManager.getDbServices(branchId);
