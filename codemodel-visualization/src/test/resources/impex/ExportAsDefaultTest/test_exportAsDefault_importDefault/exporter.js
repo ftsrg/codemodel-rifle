@@ -7,4 +7,4 @@ let name4 = function () {
     return "name4Value";
 };
 
-export { name1 as default, name2, name3, name4 };
+export { name1 as default };
