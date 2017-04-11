@@ -251,17 +251,10 @@ public class ASTScopeProcessor {
             Iterable list = (Iterable)subject;
 
             // id -- [field] -> list
-            this.storeReference(parent, list, label);
-            this.storeType(list, "List");
-            this.storeReference(parsedFilePath, list, "contains");
-            this.handleIfInSession(sessionId, list);
-
             final Iterator iterator = list.iterator();
-            int i = 0;
             Object prev = null;
             while (iterator.hasNext()) {
                 Object el = iterator.next();
-                this.processingQueue.add(new QueueItem(el, list, Integer.toString(i)));
 
                 if (prev != null) {
                     this.processingQueue.add(new QueueItem(el, prev, "_next"));
@@ -270,12 +263,7 @@ public class ASTScopeProcessor {
 
                 // connect the children directly
                 this.processingQueue.add(new QueueItem(el, parent, label));
-
-                i++;
             }
-
-            this.storeReference(list, prev, "last");
-            this.createEndNode(list, sessionId);
         } else if (subject instanceof Map) {
             Map map = (Map)subject;
 

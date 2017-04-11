@@ -60,7 +60,6 @@ public class GraphWalker extends Walker {
     public <R, E extends Throwable> R accept(Visitor<R, E> visitor) throws E {
         //filternodes:
         for (Node node : nodes) {
-
             if (simple) {
                 if (node.hasLabel(Label.label("CompilationUnit"))) {
                     continue; // filternodes;
@@ -80,6 +79,7 @@ public class GraphWalker extends Walker {
             }
 
             visitor.visitNode(node);
+
             for (Relationship relationship : node.getRelationships(Direction.OUTGOING)) {
                 if (nodes.contains(relationship.getOtherNode(node))) {
                     if (relationship.isType(RelationshipType.withName("location"))) {
@@ -108,6 +108,7 @@ public class GraphWalker extends Walker {
                 }
             }
         }
+
         return visitor.done();
     }
 }
