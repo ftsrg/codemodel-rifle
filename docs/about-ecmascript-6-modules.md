@@ -77,18 +77,6 @@ Known issue of Shift parser: `name1` gets exported not as default, but as a stan
 export { name1 as default, … };
 ```
 
-* **exportDefaultClass**
-
-```JavaScript
-export default class (…) { … }
-```
-
-* **exportDefaultClassWithName**
-
-```JavaScript
-export default class name1(…) { … }
-```
-
 * **exportDeclaration**
 
 ```JavaScript
@@ -102,6 +90,18 @@ export var name1 = …;
 export var name1 = …, name2 = …, …;
 export const name1 = …;
 export const name1 = …, name2 = …, …;
+```
+
+* **exportDefaultClass**
+
+```JavaScript
+export default class (…) { … }
+```
+
+* **exportDefaultClassWithName**
+
+```JavaScript
+export default class name1(…) { … }
 ```
 
 * **exportDefaultExpression**
