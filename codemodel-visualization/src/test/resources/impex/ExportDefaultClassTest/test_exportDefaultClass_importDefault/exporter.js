@@ -1,6 +1,5 @@
 export default class {
-    constructor(x, y) {
+    constructor(x) {
         this.x = x;
-        this.y = y;
     }
 };
