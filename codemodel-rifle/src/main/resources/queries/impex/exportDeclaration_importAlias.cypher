@@ -1,8 +1,9 @@
 MATCH
 // export.js: export var name1;
-    (exporter:CompilationUnit)-[:contains]->(:ExportDeclaration)-[:declaration]->(:VariableDeclaration)
-        -[:declarators]->(:VariableDeclarator)-[:binding]->(exportBindingIdentifier:BindingIdentifier)
-        <-[:node]-(declarationToMerge:Declaration)<--(declarationListToMerge:List)<-[:declarations]-(:Variable),
+    (exporter:CompilationUnit)-[:contains]->(:ExportDeclaration)
+        -[:declaration]->(:FunctionDeclarationClassDeclarationVariableDeclaration)-[:declarators]->(:VariableDeclarator)
+        -[:binding]->(exportBindingIdentifier:BindingIdentifier)<-[:node]-(declarationToMerge:Declaration)
+        <--(declarationListToMerge:List)<-[:declarations]-(:Variable),
 
 // import.js: import { name1 as importedName1 } from "exporter";
     (importer:CompilationUnit)-[:contains]->(import:Import)-[:namedImports]->(importSpecifier:ImportSpecifier)
