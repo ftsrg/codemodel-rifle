@@ -1,0 +1,7 @@
+title: Codemodel-Rifle
+description: Graph-based static analysis of ECMAScript 6 source code repositories
+baseurl: /codemodel-rifle
+
+theme: jekyll-theme-minimal
+show_downloads: true
+markdown: kramdown
