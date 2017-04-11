@@ -95,13 +95,8 @@ export const name1 = …, name2 = …, …;
 * **exportDefaultClass**
 
 ```JavaScript
-export default class (…) { … }
-```
-
-* **exportDefaultClassWithName**
-
-```JavaScript
-export default class name1(…) { … }
+export default class { … }
+export default class name1 { … }
 ```
 
 * **exportDefaultExpression**
@@ -134,6 +129,13 @@ export default function* (…) { … }
 export default function* name1(…) { … }
 ```
 
+* **exportName**
+
+```JavaScript
+export { name1 };
+export { name1, name2, … };
+```
+
 * **exportExpression** (not supported)
 
 *Not supported: expressions can not be imported.*
@@ -142,27 +144,26 @@ export default function* name1(…) { … }
 export expression;
 ```
 
-* **exportName**
+* **reexportAlias** (not supported)
 
-```JavaScript
-export { name1 };
-export { name1, name2, … };
-```
-
-* **reexportAlias**
+*Currently not supported.*
 
 ```JavaScript
 export { import1 as importedName1, import2 as importedName2, … } from …;
 ```
 
-* **reexportName**
+* **reexportName** (not supported)
+
+*Currently not supported.*
 
 ```JavaScript
 export { name1, name2, … } from … ;
 { import1 as importedName1, import2 as importedName2, … } from …;
 ```
 
-* **reexportNamespace**
+* **reexportNamespace** (not supported)
+
+*Currently not supported.*
 
 ```JavaScript
 export * from … ;
