@@ -23,10 +23,10 @@ export const name1 = …, name2 = …, … ;
 export expression;
 export default expression;
 export default function (…) { … }
-export default class (…) { … }
+export default class { … }
 export default function* (…) { … } // generator
 export default function name1(…) { … }
-export default class name1(…) { … }
+export default class name1 { … }
 export default function* name1(…) { … } // generator
 export { name1 as default, … };
 export * from …;
