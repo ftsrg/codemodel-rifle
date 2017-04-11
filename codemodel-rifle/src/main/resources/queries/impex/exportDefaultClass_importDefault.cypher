@@ -12,7 +12,8 @@ MATCH
 
     WHERE
     exporter.parsedFilePath CONTAINS import.moduleSpecifier
-    AND exportBindingIdentifierToDelete.name CONTAINS 'default'
+// Shift Parser parses default exported class with a binding named '*default*'
+    AND exportBindingIdentifierToDelete.name = '*default*'
 
 CREATE UNIQUE
     (exportedClassDeclarationToMerge)-[:name]->(importBindingIdentifierToMerge),
