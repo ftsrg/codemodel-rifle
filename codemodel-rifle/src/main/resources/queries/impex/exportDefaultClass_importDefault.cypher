@@ -1,10 +1,10 @@
 MATCH
-// export.js: export default class { … };
+// exporter.js: export default class { … };
     (exporter:CompilationUnit)-[:contains]->(exporterGlobalScope:GlobalScope)-[:children]->(exporterModuleScope:Scope)
         -[:astNode]->(exporterModule:Module)-[:items]->(:ExportDefault)
         -[:body]->(exportedClassDeclarationToMerge:ClassDeclaration)<-[:astNode]-(exportedClassScopeToMerge:Scope),
 
-// import.js: import defaultName from "exporter";
+// importer.js: import defaultName from "exporter";
     (importer:CompilationUnit)-[:contains]->(importerGlobalScope:GlobalScope)-[:children]->(importerModuleScope:Scope)
         -[:astNode]->(importerModule:Module)-[:items]->(import:ImportDeclaration)
         -[:defaultBinding]->(importBindingIdentifierToMerge:BindingIdentifier)
