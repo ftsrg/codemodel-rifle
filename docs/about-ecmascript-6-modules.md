@@ -134,9 +134,9 @@ export default function* (…) { … }
 export default function* name1(…) { … }
 ```
 
-* **exportExpression** (omitted)
+* **exportExpression** (not supported)
 
-*Omitted: can not be imported.*
+*Not supported: expressions can not be imported.*
 
 ```JavaScript
 export expression;
@@ -190,17 +190,17 @@ import defaultName from "exporter";
 import { name1, … } from "exporter";
 ```
 
-* **importModule** (omitted)
+* **importModule** (not supported)
 
-*Omitted: in this case, no bindings are made between the two module. The first such import executes the imported module's body. See [here](http://exploringjs.com/es6/ch_modules.html#_importing-styles).*
+*Not supported: in this case, no bindings are made between the two module. The first such import executes the imported module's body. See [here](http://exploringjs.com/es6/ch_modules.html#_importing-styles).*
 
 ```JavaScript
 import "exporter";
 ```
 
-* **importNamespace** (omitted)
+* **importNamespace** (not supported)
 
-*Temporarily omitted.*
+*Currently not supported.*
 
 ```JavaScript
 import * as exportedModule from "exporter";
