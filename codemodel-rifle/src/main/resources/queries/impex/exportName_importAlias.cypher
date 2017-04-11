@@ -4,7 +4,7 @@ MATCH
     (exporter)-[:contains]->(exportedVariable:Variable)-[:declarations]->(declarationListToMerge:List)
         -->(declarationToMerge:Declaration)-[:node]->(exportBindingIdentifierToMerge:BindingIdentifier),
 
-// import.js: import { name1 as exportedName1 } from "export";
+// import.js: import { name1 as exportedName1 } from "exporter";
     (importer:CompilationUnit)-[:contains]->(importedVariable:Variable)-[:declarations]->(declarationListToDelete:List)
         -->(declarationToDelete:Declaration)-[:node]->(importBindingIdentifierToDelete:BindingIdentifier)
         <-[:binding]-(importSpecifier:ImportSpecifier)<-[:namedImports]-(importDeclaration:ImportDeclaration)
