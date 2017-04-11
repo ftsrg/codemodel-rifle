@@ -4,8 +4,8 @@ import org.junit.Test;
 
 public class ExportAliasTest extends ImpexTestCase {
     @Test
-    public void test_exportAlias_importNamespace() {
-        String path = this.getTestResourcesFolderPath("test_exportAlias_importNamespace");
+    public void test_exportAlias_importAlias() {
+        String path = this.getTestResourcesFolderPath("test_exportAlias_importAlias");
         this.doImportExportAndVisualization(path);
     }
 
@@ -16,8 +16,8 @@ public class ExportAliasTest extends ImpexTestCase {
     }
 
     @Test
-    public void test_exportAlias_importAlias() {
-        String path = this.getTestResourcesFolderPath("test_exportAlias_importAlias");
+    public void test_exportAlias_importNamespace() {
+        String path = this.getTestResourcesFolderPath("test_exportAlias_importNamespace");
         this.doImportExportAndVisualization(path);
     }
 }
