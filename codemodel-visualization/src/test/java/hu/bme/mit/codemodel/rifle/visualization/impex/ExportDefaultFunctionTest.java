@@ -8,10 +8,4 @@ public class ExportDefaultFunctionTest extends ImpexTestCase {
         String path = this.getTestResourcesFolderPath("test_exportDefaultFunction_importDefault");
         this.doImportExportAndVisualization(path);
     }
-
-    @Test
-    public void test_exportDefaultFunction_importNamespace() {
-        String path = this.getTestResourcesFolderPath("test_exportDefaultFunction_importNamespace");
-        this.doImportExportAndVisualization(path);
-    }
 }

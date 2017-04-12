@@ -1,1 +1,1 @@
-import defaultMember from "exporter";
+import defaultName from "exporter";
