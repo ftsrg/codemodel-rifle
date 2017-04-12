@@ -29,6 +29,10 @@ scripts/init-neo4j.sh
 
 Further configuration in DbServicesManager class will be required.
 
+## Documentation
+
+The documentation is available on the [Codemodel-Rifle Wiki](https://github.com/FTSRG/codemodel-rifle/wiki).
+
 ## IDE support
 
 The project is implemented in Java 8. We recommend [Eclipse](http://www.eclipse.org/downloads/eclipse-packages/) with the [Buildship Gradle plug-in](https://projects.eclipse.org/projects/tools.buildship) or [IntelliJ IDEA](https://www.jetbrains.com/idea/) for editing the code.
