@@ -16,6 +16,7 @@ MATCH
 
     WHERE
     exporter.parsedFilePath CONTAINS import.moduleSpecifier
+    AND importSpecifier.name <> importedVariable.name
 
 CREATE UNIQUE
     (exportedFunctionDeclarationToMerge)-[:name]->(importBindingIdentifierToMerge),
