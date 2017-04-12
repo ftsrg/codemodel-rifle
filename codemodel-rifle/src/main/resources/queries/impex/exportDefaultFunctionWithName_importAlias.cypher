@@ -5,18 +5,18 @@ MATCH
         -[:body]->(exportedFunctionDeclarationToMerge:FunctionDeclaration)
         <-[:astNode]-(exportedFunctionScopeToMerge:Scope),
     (exportedFunctionDeclarationToMerge)-[:name]->(:BindingIdentifier)<-[:node]-(declarationToMerge:Declaration)
-        <-[:declarations]-(:Variable)<--(:Map)<-[:variables]-(exporterModuleScope),
+        <-[:declarations]-(exportedFunctionVariable:Variable)<--(:Map)<-[:variables]-(exporterModuleScope),
 
 // importer.js: import { name1 as importedName1 } from "exporter";
     (importer:CompilationUnit)-[:contains]->(importerGlobalScope:GlobalScope)-[:children]->(importerModuleScope:Scope)
-        -[:astNode]->(importerModule:Module)-[:items]->(import:Import)
+        -[:astNode]->(importerModule:Module)-[:items]->(import:ImportDeclaration)
         -[:namedImports]->(importSpecifier:ImportSpecifier)
         -[:binding]->(importBindingIdentifierToMerge:BindingIdentifier)<-[:node]-(declarationToDelete:Declaration)
         <-[:declarations]-(importedVariable:Variable)
 
     WHERE
     exporter.parsedFilePath CONTAINS import.moduleSpecifier
-    AND importSpecifier.name <> importedVariable.name
+    AND exportedFunctionVariable.name = importSpecifier.name
 
 CREATE UNIQUE
     (exportedFunctionDeclarationToMerge)-[:name]->(importBindingIdentifierToMerge),
