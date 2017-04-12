@@ -4,14 +4,20 @@ import org.junit.Test;
 
 public class ExportDefaultFunctionWithNameTest extends ImpexTestCase {
     @Test
+    public void test_exportDefaultFunctionWithName_importAlias() {
+        String path = this.getTestResourcesFolderPath("test_exportDefaultFunctionWithName_importAlias");
+        this.doImportExportAndVisualization(path);
+    }
+
+    @Test
     public void test_exportDefaultFunctionWithName_importDefault() {
         String path = this.getTestResourcesFolderPath("test_exportDefaultFunctionWithName_importDefault");
         this.doImportExportAndVisualization(path);
     }
 
     @Test
-    public void test_exportDefaultFunctionWithName_importNamespace() {
-        String path = this.getTestResourcesFolderPath("test_exportDefaultFunctionWithName_importNamespace");
+    public void test_exportDefaultFunctionWithName_importName() {
+        String path = this.getTestResourcesFolderPath("test_exportDefaultFunctionWithName_importName");
         this.doImportExportAndVisualization(path);
     }
 }
