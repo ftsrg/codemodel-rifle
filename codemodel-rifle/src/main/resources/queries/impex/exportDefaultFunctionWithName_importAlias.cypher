@@ -2,7 +2,8 @@ MATCH
 // exporter.js: export default function name1(foo) { return foo * 2; };
     (exporter:CompilationUnit)-[:contains]->(exporterGlobalScope:GlobalScope)-[:children]->(exporterModuleScope:Scope)
         -[:astNode]->(exporterModule:Module)-[:items]->(:ExportDefault)
-        -[:body]->(exportedFunctionDeclarationToMerge:FunctionDeclaration)<-[:astNode]-(exportedFunctionScopeToMerge:Scope),
+        -[:body]->(exportedFunctionDeclarationToMerge:FunctionDeclaration)
+        <-[:astNode]-(exportedFunctionScopeToMerge:Scope),
     (exportedFunctionDeclarationToMerge)-[:name]->(:BindingIdentifier)<-[:node]-(declarationToMerge:Declaration)
         <-[:declarations]-(:Variable)<--(:Map)<-[:variables]-(exporterModuleScope),
 
