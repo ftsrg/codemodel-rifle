@@ -10,6 +10,12 @@ public class ExportAliasTest extends ImpexTestCase {
     }
 
     @Test
+    public void test_exportAlias_importDefault() {
+        String path = this.getTestResourcesFolderPath("test_exportAlias_importDefault");
+        this.doImportExportAndVisualization(path);
+    }
+
+    @Test
     public void test_exportAlias_importName() {
         String path = this.getTestResourcesFolderPath("test_exportAlias_importName");
         this.doImportExportAndVisualization(path);
