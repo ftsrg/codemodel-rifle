@@ -8,7 +8,7 @@ MATCH
 
 RETURN
     'Non-initialized variable:' AS message,
-    subjectVariable.name AS variableName,
+    subjectVariable.name AS entityName,
     containingCompilationUnit.parsedFilePath AS compilationUnitPath,
     variableLocation.line AS line,
     variableLocation.column AS column

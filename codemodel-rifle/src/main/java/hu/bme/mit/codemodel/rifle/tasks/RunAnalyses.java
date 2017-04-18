@@ -24,13 +24,13 @@ public class RunAnalyses {
                     Record record = result.next();
 
                     String message = record.get("message").asString();
-                    String variableName = record.get("variableName").asString();
+                    String entityName = record.get("entityName").asString();
                     String compilationUnitPath = record.get("compilationUnitPath").asString();
                     int line = Integer.parseInt(record.get("line").asString());
                     int column = Integer.parseInt(record.get("column").asString());
 
                     logger.info(
-                        String.format("%s %s at %d:%d in %s", message, variableName, line, column, compilationUnitPath)
+                        String.format("%s %s at %d:%d in %s", message, entityName, line, column, compilationUnitPath)
                     );
                 }
 
