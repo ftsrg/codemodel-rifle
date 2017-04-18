@@ -22,4 +22,18 @@ public class AsgRelation {
     public String getRelationshipLabel() {
         return relationshipLabel;
     }
+
+    @Override
+    public boolean equals(Object relation) {
+        if (!(relation instanceof AsgRelation)) {
+            return false;
+        }
+
+        AsgRelation relationTypeRelation = (AsgRelation)relation;
+
+        return
+            this.getFromNode().equals(relationTypeRelation.getFromNode()) &&
+                this.getToNode().equals(relationTypeRelation.getToNode()) &&
+                this.getRelationshipLabel().equals(relationTypeRelation.getRelationshipLabel());
+    }
 }

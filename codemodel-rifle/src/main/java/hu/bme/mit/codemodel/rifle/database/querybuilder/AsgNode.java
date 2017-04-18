@@ -43,6 +43,16 @@ public class AsgNode {
     }
 
     /**
+     * Two nodes are considered the same if their ID is equal.
+     *
+     * @param node
+     * @return
+     */
+    public boolean equals(AsgNode node) {
+        return this.getId().equals(node.getId());
+    }
+
+    /**
      * Adds a property to the node entity.
      *
      * @param name
@@ -96,5 +106,27 @@ public class AsgNode {
      */
     public List<AsgRelation> getRelations() {
         return this.relations;
+    }
+
+    /**
+     * Tells if the node has a particular relation.
+     * @see AsgRelation#equals(Object)
+     *
+     * @param relation
+     * @return
+     */
+    public boolean hasRelation(AsgRelation relation) {
+        return this.getRelations().contains(relation);
+    }
+
+    /**
+     * Tells if the node has a particular relation.
+     *
+     * @param toNode
+     * @param relationshipLabel
+     * @return
+     */
+    public boolean hasRelation(AsgNode toNode, String relationshipLabel) {
+        return this.getRelations().contains(new AsgRelation(this, toNode, relationshipLabel));
     }
 }

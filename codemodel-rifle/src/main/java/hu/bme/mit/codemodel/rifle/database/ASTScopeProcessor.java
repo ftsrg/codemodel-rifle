@@ -121,7 +121,8 @@ public class ASTScopeProcessor {
 //            stopwatch.start();
             queriesToRun.addAll(QueryBuilder.getCreateNodeQueries(asgNodes));
 //            long assembleDone = stopwatch.elapsed(TimeUnit.MILLISECONDS);
-//            logger.info(String.format("%s %s (%s query assembled) %dms", parsedFilePath, "ASSEMBLE", queriesToRun.size(), assembleDone));
+//            logger.info(String.format("%s %s (%s query assembled) %dms", parsedFilePath, "ASSEMBLE", queriesToRun
+// .size(), assembleDone));
 
 //            stopwatch.reset();
 //            stopwatch.start();
@@ -129,7 +130,8 @@ public class ASTScopeProcessor {
                 dbServices.execute(q);
             }
 //            long createDone = stopwatch.elapsed(TimeUnit.MILLISECONDS);
-//            logger.info(String.format("%s %s (%s query executed) %dms", parsedFilePath, "CREATE", queriesToRun.size(), createDone));
+//            logger.info(String.format("%s %s (%s query executed) %dms", parsedFilePath, "CREATE", queriesToRun.size
+// (), createDone));
 
             queriesToRun.clear();
             queriesToRun.addAll(QueryBuilder.getSetRelationshipQueries(asgNodes));
@@ -140,7 +142,8 @@ public class ASTScopeProcessor {
                 dbServices.execute(q);
             }
 //            long relationshipDone = stopwatch.elapsed(TimeUnit.MILLISECONDS);
-//            logger.info(String.format("%s %s (%s query executed) %dms", parsedFilePath, "RELATIONSHIPS", queriesToRun.size(), relationshipDone));
+//            logger.info(String.format("%s %s (%s query executed) %dms", parsedFilePath, "RELATIONSHIPS",
+// queriesToRun.size(), relationshipDone));
 
             tx.success();
         } catch (Exception e) {
@@ -494,7 +497,9 @@ public class ASTScopeProcessor {
         AsgNode nodeFrom = this.findOrCreate(from);
         AsgNode nodeTo = this.findOrCreate(to);
 
-        nodeFrom.addRelation(nodeTo, referenceLabel);
+        if (!nodeFrom.hasRelation(nodeTo, referenceLabel)) {
+            nodeFrom.addRelation(nodeTo, referenceLabel);
+        }
     }
 
     /**
