@@ -6,18 +6,18 @@ public class NonInitializedVariableTest extends AnalysisTestCase {
     @Test
     public void asDefaultImport() {
         String path = this.getTestResourcesFolderPath("asDefaultImport");
-        this.syncAndAnalyse(path);
+        this.synchronizeAndAnalyse(path);
     }
 
     @Test
     public void asDirectFunctionArgument() {
         String path = this.getTestResourcesFolderPath("asDirectFunctionArgument");
-        this.syncAndAnalyse(path);
+        this.synchronizeAndAnalyse(path);
     }
 
     @Test
     public void asImportedVariable() {
         String path = this.getTestResourcesFolderPath("asImportedVariable");
-        this.syncAndAnalyse(path);
+        this.synchronizeAndAnalyse(path);
     }
 }

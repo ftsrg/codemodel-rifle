@@ -19,7 +19,7 @@ public class AnalysisTestCase extends TestCase {
         new DeleteGraph().delete(branchId);
     }
 
-    protected void syncAndAnalyse(String path) {
+    protected void synchronizeAndAnalyse(String path) {
         SynchronizeRepository synchronizeRepository = new SynchronizeRepository(path, branchId, sessionId);
         synchronizeRepository.sync();
 

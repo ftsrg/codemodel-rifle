@@ -6,6 +6,6 @@ public class UnreachableCodeTest extends AnalysisTestCase {
     @Test
     public void test_basic() {
         String path = this.getTestResourcesFolderPath("test_basic");
-        this.syncAndAnalyse(path);
+        this.synchronizeAndAnalyse(path);
     }
 }

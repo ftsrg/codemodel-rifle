@@ -6,6 +6,6 @@ public class DivisionByZeroTest extends AnalysisTestCase {
     @Test
     public void simpleConstant() {
         String path = this.getTestResourcesFolderPath("simpleConstant");
-        this.syncAndAnalyse(path);
+        this.synchronizeAndAnalyse(path);
     }
 }
