@@ -7,7 +7,7 @@ MATCH
     WHERE NOT (variableDeclarator)-[:init]->()
 
 RETURN
-    "Non-initialized variable:" AS message,
+    'Non-initialized variable:' AS message,
     subjectVariable.name AS variableName,
     containingCompilationUnit.parsedFilePath AS compilationUnitPath,
     variableLocation.line AS line,
