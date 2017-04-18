@@ -26,8 +26,12 @@ public class RunAnalyses {
                     String message = record.get("message").asString();
                     String variableName = record.get("variableName").asString();
                     String compilationUnitPath = record.get("compilationUnitPath").asString();
+                    int line = Integer.parseInt(record.get("line").asString());
+                    int column = Integer.parseInt(record.get("column").asString());
 
-                    logger.info(String.format("%s %s in %s", message, variableName, compilationUnitPath));
+                    logger.info(
+                        String.format("%s %s at %d:%d in %s", message, variableName, line, column, compilationUnitPath)
+                    );
                 }
 
                 tx.success();
