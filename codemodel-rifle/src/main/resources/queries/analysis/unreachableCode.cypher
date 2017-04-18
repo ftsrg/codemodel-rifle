@@ -7,7 +7,7 @@ MATCH
     literalBooleanExpression.value = 'false'
 
 RETURN
-    'Unreachable code:' AS message,
+    'Unreachable code' AS message,
     '' AS entityName,
     containingCompilationUnit.parsedFilePath AS compilationUnitPath,
     entityLocation.line AS line,

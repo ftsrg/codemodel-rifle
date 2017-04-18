@@ -7,7 +7,7 @@ MATCH
     AND rightValue.value = '0.0'
 
 RETURN
-    'Division by zero:' AS message,
+    'Division by zero' AS message,
     '' AS entityName,
     containingCompilationUnit.parsedFilePath AS compilationUnitPath,
     locationStart.line AS line,

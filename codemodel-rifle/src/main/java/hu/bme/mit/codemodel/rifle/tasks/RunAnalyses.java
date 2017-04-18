@@ -29,9 +29,11 @@ public class RunAnalyses {
                     int line = Integer.parseInt(record.get("line").asString());
                     int column = Integer.parseInt(record.get("column").asString());
 
-                    logger.info(
-                        String.format("%s %s at %d:%d in %s", message, entityName, line, column, compilationUnitPath)
-                    );
+                    if (entityName.isEmpty()) {
+                        logger.info(String.format("%s at %d:%d in %s", message, line, column, compilationUnitPath));
+                    } else {
+                        logger.info(String.format("%s: %s at %d:%d in %s", message, entityName, line, column, compilationUnitPath));
+                    }
                 }
 
                 tx.success();
