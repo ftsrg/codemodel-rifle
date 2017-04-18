@@ -8,4 +8,10 @@ public class DivisionByZeroTest extends AnalysisTestCase {
         String path = this.getTestResourcesFolderPath("test_simpleConstant");
         this.synchronizeAndAnalyse(path);
     }
+
+    @Test
+    public void test_function() {
+        String path = this.getTestResourcesFolderPath("test_function");
+        this.synchronizeAndAnalyse(path);
+    }
 }
