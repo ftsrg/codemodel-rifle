@@ -43,4 +43,18 @@ public class ResourceReader {
 
         return importExportQueries;
     }
+
+    public static Collection<String> getAnalysisQueries() {
+        final String[] extensions = new String[]{ "cypher" };
+
+        File analysisQueriesDirectory = new File(ResourceReader.class.getClassLoader().getResource("queries" + File.separator + "analysis").getPath());
+        Collection<File> importExportQueryFiles = FileUtils.listFiles(analysisQueriesDirectory, extensions, false);
+        Collection<String> importExportQueries = new ArrayList<>();
+
+        for (File file : importExportQueryFiles) {
+            importExportQueries.add(readFromResource("queries" + File.separator + "analysis" + File.separator + file.getName()));
+        }
+
+        return importExportQueries;
+    }
 }
