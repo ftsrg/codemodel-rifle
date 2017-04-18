@@ -97,9 +97,9 @@ public class ASTScopeProcessor {
         this.createFilePathNode(sessionId);
         processingQueue.add(new QueueItem(scope, null, null));
 
-        final Logger logger = Logger.getLogger("codemodel");
+//        final Logger logger = Logger.getLogger("codemodel");
 
-        Stopwatch stopwatch = Stopwatch.createStarted();
+//        Stopwatch stopwatch = Stopwatch.createStarted();
 
         try {
             while (!processingQueue.isEmpty()) {
@@ -109,44 +109,44 @@ public class ASTScopeProcessor {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        long scopeDone = stopwatch.elapsed(TimeUnit.MILLISECONDS);
-        logger.info(String.format("%s %s %dms", parsedFilePath, "SCOPING", scopeDone));
+//        long scopeDone = stopwatch.elapsed(TimeUnit.MILLISECONDS);
+//        logger.info(String.format("%s %s %dms", parsedFilePath, "SCOPING", scopeDone));
 
         final List<AsgNode> asgNodes = new ArrayList<>(this.objectsWithAsgNodes.values());
 
         try (Transaction tx = dbServices.beginTx()) {
             List<Query> queriesToRun = new ArrayList<>();
 
-            stopwatch.reset();
-            stopwatch.start();
+//            stopwatch.reset();
+//            stopwatch.start();
             queriesToRun.addAll(QueryBuilder.getCreateNodeQueries(asgNodes));
-            long assembleDone = stopwatch.elapsed(TimeUnit.MILLISECONDS);
-            logger.info(String.format("%s %s (%s query assembled) %dms", parsedFilePath, "ASSEMBLE", queriesToRun.size(), assembleDone));
+//            long assembleDone = stopwatch.elapsed(TimeUnit.MILLISECONDS);
+//            logger.info(String.format("%s %s (%s query assembled) %dms", parsedFilePath, "ASSEMBLE", queriesToRun.size(), assembleDone));
 
-            stopwatch.reset();
-            stopwatch.start();
+//            stopwatch.reset();
+//            stopwatch.start();
             for (Query q : queriesToRun) {
                 dbServices.execute(q);
             }
-            long createDone = stopwatch.elapsed(TimeUnit.MILLISECONDS);
-            logger.info(String.format("%s %s (%s query executed) %dms", parsedFilePath, "CREATE", queriesToRun.size(), createDone));
+//            long createDone = stopwatch.elapsed(TimeUnit.MILLISECONDS);
+//            logger.info(String.format("%s %s (%s query executed) %dms", parsedFilePath, "CREATE", queriesToRun.size(), createDone));
 
             queriesToRun.clear();
             queriesToRun.addAll(QueryBuilder.getSetRelationshipQueries(asgNodes));
 
-            stopwatch.reset();
-            stopwatch.start();
+//            stopwatch.reset();
+//            stopwatch.start();
             for (Query q : queriesToRun) {
                 dbServices.execute(q);
             }
-            long relationshipDone = stopwatch.elapsed(TimeUnit.MILLISECONDS);
-            logger.info(String.format("%s %s (%s query executed) %dms", parsedFilePath, "RELATIONSHIPS", queriesToRun.size(), relationshipDone));
+//            long relationshipDone = stopwatch.elapsed(TimeUnit.MILLISECONDS);
+//            logger.info(String.format("%s %s (%s query executed) %dms", parsedFilePath, "RELATIONSHIPS", queriesToRun.size(), relationshipDone));
 
             tx.success();
         } catch (Exception e) {
             e.printStackTrace();
         }
-        stopwatch.reset();
+//        stopwatch.reset();
     }
 
     /**
