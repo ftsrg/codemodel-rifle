@@ -12,3 +12,4 @@ RETURN
     containingCompilationUnit.parsedFilePath AS compilationUnitPath,
     variableLocation.line AS line,
     variableLocation.column AS column
+;
