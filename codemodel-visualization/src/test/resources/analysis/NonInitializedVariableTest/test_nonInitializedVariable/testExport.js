@@ -1,0 +1,3 @@
+let foo;
+
+export { foo };
