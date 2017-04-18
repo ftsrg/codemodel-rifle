@@ -92,7 +92,7 @@ public abstract class ImpexTestCase extends TestCase {
             long exportedAfter = stopwatch.elapsed(TimeUnit.MILLISECONDS);
             stopwatch.reset();
             logger.info(String.format("%s %dms", "EXPORTAFTER", exportedAfter));
-        } catch (IOException e) {
+        } catch (IOException | NullPointerException e) {
             e.printStackTrace();
         }
     }
