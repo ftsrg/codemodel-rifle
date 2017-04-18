@@ -7,6 +7,6 @@ MATCH
     WHERE NOT (variableDeclarator)-[:init]->()
 
 RETURN
-    "Uninitialized variable as direct function argument:" AS message,
+    "Non-initialized variable:" AS message,
     subjectVariable.name AS variableName,
     containingCompilationUnit.parsedFilePath AS compilationUnitPath
