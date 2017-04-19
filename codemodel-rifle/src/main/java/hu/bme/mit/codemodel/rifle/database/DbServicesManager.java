@@ -11,7 +11,7 @@ import neo4j.driver.testkit.EmbeddedTestkitDriver;
  * Provides a DbServices singleton instance for each branch.
  */
 public class DbServicesManager {
-    protected static Map<String, DbServices> dbServices = new HashMap<>();
+    private static Map<String, DbServices> dbServices = new HashMap<>();
 
     synchronized public static DbServices getDbServices(String branchId) {
         if (! dbServices.containsKey(branchId)) {
