@@ -7,5 +7,5 @@ public class NonInitializedVariableTest extends AnalysisTestCase {
     public void test_nonInitializedVariable() {
         String path = this.getTestResourcesFolderPath("test_nonInitializedVariable");
         this.synchronizeAndAnalyse(path);
-}
+    }
 }
