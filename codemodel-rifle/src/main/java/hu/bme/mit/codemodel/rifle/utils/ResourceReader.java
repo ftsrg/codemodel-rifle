@@ -34,7 +34,7 @@ public class ResourceReader {
         final String[] extensions = new String[]{ "cypher" };
 
         File importExportQueriesDirectory = new File(ResourceReader.class.getClassLoader().getResource("queries" + File.separator + "impex").getPath());
-        Collection<File> importExportQueryFiles = FileUtils.listFiles(importExportQueriesDirectory, extensions, false);
+        Collection<File> importExportQueryFiles = FileUtils.listFiles(importExportQueriesDirectory, extensions, true);
         Collection<String> importExportQueries = new ArrayList<>();
 
         for (File file : importExportQueryFiles) {
