@@ -65,10 +65,10 @@ public class GraphWalker extends Walker {
                     continue; // filternodes;
                 }
                 if (node.hasLabel(Label.label("SourceSpan"))) {
-//                    continue; // filternodes;
+                    continue; // filternodes;
                 }
                 if (node.hasLabel(Label.label("SourceLocation"))) {
-//                    continue; // filternodes;
+                    continue; // filternodes;
                 }
             }
 
@@ -83,7 +83,7 @@ public class GraphWalker extends Walker {
             for (Relationship relationship : node.getRelationships(Direction.OUTGOING)) {
                 if (nodes.contains(relationship.getOtherNode(node))) {
                     if (relationship.isType(RelationshipType.withName("location"))) {
-//                        continue;
+                        continue;
                     }
 
                     if (!cfg) {
