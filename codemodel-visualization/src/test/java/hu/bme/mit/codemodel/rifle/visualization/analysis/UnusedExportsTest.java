@@ -4,8 +4,8 @@ import org.junit.Test;
 
 public class UnusedExportsTest extends AnalysisTestCase {
     @Test
-    public void basicTest() {
-        String path = this.getTestResourcesFolderPath("basicTest");
+    public void namedExports() {
+        String path = this.getTestResourcesFolderPath("namedExports");
         this.synchronizeAndAnalyse(path);
     }
 }
