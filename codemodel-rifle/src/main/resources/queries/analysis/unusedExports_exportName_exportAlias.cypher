@@ -8,7 +8,7 @@ MATCH
     NOT (exportedVariable)-[:declarations]->(:Declaration)-[:node]->(:VariableReference)<-[:binding]-(:ImportSpecifier)
 
 RETURN
-    'Globally unused variable export' AS message,
+    'Globally unused export' AS message,
     exportedVariable.name AS entityName,
     exporter.parsedFilePath AS compilationUnitPath,
     exportLocation.line AS line,
