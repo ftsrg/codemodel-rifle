@@ -1,0 +1,1 @@
+import asd from "exporter";

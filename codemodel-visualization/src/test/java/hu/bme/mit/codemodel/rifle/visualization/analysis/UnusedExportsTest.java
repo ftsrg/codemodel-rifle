@@ -10,6 +10,12 @@ public class UnusedExportsTest extends AnalysisTestCase {
     }
 
     @Test
+    public void exportDefault() {
+        String path = this.getTestResourcesFolderPath("exportDefault");
+        this.synchronizeAndAnalyse(path);
+    }
+
+    @Test
     public void exportName() {
         String path = this.getTestResourcesFolderPath("exportName");
         this.synchronizeAndAnalyse(path);
