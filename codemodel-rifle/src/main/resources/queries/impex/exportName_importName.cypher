@@ -12,8 +12,8 @@ MATCH
     WHERE
     exporter.parsedFilePath CONTAINS import.moduleSpecifier
     AND exportBindingIdentifier.name = importBindingIdentifierToMerge.name
-    AND exportLocalSpecifier.exportedName = exportBindingIdentifier.name
-    AND importSpecifier.name = importBindingIdentifierToMerge.name
+    AND NOT exists(exportLocalSpecifier.exportedName)
+    AND NOT exists(importSpecifier.name)
 
 CREATE UNIQUE
     (importedVariable)-[:declarations]->(declarationToMerge),
