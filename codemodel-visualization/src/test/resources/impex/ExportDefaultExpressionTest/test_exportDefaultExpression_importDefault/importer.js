@@ -1,1 +1,0 @@
-import defaultName from "exporter";
