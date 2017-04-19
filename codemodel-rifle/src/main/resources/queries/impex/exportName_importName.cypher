@@ -1,6 +1,6 @@
 MATCH
 // exporter.js: export { name1 };
-    (exporter:CompilationUnit)-[:contains]->(:ExportLocals)-[:namedExports]->(:ExportLocalSpecifier)
+    (exporter:CompilationUnit)-[:contains]->(:ExportLocals)-[:namedExports]->(exportLocalSpecifier:ExportLocalSpecifier)
         -[:name]->(exportBindingIdentifier:IdentifierExpression)<-[:node]-(:Reference)<-[:references]-(:Variable)
         -[:declarations]->(declarationToMerge:Declaration)-[:node]->(:BindingIdentifier),
 
@@ -12,6 +12,8 @@ MATCH
     WHERE
     exporter.parsedFilePath CONTAINS import.moduleSpecifier
     AND exportBindingIdentifier.name = importBindingIdentifierToMerge.name
+    AND exportLocalSpecifier.exportedName = exportBindingIdentifier.name
+    AND importSpecifier.name = importBindingIdentifierToMerge.name
 
 CREATE UNIQUE
     (importedVariable)-[:declarations]->(declarationToMerge),
