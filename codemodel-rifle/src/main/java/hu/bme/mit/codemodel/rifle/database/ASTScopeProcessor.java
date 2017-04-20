@@ -92,8 +92,9 @@ public class ASTScopeProcessor {
 
         final Logger logger = Logger.getLogger("codemodel");
 
-        Stopwatch stopwatch = Stopwatch.createStarted();
+        Stopwatch stopwatch = Stopwatch.createUnstarted();
 
+        stopwatch.start();
         try {
             while (!processingQueue.isEmpty()) {
                 QueueItem queueItem = processingQueue.take();
@@ -104,43 +105,42 @@ public class ASTScopeProcessor {
         }
         long mappingDone = stopwatch.elapsed(TimeUnit.MILLISECONDS);
         logger.info(String.format("%s %s %dms", parsedFilePath, "MAPPING", mappingDone));
+        stopwatch.reset();
 
         final List<AsgNode> asgNodes = new ArrayList<>(this.objectsWithAsgNodes.values());
 
         try {
             List<Query> queriesToRun = new ArrayList<>();
 
-//            stopwatch.reset();
-//            stopwatch.start();
             queriesToRun.addAll(QueryBuilder.getCreateNodeQueries(asgNodes));
-//            long assembleDone = stopwatch.elapsed(TimeUnit.MILLISECONDS);
-//            logger.info(String.format("%s %s (%s query assembled) %dms", parsedFilePath, "ASSEMBLE", queriesToRun
-// .size(), assembleDone));
 
-            stopwatch.reset();
             stopwatch.start();
             for (Query q : queriesToRun) {
                 tx.run(q.getStatementTemplate(), q.getStatementParameters());
             }
             long createDone = stopwatch.elapsed(TimeUnit.MILLISECONDS);
-            logger.info(String.format("%s %s (%s query executed) %dms", parsedFilePath, "CREATE", queriesToRun.size()
-                , createDone));
+            logger.info(
+                String.format("%s %s (%s query executed) %dms", parsedFilePath, "CREATE", queriesToRun.size(),
+                    createDone)
+            );
+            stopwatch.reset();
 
             queriesToRun.clear();
             queriesToRun.addAll(QueryBuilder.getSetRelationshipQueries(asgNodes));
 
-            stopwatch.reset();
             stopwatch.start();
             for (Query q : queriesToRun) {
                 tx.run(q.getStatementTemplate(), q.getStatementParameters());
             }
             long relationshipDone = stopwatch.elapsed(TimeUnit.MILLISECONDS);
-            logger.info(String.format("%s %s (%s query executed) %dms", parsedFilePath, "RELATIONSHIPS",
-                queriesToRun.size(), relationshipDone));
+            logger.info(
+                String.format("%s %s (%s query executed) %dms", parsedFilePath, "RELATIONSHIPS", queriesToRun.size(),
+                    relationshipDone)
+            );
+            stopwatch.reset();
         } catch (Exception e) {
             e.printStackTrace();
         }
-        stopwatch.reset();
     }
 
     /**

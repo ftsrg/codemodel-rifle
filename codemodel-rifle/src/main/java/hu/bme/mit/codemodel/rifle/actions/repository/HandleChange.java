@@ -41,13 +41,27 @@ public class HandleChange {
     }
 
     protected void parseFile(String sessionId, String path, String content, String branchId, Transaction tx) throws JsError {
-        ParserWithLocation parser = new ParserWithLocation();
-        Module module = parser.parseModule(content);
+        Stopwatch stopwatch = Stopwatch.createUnstarted();
 
-        GlobalScope globalScope = ScopeAnalyzer.analyze(module);
+        ParserWithLocation parser = new ParserWithLocation();
+        stopwatch.start();
+        Module module = parser.parseModule(content);
+        long parseDone = stopwatch.elapsed(TimeUnit.MILLISECONDS);
+        logger.info(
+            String.format("%s %s %dms", path, "PARSE", parseDone)
+        );
+        stopwatch.reset();
+
+        stopwatch.start();
+        GlobalScope scope = ScopeAnalyzer.analyze(module);
+        long scopeDone = stopwatch.elapsed(TimeUnit.MILLISECONDS);
+        logger.info(
+            String.format("%s %s %dms", path, "SCOPE", scopeDone)
+        );
+        stopwatch.reset();
 
         ASTScopeProcessor astScopeProcessor = new ASTScopeProcessor(path, parser);
-        astScopeProcessor.processScope(globalScope, sessionId, tx);
+        astScopeProcessor.processScope(scope, sessionId, tx);
     }
 
 //    public boolean modify(String sessionId, String path, String content, String branchId, String commitHash) {

@@ -53,6 +53,7 @@ public class SynchronizeRepository {
                     tx = session.beginTransaction();
 
                     String contents = FileUtils.readFileToString(file);
+                    logger.info(String.format("%s (%d bytes)", file.getAbsolutePath(), file.length()));
                     handleChange.add(sessionId, file.getAbsolutePath(), contents, branchId, null, tx);
 
                     tx.success();
@@ -62,8 +63,8 @@ public class SynchronizeRepository {
                     if (tx != null) {
                         stopwatch.start();
                         tx.close();
-                        long commited = stopwatch.elapsed(TimeUnit.MILLISECONDS);
-                        logger.info(String.format("COMMIT %dms", commited));
+                        long commitDone = stopwatch.elapsed(TimeUnit.MILLISECONDS);
+                        logger.info(String.format("COMMIT %dms", commitDone));
                         stopwatch.reset();
                     }
                 }
