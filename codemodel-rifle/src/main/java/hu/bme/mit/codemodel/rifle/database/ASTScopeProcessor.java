@@ -90,9 +90,9 @@ public class ASTScopeProcessor {
         this.createFilePathNode(sessionId);
         processingQueue.add(new QueueItem(scope, null, null));
 
-//        final Logger logger = Logger.getLogger("codemodel");
+        final Logger logger = Logger.getLogger("codemodel");
 
-//        Stopwatch stopwatch = Stopwatch.createStarted();
+        Stopwatch stopwatch = Stopwatch.createStarted();
 
         try {
             while (!processingQueue.isEmpty()) {
@@ -102,8 +102,8 @@ public class ASTScopeProcessor {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-//        long scopeDone = stopwatch.elapsed(TimeUnit.MILLISECONDS);
-//        logger.info(String.format("%s %s %dms", parsedFilePath, "SCOPING", scopeDone));
+        long mappingDone = stopwatch.elapsed(TimeUnit.MILLISECONDS);
+        logger.info(String.format("%s %s %dms", parsedFilePath, "MAPPING", mappingDone));
 
         final List<AsgNode> asgNodes = new ArrayList<>(this.objectsWithAsgNodes.values());
 
@@ -117,30 +117,30 @@ public class ASTScopeProcessor {
 //            logger.info(String.format("%s %s (%s query assembled) %dms", parsedFilePath, "ASSEMBLE", queriesToRun
 // .size(), assembleDone));
 
-//            stopwatch.reset();
-//            stopwatch.start();
+            stopwatch.reset();
+            stopwatch.start();
             for (Query q : queriesToRun) {
                 tx.run(q.getStatementTemplate(), q.getStatementParameters());
             }
-//            long createDone = stopwatch.elapsed(TimeUnit.MILLISECONDS);
-//            logger.info(String.format("%s %s (%s query executed) %dms", parsedFilePath, "CREATE", queriesToRun.size
-// (), createDone));
+            long createDone = stopwatch.elapsed(TimeUnit.MILLISECONDS);
+            logger.info(String.format("%s %s (%s query executed) %dms", parsedFilePath, "CREATE", queriesToRun.size()
+                , createDone));
 
             queriesToRun.clear();
             queriesToRun.addAll(QueryBuilder.getSetRelationshipQueries(asgNodes));
 
-//            stopwatch.reset();
-//            stopwatch.start();
+            stopwatch.reset();
+            stopwatch.start();
             for (Query q : queriesToRun) {
                 tx.run(q.getStatementTemplate(), q.getStatementParameters());
             }
-//            long relationshipDone = stopwatch.elapsed(TimeUnit.MILLISECONDS);
-//            logger.info(String.format("%s %s (%s query executed) %dms", parsedFilePath, "RELATIONSHIPS",
-// queriesToRun.size(), relationshipDone));
+            long relationshipDone = stopwatch.elapsed(TimeUnit.MILLISECONDS);
+            logger.info(String.format("%s %s (%s query executed) %dms", parsedFilePath, "RELATIONSHIPS",
+                queriesToRun.size(), relationshipDone));
         } catch (Exception e) {
             e.printStackTrace();
         }
-//        stopwatch.reset();
+        stopwatch.reset();
     }
 
     /**

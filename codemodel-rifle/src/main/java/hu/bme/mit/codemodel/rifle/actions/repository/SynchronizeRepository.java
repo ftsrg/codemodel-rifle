@@ -3,7 +3,10 @@ package hu.bme.mit.codemodel.rifle.actions.repository;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 
+import com.google.common.base.Stopwatch;
 import hu.bme.mit.codemodel.rifle.database.DbServices;
 import hu.bme.mit.codemodel.rifle.database.DbServicesManager;
 import org.apache.commons.io.FileUtils;
@@ -21,6 +24,8 @@ public class SynchronizeRepository {
 
     protected final DbServices dbServices;
 
+    private static final Logger logger = Logger.getLogger("codemodel");
+
     protected final String path;
     protected final String branchId;
     protected final String sessionId;
@@ -37,16 +42,31 @@ public class SynchronizeRepository {
         HandleChange handleChange = new HandleChange();
         Collection<File> files = FileUtils.listFiles(new File(path), extensions, true);
 
+        Stopwatch stopwatch = Stopwatch.createUnstarted();
+
         try (Session session = dbServices.getDriver().session()) {
-            try (Transaction tx = session.beginTransaction()) {
-                for (File file : files) {
+            for (File file : files) {
+                Transaction tx = null;
+
+//                Using try-finally instead of try-with-resources to measure commit time
+                try {
+                    tx = session.beginTransaction();
+
                     String contents = FileUtils.readFileToString(file);
                     handleChange.add(sessionId, file.getAbsolutePath(), contents, branchId, null, tx);
-                }
 
-                tx.success();
-            } catch (Exception e) {
-                e.printStackTrace();
+                    tx.success();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                } finally {
+                    if (tx != null) {
+                        stopwatch.start();
+                        tx.close();
+                        long commited = stopwatch.elapsed(TimeUnit.MILLISECONDS);
+                        logger.info(String.format("COMMIT %dms", commited));
+                        stopwatch.reset();
+                    }
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
