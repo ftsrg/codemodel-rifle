@@ -25,11 +25,11 @@ public class HandleChange {
 
     private static final Logger logger = Logger.getLogger("codemodel");
 
-    public boolean add(String sessionId, String path, String content, String branchId, String commitHash) {
+    public boolean add(String sessionId, String path, String content, String branchId, String commitHash, Transaction tx) {
         setCommitHashInNewTransaction(branchId, commitHash);
 
         try {
-            parseFile(sessionId, path, content, branchId);
+            parseFile(sessionId, path, content, branchId, tx);
 
             return true;
         } catch (JsError jsError) {
@@ -40,14 +40,14 @@ public class HandleChange {
         }
     }
 
-    protected void parseFile(String sessionId, String path, String content, String branchId) throws JsError {
+    protected void parseFile(String sessionId, String path, String content, String branchId, Transaction tx) throws JsError {
         ParserWithLocation parser = new ParserWithLocation();
         Module module = parser.parseModule(content);
 
         GlobalScope globalScope = ScopeAnalyzer.analyze(module);
 
-        ASTScopeProcessor astScopeProcessor = new ASTScopeProcessor(DbServicesManager.getDbServices(branchId), path, parser);
-        astScopeProcessor.processScope(globalScope, sessionId);
+        ASTScopeProcessor astScopeProcessor = new ASTScopeProcessor(path, parser);
+        astScopeProcessor.processScope(globalScope, sessionId, tx);
     }
 
 //    public boolean modify(String sessionId, String path, String content, String branchId, String commitHash) {

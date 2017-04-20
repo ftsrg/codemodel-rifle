@@ -28,11 +28,6 @@ import com.shapesecurity.shift.scope.Scope;
  */
 public class ASTScopeProcessor {
     /**
-     * DbServices instance for branch.
-     */
-    private final DbServices dbServices;
-
-    /**
      * Path of the parsed file.
      */
     private final String parsedFilePath;
@@ -75,12 +70,10 @@ public class ASTScopeProcessor {
     /**
      * Default constructor.
      *
-     * @param dbServices
      * @param parsedFilePath
      * @param parserWithLocation
      */
-    public ASTScopeProcessor(DbServices dbServices, String parsedFilePath, ParserWithLocation parserWithLocation) {
-        this.dbServices = dbServices;
+    public ASTScopeProcessor(String parsedFilePath, ParserWithLocation parserWithLocation) {
         this.parsedFilePath = parsedFilePath;
         this.parserWithLocation = parserWithLocation;
     }
@@ -93,7 +86,7 @@ public class ASTScopeProcessor {
      * @param scope
      * @param sessionId
      */
-    public void processScope(Scope scope, String sessionId) {
+    public void processScope(Scope scope, String sessionId, Transaction tx) {
         this.createFilePathNode(sessionId);
         processingQueue.add(new QueueItem(scope, null, null));
 
@@ -114,7 +107,7 @@ public class ASTScopeProcessor {
 
         final List<AsgNode> asgNodes = new ArrayList<>(this.objectsWithAsgNodes.values());
 
-        try (Transaction tx = dbServices.beginTx()) {
+        try {
             List<Query> queriesToRun = new ArrayList<>();
 
 //            stopwatch.reset();
@@ -127,7 +120,7 @@ public class ASTScopeProcessor {
 //            stopwatch.reset();
 //            stopwatch.start();
             for (Query q : queriesToRun) {
-                dbServices.execute(q);
+                tx.run(q.getStatementTemplate(), q.getStatementParameters());
             }
 //            long createDone = stopwatch.elapsed(TimeUnit.MILLISECONDS);
 //            logger.info(String.format("%s %s (%s query executed) %dms", parsedFilePath, "CREATE", queriesToRun.size
@@ -139,13 +132,11 @@ public class ASTScopeProcessor {
 //            stopwatch.reset();
 //            stopwatch.start();
             for (Query q : queriesToRun) {
-                dbServices.execute(q);
+                tx.run(q.getStatementTemplate(), q.getStatementParameters());
             }
 //            long relationshipDone = stopwatch.elapsed(TimeUnit.MILLISECONDS);
 //            logger.info(String.format("%s %s (%s query executed) %dms", parsedFilePath, "RELATIONSHIPS",
 // queriesToRun.size(), relationshipDone));
-
-            tx.success();
         } catch (Exception e) {
             e.printStackTrace();
         }

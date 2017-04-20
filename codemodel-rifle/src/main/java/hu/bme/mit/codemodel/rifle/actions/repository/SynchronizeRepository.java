@@ -7,6 +7,7 @@ import java.util.Collection;
 import hu.bme.mit.codemodel.rifle.database.DbServices;
 import hu.bme.mit.codemodel.rifle.database.DbServicesManager;
 import org.apache.commons.io.FileUtils;
+import org.neo4j.driver.v1.Session;
 import org.neo4j.driver.v1.Transaction;
 
 /**
@@ -36,13 +37,15 @@ public class SynchronizeRepository {
         HandleChange handleChange = new HandleChange();
         Collection<File> files = FileUtils.listFiles(new File(path), extensions, true);
 
-        try (Transaction tx = dbServices.beginTx()) {
-            for (File file : files) {
-                String contents = FileUtils.readFileToString(file);
-                handleChange.add(sessionId, file.getAbsolutePath(), contents, branchId, null);
+        try (Session session = dbServices.getDriver().session()) {
+            try (Transaction tx = session.beginTransaction()) {
+                for (File file : files) {
+                    String contents = FileUtils.readFileToString(file);
+                    handleChange.add(sessionId, file.getAbsolutePath(), contents, branchId, null, tx);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-
-            tx.success();
         } catch (Exception e) {
             e.printStackTrace();
         }

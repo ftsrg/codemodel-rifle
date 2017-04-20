@@ -22,20 +22,28 @@ public class DbServices {
         this.driver = driver;
     }
 
+    public Driver getDriver() {
+        return this.driver;
+    }
+
+    @Deprecated
     public Transaction beginTx() {
         Session session = driver.session();
         this.transaction = session.beginTransaction();
         return this.transaction;
     }
 
+    @Deprecated
     public StatementResult execute(String statement) {
         return this.transaction.run(statement);
     }
 
+    @Deprecated
     public StatementResult execute(String statementTemplate, Map<String, Object> statementParameters) {
         return this.transaction.run(statementTemplate, statementParameters);
     }
 
+    @Deprecated
     public StatementResult execute(Query q) {
         return this.execute(q.getStatementTemplate(), q.getStatementParameters());
     }
