@@ -43,6 +43,8 @@ public class SynchronizeRepository {
                     String contents = FileUtils.readFileToString(file);
                     handleChange.add(sessionId, file.getAbsolutePath(), contents, branchId, null, tx);
                 }
+
+                tx.success();
             } catch (Exception e) {
                 e.printStackTrace();
             }
