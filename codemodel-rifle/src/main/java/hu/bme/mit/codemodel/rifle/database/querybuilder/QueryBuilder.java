@@ -95,7 +95,7 @@ public class QueryBuilder {
      */
     private static Query createMatchNodeQueryBody(AsgNode node) {
         String nodeIdBinding = Utils.createUniqueIdentifierName();
-        String statementTemplate = String.format("(`%s`{`id`:$`%s`})", node.getId(), nodeIdBinding);
+        String statementTemplate = String.format("(`%s`:`AsgNode`{`id`:$`%s`})", node.getId(), nodeIdBinding);
         Map<String, Object> statementParameters = new HashMap<>();
         statementParameters.put(nodeIdBinding, node.getId());
 
@@ -169,7 +169,7 @@ public class QueryBuilder {
      * @return Query
      */
     private static Query createSetRelationshipQuery(AsgRelation relation) {
-        String statementTemplate = String.format("MATCH(`from`{`id`:$`fromId`}),(`to`{`id`:$`toId`})CREATE(`from`)" +
+        String statementTemplate = String.format("MATCH(`from`:`AsgNode`{`id`:$`fromId`}),(`to`:`AsgNode`{`id`:$`toId`})CREATE(`from`)" +
             "-[:`%s`]->(`to`)", relation.getRelationshipLabel());
 
         Map<String, Object> statementParameters = new HashMap<>();
