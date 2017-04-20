@@ -16,14 +16,15 @@ import neo4j.driver.testkit.EmbeddedTestkitDriver;
  */
 public class DbServices {
     protected final Driver driver;
+    protected Session session;
     protected Transaction transaction;
 
     public DbServices(Driver driver) {
         this.driver = driver;
+        this.session = this.driver.session();
     }
 
     public Transaction beginTx() {
-        Session session = driver.session();
         this.transaction = session.beginTransaction();
         return this.transaction;
     }
