@@ -506,7 +506,16 @@ public class ASTScopeProcessor {
         }
 
         AsgNode node = this.findOrCreate(subject);
-        node.addProperty(propertyName, propertyValue.toString());
+
+        Class propertyValueClass = propertyValue.getClass();
+
+        if (propertyValueClass == Boolean.class ||
+            propertyValueClass == Long.class ||
+            propertyValueClass == Double.class) {
+            node.addProperty(propertyName, propertyValue);
+        } else {
+            node.addProperty(propertyName, propertyValue.toString());
+        }
     }
 
     /**
