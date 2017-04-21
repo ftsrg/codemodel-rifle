@@ -31,6 +31,7 @@ public class AsgNode {
      */
     public AsgNode() {
         this.addProperty("id", this.id);
+        this.addLabel("AsgNode");
     }
 
     /**
