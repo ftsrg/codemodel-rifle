@@ -1,10 +1,10 @@
 MATCH
-    (binaryExpression:BinaryExpression)-[:right]->(rightValue:LiteralNumericExpression)-[:location]->(:SourceSpan)
-        -[:start]->(locationStart:SourceLocation)<-[:contains]-(containingCompilationUnit:CompilationUnit)
+    (binaryExpression:BinaryExpression)-[:right]->(rightValue:Expression)-[:location]->(:SourceSpan)
+        -[:start]->(locationStart:SourceLocation)<-[:contains]-(containingCompilationUnit:CompilationUnit),
+    (rightValue)-[:_qualifier]->(equalsZero:EqualsZero)
 
     WHERE
     binaryExpression.operator = 'Div'
-    AND rightValue.value = '0.0'
 
 RETURN
     'Division by zero' AS message,

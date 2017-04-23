@@ -1,4 +1,4 @@
-package hu.bme.mit.codemodel.rifle.visualization.analysis;
+package hu.bme.mit.codemodel.rifle.visualization.qualifier;
 
 import hu.bme.mit.codemodel.rifle.actions.repository.SynchronizeRepository;
 import hu.bme.mit.codemodel.rifle.actions.utils.DeleteGraph;
@@ -9,7 +9,6 @@ import hu.bme.mit.codemodel.rifle.tasks.QualifierSystem;
 import hu.bme.mit.codemodel.rifle.visualization.TestCase;
 import hu.bme.mit.codemodel.rifle.visualization.actions.ExportGraph;
 import hu.bme.mit.codemodel.rifle.visualization.database.DbServiceDecorator;
-import hu.bme.mit.codemodel.rifle.visualization.qualifier.QualifierSystemTestCase;
 import org.junit.After;
 import org.junit.Before;
 
@@ -18,11 +17,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.logging.Logger;
 
-public class AnalysisTestCase extends TestCase {
+public class QualifierSystemTestCase extends TestCase {
     private static final Logger logger = Logger.getLogger("codemodel");
 
-    AnalysisTestCase() {
-        this.testFolderPrefix = "analysis";
+    QualifierSystemTestCase() {
+        this.testFolderPrefix = "qualifier";
     }
 
     @Before
@@ -31,7 +30,7 @@ public class AnalysisTestCase extends TestCase {
         new DeleteGraph().delete(branchId);
     }
 
-    protected void synchronizeAndAnalyse(String path) {
+    protected void doQualificationAndVisualization(String path) {
         DbServices dbServices = DbServicesManager.getDbServices(branchId);
         DbServiceDecorator dbServiceDecorator = new DbServiceDecorator(dbServices.getUnderlyingDatabaseService());
 

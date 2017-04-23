@@ -48,13 +48,41 @@ public class ResourceReader {
         final String[] extensions = new String[]{ "cypher" };
 
         File analysisQueriesDirectory = new File(ResourceReader.class.getClassLoader().getResource("queries" + File.separator + "analysis").getPath());
-        Collection<File> importExportQueryFiles = FileUtils.listFiles(analysisQueriesDirectory, extensions, false);
-        Collection<String> importExportQueries = new ArrayList<>();
+        Collection<File> analysisQueryFiles = FileUtils.listFiles(analysisQueriesDirectory, extensions, false);
+        Collection<String> analysisQueries = new ArrayList<>();
 
-        for (File file : importExportQueryFiles) {
-            importExportQueries.add(readFromResource("queries" + File.separator + "analysis" + File.separator + file.getName()));
+        for (File file : analysisQueryFiles) {
+            analysisQueries.add(readFromResource("queries" + File.separator + "analysis" + File.separator + file.getName()));
         }
 
-        return importExportQueries;
+        return analysisQueries;
+    }
+
+    public static Collection<String> getQualifierQueries() {
+        final String[] extensions = new String[]{ "cypher" };
+
+        File qualifierQueriesDirectory = new File(ResourceReader.class.getClassLoader().getResource("queries" + File.separator + "qualifier" + File.separator + "qualifiers").getPath());
+        Collection<File> qualifierQueryFiles = FileUtils.listFiles(qualifierQueriesDirectory, extensions, false);
+        Collection<String> qualifierQueries = new ArrayList<>();
+
+        for (File file : qualifierQueryFiles) {
+            qualifierQueries.add(readFromResource("queries" + File.separator + "qualifier" + File.separator + "qualifiers" + File.separator + file.getName()));
+        }
+
+        return qualifierQueries;
+    }
+
+    public static Collection<String> getQualifierProviderQueries() {
+        final String[] extensions = new String[]{ "cypher" };
+
+        File qualifierProviderQueriesDirectory = new File(ResourceReader.class.getClassLoader().getResource("queries" + File.separator + "qualifier" + File.separator + "qualifierProviders").getPath());
+        Collection<File> qualifierProviderQueryFiles = FileUtils.listFiles(qualifierProviderQueriesDirectory, extensions, false);
+        Collection<String> qualifierProviderQueries = new ArrayList<>();
+
+        for (File file : qualifierProviderQueryFiles) {
+            qualifierProviderQueries.add(readFromResource("queries" + File.separator + "qualifier" + File.separator + "qualifierProviders" + File.separator + file.getName()));
+        }
+
+        return qualifierProviderQueries;
     }
 }
