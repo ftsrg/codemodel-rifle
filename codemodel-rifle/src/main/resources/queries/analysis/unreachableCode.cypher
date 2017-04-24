@@ -1,10 +1,7 @@
 MATCH
-    (containingCompilationUnit:CompilationUnit)-[:contains]->(ifStatement:IfStatement)
-        -[:test]->(literalBooleanExpression:LiteralBooleanExpression),
-    (ifStatement)-[:consequent]->(:BlockStatement)-[:location]->(:SourceSpan)-[:start]->(entityLocation:SourceLocation)
-
-    WHERE
-    literalBooleanExpression.value = 'false'
+    (containingCompilationUnit:CompilationUnit)-[:contains]->(statement:Statement)-[:_qualifier]->(:ExceptionThrown),
+    (statement)-[:_next]->(unreachableStatement:Statement),
+    (unreachableStatement)-[:location]->(:SourceSpan)-[:start]->(entityLocation:SourceLocation)
 
 RETURN
     'Unreachable code' AS message,

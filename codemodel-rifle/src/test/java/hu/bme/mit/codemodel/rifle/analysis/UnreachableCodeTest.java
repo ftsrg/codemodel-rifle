@@ -8,4 +8,10 @@ public class UnreachableCodeTest extends AnalysisTestCase {
         String path = this.getTestResourcesFolderPath("test_basic");
         this.synchronizeAndAnalyse(path);
     }
+
+    @Test
+    public void testNestedException() {
+        String path = this.getTestResourcesFolderPath("testNestedException");
+        this.synchronizeAndAnalyse(path);
+    }
 }

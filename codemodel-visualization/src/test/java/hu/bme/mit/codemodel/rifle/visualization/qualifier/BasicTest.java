@@ -8,4 +8,10 @@ public class BasicTest extends QualifierSystemTestCase {
         String path = this.getTestResourcesFolderPath("basicTest");
         this.doQualificationAndVisualization(path);
     }
+
+    @Test
+    public void basicExceptionTest() {
+        String path = this.getTestResourcesFolderPath("basicExceptionTest");
+        this.doQualificationAndVisualization(path);
+    }
 }

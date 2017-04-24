@@ -91,7 +91,7 @@ public class GraphWalker extends Walker {
                             continue;
                         }
                         if (relationship.isType(RelationshipType.withName("_next"))) {
-                            continue;
+//                            continue;
                         }
                         if (relationship.isType(RelationshipType.withName("_true"))) {
                             continue;
