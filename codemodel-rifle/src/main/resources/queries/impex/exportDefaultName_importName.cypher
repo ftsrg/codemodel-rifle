@@ -13,9 +13,8 @@ MATCH
     exporter.parsedFilePath CONTAINS import.moduleSpecifier
     AND exportedIdentifierExpression.name = importBindingIdentifierToMerge.name
 
-CREATE UNIQUE
-    (importedVariable)-[:declarations]->(declarationToMerge),
-    (declarationToMerge)-[:node]->(importBindingIdentifierToMerge)
+MERGE
+    (importedVariable)-[:declarations]->(declarationToMerge)-[:node]->(importBindingIdentifierToMerge)
 
 DETACH DELETE
 declarationToDelete

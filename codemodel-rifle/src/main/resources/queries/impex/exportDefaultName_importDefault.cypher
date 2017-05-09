@@ -12,9 +12,8 @@ MATCH
     WHERE
     exporter.parsedFilePath CONTAINS import.moduleSpecifier
 
-CREATE UNIQUE
-    (importedVariable)-[:declarations]->(declarationToMerge),
-    (declarationToMerge)-[:node]->(importBindingIdentifierToMerge)
+MERGE
+    (importedVariable)-[:declarations]->(declarationToMerge)-[:node]->(importBindingIdentifierToMerge)
 
 DETACH DELETE
 declarationToDelete

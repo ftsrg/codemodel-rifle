@@ -1,5 +1,5 @@
 MATCH
-// exporter.js: export { name1 };
+// exporter.js: let name1 = "name1Value"; export { name1 };
     (exporter:CompilationUnit)-[:contains]->(:ExportLocals)-[:namedExports]->(:ExportLocalSpecifier)
         -[:name]->(exportBindingIdentifier:IdentifierExpression)<-[:node]-(:Reference)<-[:references]-(:Variable)
         -[:declarations]->(declarationToMerge:Declaration)-[:node]->(:BindingIdentifier),
@@ -13,9 +13,8 @@ MATCH
     exporter.parsedFilePath CONTAINS import.moduleSpecifier
     AND exportBindingIdentifier.name = importSpecifier.name
 
-CREATE UNIQUE
-    (importedVariable)-[:declarations]->(declarationToMerge),
-    (declarationToMerge)-[:node]->(importBindingIdentifierToMerge)
+MERGE
+    (importedVariable)-[:declarations]->(declarationToMerge)-[:node]->(importBindingIdentifierToMerge)
 
 DETACH DELETE
 declarationToDelete

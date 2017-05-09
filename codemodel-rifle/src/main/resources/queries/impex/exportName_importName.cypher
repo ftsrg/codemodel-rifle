@@ -15,9 +15,8 @@ MATCH
     AND NOT exists(exportLocalSpecifier.exportedName)
     AND NOT exists(importSpecifier.name)
 
-CREATE UNIQUE
-    (importedVariable)-[:declarations]->(declarationToMerge),
-    (declarationToMerge)-[:node]->(importBindingIdentifierToMerge)
+MERGE
+    (importedVariable)-[:declarations]->(declarationToMerge)-[:node]->(importBindingIdentifierToMerge)
 
 DETACH DELETE
 declarationToDelete
