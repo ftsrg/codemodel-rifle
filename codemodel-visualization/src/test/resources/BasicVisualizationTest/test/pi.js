@@ -1,1 +1,2 @@
-const PI = 3.141593
+let name1 = "name1Value";
+export { name1 };

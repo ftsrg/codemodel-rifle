@@ -1,8 +1,7 @@
-function lol() {
-    let a = 5 - 6;
-    a += 1;
-
-    return a;
-}
-
-let foo = 5 / lol();
+var a = 0;
+export default function b() {
+    let c = function d() {
+        return a;
+    };
+    return c();
+};
