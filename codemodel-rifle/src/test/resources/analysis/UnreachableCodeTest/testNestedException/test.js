@@ -4,9 +4,9 @@ function test() {
     };
 }
 let foo = test;
-var asd = function () {
+let asd = function () {
     return function () {
-        var b = test();
+        let b = test();
         return 0;
     }
 };
