@@ -1,6 +1,5 @@
 dependencies {
     compile group: 'org.jhades', name: 'jhades', version: '1.0.4'
-    compile group: 'neo4j-drivers', name: 'neo4j-embedded-testkit-driver', version: '0.0.3-SNAPSHOT'
 
     compile group: 'org.neo4j', name: 'neo4j-bolt', version: neo4jVersion
     compile group: 'org.neo4j', name: 'neo4j-kernel', version: neo4jVersion

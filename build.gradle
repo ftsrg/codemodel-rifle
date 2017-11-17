@@ -16,9 +16,7 @@ subprojects {
     targetCompatibility = 1.8
 
     repositories {
-        mavenLocal()
         jcenter()
-        maven { url "http://docs.inf.mit.bme.hu/ingraph-deps" }
     }
 }
 
