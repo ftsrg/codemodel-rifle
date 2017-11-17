@@ -1,15 +1,14 @@
 package hu.bme.mit.codemodel.rifle.database;
 
-import java.util.Map;
-
 import hu.bme.mit.codemodel.rifle.database.querybuilder.Query;
+import neo4j.driver.testkit.EmbeddedTestkitDriver;
 import org.neo4j.driver.v1.Driver;
 import org.neo4j.driver.v1.Session;
 import org.neo4j.driver.v1.StatementResult;
 import org.neo4j.driver.v1.Transaction;
 import org.neo4j.graphdb.GraphDatabaseService;
 
-import neo4j.driver.testkit.EmbeddedTestkitDriver;
+import java.util.Map;
 
 /**
  * Provides database services like transaction handling and query executing.

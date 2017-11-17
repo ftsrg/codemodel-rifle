@@ -23,8 +23,8 @@ subprojects {
 }
 
 ext {
-    guavaVersion = '21.0'
-    neo4jDriverVersion = '1.1.1'
-    neo4jVersion = '3.1.1'
+    guavaVersion = '22.0'
+    neo4jDriverVersion = '1.4.4'
+    neo4jVersion = '3.2.7'
     jUnitVersion = '4.12'
 }

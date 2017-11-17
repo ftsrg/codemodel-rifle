@@ -2,6 +2,13 @@ dependencies {
     compile group: 'org.jhades', name: 'jhades', version: '1.0.4'
     compile group: 'neo4j-drivers', name: 'neo4j-embedded-testkit-driver', version: '0.0.3-SNAPSHOT'
 
+    compile group: 'org.neo4j', name: 'neo4j-bolt', version: neo4jVersion
+    compile group: 'org.neo4j', name: 'neo4j-kernel', version: neo4jVersion
+    compile group: 'org.neo4j', name: 'neo4j-io', version: neo4jVersion
+    compile group: 'org.neo4j', name: 'neo4j-kernel', version: neo4jVersion, classifier: 'tests'
+    compile group: 'org.neo4j', name: 'neo4j-io', version: neo4jVersion, classifier: 'tests'
+    compile group: 'org.neo4j.driver', name: 'neo4j-java-driver', version: neo4jDriverVersion
+
 //    compile group: 'com.shapesecurity', name: 'shift', version: '2.2.0'
     compile group: 'com.shapesecurity.shift', name: 'es2016', version: '1.0.0'
     compile group: 'commons-io', name: 'commons-io', version: '2.4'

@@ -1,11 +1,10 @@
 package hu.bme.mit.codemodel.rifle.database;
 
-import java.util.HashMap;
-import java.util.Map;
-
+import neo4j.driver.testkit.EmbeddedTestkitDriver;
 import org.neo4j.driver.v1.Driver;
 
-import neo4j.driver.testkit.EmbeddedTestkitDriver;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Provides a DbServices singleton instance for each branch.
