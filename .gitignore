@@ -17,3 +17,4 @@ performance-metrics.txt*
 build/
 /.gradle/
 out/
+target/
