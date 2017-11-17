@@ -25,6 +25,6 @@ subprojects {
 ext {
     guavaVersion = '22.0'
     neo4jDriverVersion = '1.4.4'
-    neo4jVersion = '3.2.7'
+    neo4jVersion = '3.1.1'
     jUnitVersion = '4.12'
 }
