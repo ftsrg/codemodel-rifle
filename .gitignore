@@ -16,3 +16,4 @@ neo4j-*
 performance-metrics.txt*
 build/
 /.gradle/
+out/
