@@ -2,6 +2,6 @@ language: java
 jdk:
   - oraclejdk8
 notifications:
-  slack: ftsrg:8yjVb8nJs5WtLkpuM4MZVB9J
+  slack: ingraph:j0DGbEHmZIY9vXnDMMQUN1nY
   on_success: change
   on_failure: always
