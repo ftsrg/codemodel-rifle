@@ -3,6 +3,7 @@ package hu.bme.mit.codemodel.rifle.database;
 import neo4j.driver.testkit.EmbeddedTestkitDriver;
 import org.neo4j.driver.v1.Driver;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -14,7 +15,11 @@ public class DbServicesManager {
 
     synchronized public static DbServices getDbServices(String branchId) {
         if (! dbServices.containsKey(branchId)) {
-            final Driver driver = new EmbeddedTestkitDriver();
+            File storeDir = new File("/tmp/graphdb");
+            if (storeDir.exists()) {
+                storeDir.delete();
+            }
+            final Driver driver = new EmbeddedTestkitDriver(storeDir);
             final DbServices dbs = new DbServices(driver);
             dbServices.put(branchId, dbs);
         }

@@ -8,12 +8,14 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.factory.GraphDatabaseSettings;
 import org.neo4j.test.TestGraphDatabaseFactory;
 
+import java.io.File;
+
 public class EmbeddedTestkitDriver implements Driver {
 
     protected final GraphDatabaseService gds;
     protected final Driver driver;
 
-    public EmbeddedTestkitDriver() {
+    public EmbeddedTestkitDriver(final File storeDir) {
         GraphDatabaseSettings.BoltConnector bolt = GraphDatabaseSettings.boltConnector( "0" );
 
         String host = "localhost";
@@ -26,6 +28,7 @@ public class EmbeddedTestkitDriver implements Driver {
             try {
                 graphDb = new TestGraphDatabaseFactory()
                     .newImpermanentDatabaseBuilder()
+//                    .newEmbeddedDatabaseBuilder(storeDir)
                     .setConfig(bolt.type, "BOLT")
                     .setConfig(bolt.enabled, "true")
                     .setConfig(bolt.address, address)
@@ -33,6 +36,8 @@ public class EmbeddedTestkitDriver implements Driver {
             } catch (RuntimeException e) {
                 // this is usually a org.neo4j.kernel.lifecycle.LifecycleException
                 // caused by org.neo4j.helpers.PortBindException
+                e.printStackTrace();
+                System.out.println("Cannot connect on port " + port + ", retrying on a higher port.");
                 continue;
             }
             break;
@@ -41,10 +46,6 @@ public class EmbeddedTestkitDriver implements Driver {
         gds = graphDb;
         driver = GraphDatabase.driver("bolt://" + address);
     }
-
-//    public EmbeddedTestkitDriver(final File storeDir) {
-//        gds = new GraphDatabaseFactory().newEmbeddedDatabase(storeDir);
-//    }
 
     @Override
     public boolean isEncrypted() {
