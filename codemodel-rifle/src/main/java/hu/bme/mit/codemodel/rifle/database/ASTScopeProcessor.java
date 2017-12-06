@@ -9,6 +9,7 @@ import java.util.logging.Logger;
 
 import com.google.common.base.Stopwatch;
 import hu.bme.mit.codemodel.rifle.database.querybuilder.AsgNode;
+import hu.bme.mit.codemodel.rifle.database.querybuilder.AsgRelation;
 import hu.bme.mit.codemodel.rifle.database.querybuilder.Query;
 import hu.bme.mit.codemodel.rifle.database.querybuilder.QueryBuilder;
 import org.neo4j.driver.v1.Transaction;
@@ -140,6 +141,38 @@ public class ASTScopeProcessor {
             stopwatch.reset();
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    public void processScopeCsv(CsvAssembler csvAssembler, Scope scope, String sessionId) {
+        this.createFilePathNode(sessionId);
+        processingQueue.add(new QueueItem(scope, null, null));
+
+        final Logger logger = Logger.getLogger("codemodel");
+
+        Stopwatch stopwatch = Stopwatch.createUnstarted();
+
+        stopwatch.start();
+        try {
+            while (!processingQueue.isEmpty()) {
+                QueueItem queueItem = processingQueue.take();
+                process(queueItem, sessionId);
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        long mappingDone = stopwatch.elapsed(TimeUnit.MILLISECONDS);
+        logger.info(String.format("%s %s %dms", parsedFilePath, "MAPPING", mappingDone));
+        stopwatch.reset();
+
+        final List<AsgNode> asgNodes = new ArrayList<>(this.objectsWithAsgNodes.values());
+
+        final Set<String> allPropertyNames = new HashSet<>();
+        asgNodes.forEach(node -> allPropertyNames.addAll(node.getProperties().keySet()));
+
+        for (AsgNode node : asgNodes) {
+            csvAssembler.addNodeToCsv(node);
+            node.getRelations().forEach(relation -> csvAssembler.addRelationShipToCsv(relation));
         }
     }
 

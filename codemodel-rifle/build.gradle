@@ -12,5 +12,6 @@ dependencies {
     compile group: 'com.shapesecurity.shift', name: 'es2016', version: '1.0.0'
     compile group: 'commons-io', name: 'commons-io', version: '2.4'
     compile group: 'net.jodah', name: 'failsafe', version: '0.8.3'
+    compile group: 'net.sf.supercsv', name: 'super-csv', version: '2.4.0'
     testCompile group: 'junit', name: 'junit', version: jUnitVersion
 }

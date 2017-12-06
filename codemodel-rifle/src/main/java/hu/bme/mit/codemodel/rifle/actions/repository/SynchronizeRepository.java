@@ -1,12 +1,12 @@
 package hu.bme.mit.codemodel.rifle.actions.repository;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Collection;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import com.google.common.base.Stopwatch;
+import hu.bme.mit.codemodel.rifle.database.CsvAssembler;
 import hu.bme.mit.codemodel.rifle.database.DbServices;
 import hu.bme.mit.codemodel.rifle.database.DbServicesManager;
 import org.apache.commons.io.FileUtils;
@@ -21,6 +21,8 @@ import org.neo4j.driver.v1.Transaction;
  */
 public class SynchronizeRepository {
     protected static final String[] extensions = new String[]{ "js" };
+
+    protected static final String csvFolderPath = "/Users/luczsoma/Desktop/csv";
 
     protected final DbServices dbServices;
 
@@ -48,7 +50,7 @@ public class SynchronizeRepository {
             for (File file : files) {
                 Transaction tx = null;
 
-//                Using try-finally instead of try-with-resources to measure commit time
+                // Using try-finally instead of try-with-resources to measure commit time
                 try {
                     tx = session.beginTransaction();
 
@@ -69,6 +71,32 @@ public class SynchronizeRepository {
                     }
                 }
             }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void syncWithCsv(String namePrefix) {
+        HandleChange handleChange = new HandleChange();
+        Collection<File> files = FileUtils.listFiles(new File(path), extensions, true);
+
+        CsvAssembler csvAssembler = new CsvAssembler();
+
+        for (File file : files) {
+            try {
+                String contents = FileUtils.readFileToString(file);
+                logger.info(String.format("%s (%d bytes)", file.getAbsolutePath(), file.length()));
+                boolean result = handleChange.addCsv(csvAssembler, sessionId, file.getAbsolutePath(), contents, branchId, null);
+                if (!result) {
+                    return;
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        try {
+            csvAssembler.writeCsv(SynchronizeRepository.csvFolderPath, namePrefix);
         } catch (Exception e) {
             e.printStackTrace();
         }

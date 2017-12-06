@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
+import hu.bme.mit.codemodel.rifle.database.CsvAssembler;
 import org.neo4j.driver.v1.Transaction;
 
 import com.google.common.base.Stopwatch;
@@ -40,6 +41,19 @@ public class HandleChange {
         }
     }
 
+    public boolean addCsv(CsvAssembler csvAssembler, String sessionId, String path, String content, String branchId, String commitHash) {
+        try {
+            this.parseFileCsv(csvAssembler, sessionId, path, content, branchId);
+
+            return true;
+        } catch (JsError jsError) {
+            System.err.println(path);
+            jsError.printStackTrace();
+
+            return false;
+        }
+    }
+
     protected void parseFile(String sessionId, String path, String content, String branchId, Transaction tx) throws JsError {
         Stopwatch stopwatch = Stopwatch.createUnstarted();
 
@@ -62,6 +76,30 @@ public class HandleChange {
 
         ASTScopeProcessor astScopeProcessor = new ASTScopeProcessor(path, parser);
         astScopeProcessor.processScope(scope, sessionId, tx);
+    }
+
+    protected void parseFileCsv(CsvAssembler csvAssembler, String sessionId, String path, String content, String branchId) throws JsError {
+        Stopwatch stopwatch = Stopwatch.createUnstarted();
+
+        ParserWithLocation parser = new ParserWithLocation();
+        stopwatch.start();
+        Module module = parser.parseModule(content);
+        long parseDone = stopwatch.elapsed(TimeUnit.MILLISECONDS);
+        logger.info(
+            String.format("%s %s %dms", path, "PARSE", parseDone)
+        );
+        stopwatch.reset();
+
+        stopwatch.start();
+        GlobalScope scope = ScopeAnalyzer.analyze(module);
+        long scopeDone = stopwatch.elapsed(TimeUnit.MILLISECONDS);
+        logger.info(
+            String.format("%s %s %dms", path, "SCOPE", scopeDone)
+        );
+        stopwatch.reset();
+
+        ASTScopeProcessor astScopeProcessor = new ASTScopeProcessor(path, parser);
+        astScopeProcessor.processScopeCsv(csvAssembler, scope, sessionId);
     }
 
 //    public boolean modify(String sessionId, String path, String content, String branchId, String commitHash) {
