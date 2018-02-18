@@ -8,14 +8,12 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.factory.GraphDatabaseSettings;
 import org.neo4j.test.TestGraphDatabaseFactory;
 
-import java.io.File;
-
 public class EmbeddedTestkitDriver implements Driver {
 
     protected final GraphDatabaseService gds;
     protected final Driver driver;
 
-    public EmbeddedTestkitDriver(final File storeDir) {
+    public EmbeddedTestkitDriver() {
         GraphDatabaseSettings.BoltConnector bolt = GraphDatabaseSettings.boltConnector( "0" );
 
         String host = "localhost";
@@ -28,7 +26,6 @@ public class EmbeddedTestkitDriver implements Driver {
             try {
                 graphDb = new TestGraphDatabaseFactory()
                     .newImpermanentDatabaseBuilder()
-//                    .newEmbeddedDatabaseBuilder(storeDir)
                     .setConfig(bolt.type, "BOLT")
                     .setConfig(bolt.enabled, "true")
                     .setConfig(bolt.address, address)
